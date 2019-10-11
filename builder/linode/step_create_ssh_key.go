@@ -1,4 +1,4 @@
-package googlecompute
+package linode
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"io/ioutil"
 	"os"
 
 	"github.com/hashicorp/packer/helper/multistep"
@@ -22,15 +23,16 @@ type StepCreateSSHKey struct {
 
 // Run executes the Packer build step that generates SSH key pairs.
 // The key pairs are added to the ssh config
-func (s *StepCreateSSHKey) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packer.Ui)
 	config := state.Get("config").(*Config)
 
 	if config.Comm.SSHPrivateKeyFile != "" {
 		ui.Say("Using existing SSH private key")
-		privateKeyBytes, err := config.Comm.ReadSSHPrivateKeyFile()
+		privateKeyBytes, err := ioutil.ReadFile(config.Comm.SSHPrivateKeyFile)
 		if err != nil {
-			state.Put("error", err)
+			state.Put("error", fmt.Errorf(
+				"Error loading configured private key file: %s", err))
 			return multistep.ActionHalt
 		}
 
@@ -65,6 +67,11 @@ func (s *StepCreateSSHKey) Run(ctx context.Context, state multistep.StateBag) mu
 	config.Comm.SSHPrivateKey = pem.EncodeToMemory(&priv_blk)
 	config.Comm.SSHPublicKey = ssh.MarshalAuthorizedKey(pub)
 
+	// Linode has a serious issue with the newline that the ssh package appends to the end of the key.
+	if config.Comm.SSHPublicKey[len(config.Comm.SSHPublicKey)-1] == '\n' {
+		config.Comm.SSHPublicKey = config.Comm.SSHPublicKey[:len(config.Comm.SSHPublicKey)-1]
+	}
+
 	if s.Debug {
 		ui.Message(fmt.Sprintf("Saving key for debug purposes: %s", s.DebugKeyPath))
 		f, err := os.Create(s.DebugKeyPath)
@@ -84,5 +91,5 @@ func (s *StepCreateSSHKey) Run(ctx context.Context, state multistep.StateBag) mu
 	return multistep.ActionContinue
 }
 
-// Nothing to clean up. SSH keys are associated with a single GCE instance.
+// Nothing to clean up. SSH keys are associated with a single Linode instance.
 func (s *StepCreateSSHKey) Cleanup(state multistep.StateBag) {}
