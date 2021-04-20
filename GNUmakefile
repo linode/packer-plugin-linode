@@ -1,4 +1,4 @@
-NAME=scaffolding
+NAME=linode
 BINARY=packer-plugin-${NAME}
 
 COUNT?=1
