@@ -1,0 +1,15 @@
+{
+	"builders": [{
+	  "type": "linode",
+	  "linode_token": "YOUR API TOKEN",
+	  "image": "linode/debian9",
+	  "region": "us-east",
+	  "instance_type": "g6-nanode-1",
+	  "instance_label": "temporary-linode-{{timestamp}}",
+
+	  "image_label": "private-image-{{timestamp}}",
+	  "image_description": "My Private Image",
+
+	  "ssh_username": "root"
+	}]
+}
