@@ -1,16 +1,8 @@
 ---
-description: >
+description: |
   The linode Packer builder is able to create new images for use with Linode.
-  The
-
-  builder takes a source image, runs any provisioning necessary on the image
-
-  after launching it, then snapshots it into a reusable image. This reusable
-
-  image can then be used as the foundation of new servers that are launched
-
-  within all Linode regions.
 page_title: Linode - Builders
+nav_title: Linode
 ---
 
 # Linode Builder
@@ -27,6 +19,23 @@ foundation of new servers that are launched within Linode.
 
 The builder does _not_ manage images. Once it creates an image, it is up to you
 to use it or delete it.
+
+### Installation
+
+To install this plugin using Packer v1.7.0 or later, copy and paste this code into your Packer configuration.
+
+Then, run [`packer init`](https://www.packer.io/docs/commands/init).
+
+```hcl
+packer {
+  required_plugins {
+    linode = {
+      version = ">= 0.0.1"
+      source  = "github.com/hashicorp/linode"
+    }
+  }
+}
+```
 
 ## Configuration Reference
 
@@ -93,6 +102,30 @@ Here is a Linode builder example. The `linode_token` should be replaced with an
 actual [Linode Personal Access
 Token](https://www.linode.com/docs/platform/api/getting-started-with-the-linode-api/#get-an-access-token).
 
+<Tabs>
+<Tab heading="HCL2">
+```hcl
+
+locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }
+
+source "linode" "example" {
+  image             = "linode/debian9"
+  image_description = "My Private Image"
+  image_label       = "private-image-${local.timestamp}"
+  instance_label    = "temporary-linode-${local.timestamp}"
+  instance_type     = "g6-nanode-1"
+  linode_token      = "YOUR API TOKEN"
+  region            = "us-east"
+  ssh_username      = "root"
+}
+
+build {
+  sources = ["source.linode.example"]
+}
+
+```
+</Tab>
+<Tab heading="JSON">
 ```json
 {
   "type": "linode",
@@ -108,3 +141,5 @@ Token](https://www.linode.com/docs/platform/api/getting-started-with-the-linode-
   "ssh_username": "root"
 }
 ```
+</Tab>
+</Tabs>
