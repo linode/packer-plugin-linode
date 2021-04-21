@@ -104,6 +104,7 @@ Token](https://www.linode.com/docs/platform/api/getting-started-with-the-linode-
 
 <Tabs>
 <Tab heading="HCL2">
+  
 ```hcl
 
 locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }
@@ -124,8 +125,10 @@ build {
 }
 
 ```
+
 </Tab>
 <Tab heading="JSON">
+  
 ```json
 {
   "type": "linode",
@@ -141,5 +144,6 @@ build {
   "ssh_username": "root"
 }
 ```
+
 </Tab>
 </Tabs>
