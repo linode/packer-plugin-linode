@@ -69,13 +69,13 @@ type FlatConfig struct {
 	WinRMUseNTLM              *bool             `mapstructure:"winrm_use_ntlm" cty:"winrm_use_ntlm" hcl:"winrm_use_ntlm"`
 	PersonalAccessToken       *string           `mapstructure:"linode_token" cty:"linode_token" hcl:"linode_token"`
 	Region                    *string           `mapstructure:"region" cty:"region" hcl:"region"`
+	AuthorizedKeys            []string          `mapstructure:"authorized_keys" cty:"authorized_keys" hcl:"authorized_keys"`
 	InstanceType              *string           `mapstructure:"instance_type" cty:"instance_type" hcl:"instance_type"`
 	Label                     *string           `mapstructure:"instance_label" cty:"instance_label" hcl:"instance_label"`
 	Tags                      []string          `mapstructure:"instance_tags" cty:"instance_tags" hcl:"instance_tags"`
 	Image                     *string           `mapstructure:"image" cty:"image" hcl:"image"`
 	SwapSize                  *int              `mapstructure:"swap_size" cty:"swap_size" hcl:"swap_size"`
 	RootPass                  *string           `mapstructure:"root_pass" cty:"root_pass" hcl:"root_pass"`
-	RootSSHKey                *string           `mapstructure:"root_ssh_key" cty:"root_ssh_key" hcl:"root_ssh_key"`
 	ImageLabel                *string           `mapstructure:"image_label" cty:"image_label" hcl:"image_label"`
 	Description               *string           `mapstructure:"image_description" cty:"image_description" hcl:"image_description"`
 	StateTimeout              *string           `mapstructure:"state_timeout" required:"false" cty:"state_timeout" hcl:"state_timeout"`
@@ -152,13 +152,13 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"winrm_use_ntlm":               &hcldec.AttrSpec{Name: "winrm_use_ntlm", Type: cty.Bool, Required: false},
 		"linode_token":                 &hcldec.AttrSpec{Name: "linode_token", Type: cty.String, Required: false},
 		"region":                       &hcldec.AttrSpec{Name: "region", Type: cty.String, Required: false},
+		"authorized_keys":              &hcldec.AttrSpec{Name: "authorized_keys", Type: cty.List(cty.String), Required: false},
 		"instance_type":                &hcldec.AttrSpec{Name: "instance_type", Type: cty.String, Required: false},
 		"instance_label":               &hcldec.AttrSpec{Name: "instance_label", Type: cty.String, Required: false},
 		"instance_tags":                &hcldec.AttrSpec{Name: "instance_tags", Type: cty.List(cty.String), Required: false},
 		"image":                        &hcldec.AttrSpec{Name: "image", Type: cty.String, Required: false},
 		"swap_size":                    &hcldec.AttrSpec{Name: "swap_size", Type: cty.Number, Required: false},
 		"root_pass":                    &hcldec.AttrSpec{Name: "root_pass", Type: cty.String, Required: false},
-		"root_ssh_key":                 &hcldec.AttrSpec{Name: "root_ssh_key", Type: cty.String, Required: false},
 		"image_label":                  &hcldec.AttrSpec{Name: "image_label", Type: cty.String, Required: false},
 		"image_description":            &hcldec.AttrSpec{Name: "image_description", Type: cty.String, Required: false},
 		"state_timeout":                &hcldec.AttrSpec{Name: "state_timeout", Type: cty.String, Required: false},

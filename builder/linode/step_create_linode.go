@@ -22,13 +22,19 @@ func (s *stepCreateLinode) Run(ctx context.Context, state multistep.StateBag) mu
 
 	createOpts := linodego.InstanceCreateOptions{
 		RootPass:       c.Comm.Password(),
-		AuthorizedKeys: []string{string(c.Comm.SSHPublicKey)},
+		AuthorizedKeys: []string{},
 		Region:         c.Region,
 		Type:           c.InstanceType,
 		Label:          c.Label,
 		Image:          c.Image,
 		SwapSize:       &c.SwapSize,
 	}
+
+	if pubKey := string(c.Comm.SSHPublicKey); pubKey != "" {
+		createOpts.AuthorizedKeys = append(createOpts.AuthorizedKeys, pubKey)
+	}
+
+	createOpts.AuthorizedKeys = append(createOpts.AuthorizedKeys, c.AuthorizedKeys...)
 
 	instance, err := s.client.CreateInstance(ctx, createOpts)
 	if err != nil {

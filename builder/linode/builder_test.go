@@ -1,6 +1,7 @@
 package linode
 
 import (
+	"reflect"
 	"strconv"
 	"testing"
 	"time"
@@ -287,5 +288,39 @@ func TestBuilderPrepare_StateTimeout(t *testing.T) {
 	}
 	if err == nil {
 		t.Fatal("should have error")
+	}
+}
+
+func TestBuilderPrepare_AuthorizedKeys(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test optional
+	delete(config, "authorized_keys")
+	_, warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expected := []string{
+		"ssh-rsa test@test",
+	}
+
+	// Test set
+	config["authorized_keys"] = expected
+	b = Builder{}
+	_, warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if !reflect.DeepEqual(b.config.AuthorizedKeys, expected) {
+		t.Errorf("got %v, expected %v", b.config.AuthorizedKeys, expected)
 	}
 }
