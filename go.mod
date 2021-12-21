@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/go-resty/resty/v2 v2.3.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.11.1
-	github.com/hashicorp/packer-plugin-sdk v0.2.10
+	github.com/hashicorp/packer-plugin-sdk v0.2.11
 	github.com/linode/linodego v0.30.0
 	github.com/zclconf/go-cty v1.10.0
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
