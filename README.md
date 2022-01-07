@@ -20,7 +20,7 @@ packer {
   required_plugins {
     linode = {
       version = ">= 1.0.0"
-      source  = "github.com/hashicorp/linode"
+      source  = "github.com/hashicorp/packer-plugin-linode"
     }
   }
 }

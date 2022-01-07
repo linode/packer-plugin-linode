@@ -20,7 +20,7 @@ packer {
   required_plugins {
     linode = {
       version = ">= 1.0.0"
-      source  = "github.com/hashicorp/linode"
+      source  = "github.com/hashicorp/packer-plugin-linode"
     }
   }
 }
@@ -50,4 +50,3 @@ on [installing a plugin](https://www.packer.io/docs/extending/plugins/#installin
 ### Builders
 
 - [builder](/docs/builders/linode.mdx) - The Linode Builder creates [Linode Images](https://www.linode.com/docs/guides/linode-images/) for use on [Linode](https://www.linode.com/).
-
