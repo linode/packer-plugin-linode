@@ -33,7 +33,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	if errs != nil {
 		return nil, warnings, errs
 	}
-	return nil, nil, nil
+	return nil, warnings, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook) (ret packersdk.Artifact, err error) {
