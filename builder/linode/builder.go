@@ -95,7 +95,12 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 		ImageLabel: image.Label,
 		ImageID:    image.ID,
 		Driver:     &client,
-		StateData:  map[string]interface{}{"generated_data": state.Get("generated_data")},
+		StateData: map[string]interface{}{
+			"generated_data": state.Get("generated_data"),
+			"source_image":   b.config.Image,
+			"region":         b.config.Region,
+			"linode_type":    b.config.InstanceType,
+		},
 	}
 
 	return artifact, nil
