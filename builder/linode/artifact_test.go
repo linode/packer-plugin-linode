@@ -90,7 +90,7 @@ func TestArtifactState_hcpPackerRegistryMetadata(t *testing.T) {
 	// check that all properties of the images were set correctly
 	expected := registryimage.Image{
 		ImageID:        "test-image",
-		ProviderName:   "Linode",
+		ProviderName:   "linode",
 		ProviderRegion: "us-east",
 		SourceImageID:  "linode/debian9",
 		Labels: map[string]string{

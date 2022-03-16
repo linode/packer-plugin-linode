@@ -61,7 +61,7 @@ func (a Artifact) stateHCPPackerRegistryMetadata() interface{} {
 	}
 	// create the image from artifact
 	image, err := registryimage.FromArtifact(a,
-		registryimage.WithProvider("Linode"),
+		registryimage.WithProvider("linode"),
 		registryimage.WithID(a.ImageID),
 		registryimage.WithSourceID(sourceImage),
 		registryimage.WithRegion(region))
