@@ -33,7 +33,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	if errs != nil {
 		return nil, warnings, errs
 	}
-	return nil, nil, nil
+	return nil, warnings, nil
 }
 
 func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook) (ret packersdk.Artifact, err error) {
@@ -95,7 +95,12 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 		ImageLabel: image.Label,
 		ImageID:    image.ID,
 		Driver:     &client,
-		StateData:  map[string]interface{}{"generated_data": state.Get("generated_data")},
+		StateData: map[string]interface{}{
+			"generated_data": state.Get("generated_data"),
+			"source_image":   b.config.Image,
+			"region":         b.config.Region,
+			"linode_type":    b.config.InstanceType,
+		},
 	}
 
 	return artifact, nil
