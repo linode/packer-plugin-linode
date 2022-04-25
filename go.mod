@@ -4,13 +4,15 @@ go 1.17
 
 require (
 	github.com/go-resty/resty/v2 v2.3.0 // indirect
-	github.com/hashicorp/hcl/v2 v2.11.1
+	github.com/hashicorp/hcl/v2 v2.12.0
 	github.com/hashicorp/packer-plugin-sdk v0.2.11
 	github.com/linode/linodego v0.30.0
 	github.com/zclconf/go-cty v1.10.0
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
 	golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f
 )
+
+require github.com/mitchellh/mapstructure v1.4.1
 
 require (
 	cloud.google.com/go v0.94.0 // indirect
@@ -65,7 +67,6 @@ require (
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/mitchellh/iochan v1.0.0 // indirect
-	github.com/mitchellh/mapstructure v1.4.1 // indirect
 	github.com/mitchellh/reflectwalk v1.0.0 // indirect
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/packer-community/winrmcp v0.0.0-20180921211025-c76d91c1e7db // indirect
