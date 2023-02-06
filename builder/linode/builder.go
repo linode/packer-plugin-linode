@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 // The linode package contains a packersdk.Builder implementation
 // that builds Linode images.
 package linode
