@@ -27,7 +27,7 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 	})
 
 	if err == nil {
-		_, err = s.client.WaitForInstanceDiskStatus(ctx, instance.ID, disk.ID, linodego.DiskReady, 600)
+		_, err = s.client.WaitForInstanceDiskStatus(ctx, instance.ID, disk.ID, linodego.DiskReady, int(c.ImageCreateTimeout.Seconds()))
 	}
 
 	if err == nil {

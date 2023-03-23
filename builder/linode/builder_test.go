@@ -291,6 +291,46 @@ func TestBuilderPrepare_StateTimeout(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare_ImageCreateTimeout(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test default
+	_, warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if b.config.ImageCreateTimeout != 10*time.Minute {
+		t.Errorf("invalid: %s", b.config.ImageCreateTimeout)
+	}
+
+	// Test set
+	config["image_create_timeout"] = "20m"
+	b = Builder{}
+	_, warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	// Test bad
+	config["image_create_timeout"] = "tubes"
+	b = Builder{}
+	_, warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err == nil {
+		t.Fatal("should have error")
+	}
+}
+
 func TestBuilderPrepare_AuthorizedKeys(t *testing.T) {
 	var b Builder
 	config := testConfig()
