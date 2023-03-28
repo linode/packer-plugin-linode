@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/hashicorp/packer-plugin-linode/version"
+	"github.com/linode/packer-plugin-linode/version"
 	"github.com/linode/linodego"
 	"golang.org/x/oauth2"
 )

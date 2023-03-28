@@ -35,13 +35,13 @@ jobs:
           GOOS: linux
   build_windows:
     executor: golang
-    working_directory: ~/go/src/github.com/hashicorp/packer-plugin-linode
+    working_directory: ~/go/src/github.com/linode/packer-plugin-linode
     steps:
       - build-and-persist-plugin-binary:
           GOOS: windows
   build_darwin:
     executor: golang
-    working_directory: ~/go/src/github.com/hashicorp/packer-plugin-linode
+    working_directory: ~/go/src/github.com/linode/packer-plugin-linode
     steps:
       - build-and-persist-plugin-binary:
           GOOS: darwin
@@ -50,19 +50,19 @@ jobs:
           GOARCH: arm64
   build_freebsd:
     executor: golang
-    working_directory: ~/go/src/github.com/hashicorp/packer-plugin-linode
+    working_directory: ~/go/src/github.com/linode/packer-plugin-linode
     steps:
       - build-and-persist-plugin-binary:
           GOOS: freebsd
   build_solaris:
     executor: golang
-    working_directory: ~/go/src/github.com/hashicorp/packer-plugin-linode
+    working_directory: ~/go/src/github.com/linode/packer-plugin-linode
     steps:
       - build-and-persist-plugin-binary:
           GOOS: solaris
   build_openbsd:
     executor: golang
-    working_directory: ~/go/src/github.com/hashicorp/packer-plugin-linode
+    working_directory: ~/go/src/github.com/linode/packer-plugin-linode
     steps:
       - build-and-persist-plugin-binary:
           GOOS: openbsd

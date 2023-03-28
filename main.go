@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/hashicorp/packer-plugin-linode/builder/linode"
-	"github.com/hashicorp/packer-plugin-linode/version"
+	"github.com/linode/packer-plugin-linode/builder/linode"
+	"github.com/linode/packer-plugin-linode/version"
 
 	"github.com/hashicorp/packer-plugin-sdk/plugin"
 )

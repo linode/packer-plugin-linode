@@ -4,7 +4,7 @@ In order to have a good experience with our community, we recommend that you
 read the contributing guidelines for making a PR, and understand the lifecycle
 of a Packer Plugin PR:
 
-https://github.com/hashicorp/packer-plugin-linode/blob/main/.github/CONTRIBUTING.md#opening-an-pull-request
+https://github.com/linode/packer-plugin-linode/blob/main/.github/CONTRIBUTING.md#opening-an-pull-request
 
 Describe the change you are making here!
 
