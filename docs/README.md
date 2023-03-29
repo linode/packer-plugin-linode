@@ -20,7 +20,7 @@ packer {
   required_plugins {
     linode = {
       version = ">= 1.0.1"
-      source  = "github.com/hashicorp/linode"
+      source  = "github.com/linode/linode"
     }
   }
 }
@@ -28,7 +28,7 @@ packer {
 
 #### Manual installation
 
-You can find pre-built binary releases of the plugin [here](https://github.com/hashicorp/packer-plugin-linode/releases).
+You can find pre-built binary releases of the plugin [here](https://github.com/linode/packer-plugin-linode/releases).
 Once you have downloaded the latest archive corresponding to your target OS,
 uncompress it to retrieve the plugin binary file corresponding to your platform.
 To install the plugin, please follow the Packer documentation on
