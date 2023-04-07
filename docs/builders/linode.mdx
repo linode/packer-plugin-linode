@@ -98,6 +98,10 @@ can also be supplied to override the typical auto-generated key:
   Linode instance to enter a desired state (such as "running") before timing
   out. The default state timeout is "5m".
 
+- image_create_timeout (string) - The time to wait, as a duration string, for the
+  disk image to be created successfully before timing out.
+  The default image creation timeout is "10m".
+
 ## Basic Example
 
 Here is a Linode builder example. The `linode_token` should be replaced with an
