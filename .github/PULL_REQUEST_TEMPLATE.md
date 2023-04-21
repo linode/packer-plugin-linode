@@ -1,17 +1,13 @@
-**DELETE THIS TEMPLATE BEFORE SUBMITTING**
+## 📝 Description
 
-In order to have a good experience with our community, we recommend that you
-read the contributing guidelines for making a PR, and understand the lifecycle
-of a Packer Plugin PR:
+**What does this PR do and why is this change necessary?**
 
-https://github.com/linode/packer-plugin-linode/blob/main/.github/CONTRIBUTING.md#opening-an-pull-request
+## ✔️ How to Test
 
-Describe the change you are making here!
+**What are the steps to reproduce the issue or verify the changes?**
 
-Please include tests. We recommend looking at existing tests as an example. 
+**How do I run the relevant unit/integration tests?**
 
-If your PR resolves any open issue(s), please indicate them like this so they will be closed when your PR is merged:
+## 📷 Preview
 
-Closes #xxx
-Closes #xxx
-
+**If applicable, include a screenshot or code snippet of this change. Otherwise, please remove this section.**
