@@ -1,0 +1,46 @@
+name: Bug Report
+description: File a bug report
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: input
+    id: packer-version
+    attributes:
+      label: Packer Version
+      description: What version of Packer are you running?
+      placeholder: v1.8.6
+    validations:
+      required: true
+
+  - type: input
+    id: plugin-version
+    attributes:
+      label: Packer Plugin Linode Version
+      description: What version of packer-plugin-linode are you running?
+      placeholder: v1.0.5
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What should have happened?
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: List any custom configurations and the steps to reproduce this error
+
+  - type: textarea
+    id: error
+    attributes:
+      label: Error Output
+      description: If you received an error output that is too long, use Gists

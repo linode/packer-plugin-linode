@@ -1,0 +1,20 @@
+name: Enhancement
+description: Request a feature
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What would you like this feature to do in detail?
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Use Case(s)
+      description: Any relevant use-cases that you see.
+    validations:
+      required: true
