@@ -1,20 +1,20 @@
 NAME=linode
 BINARY=packer-plugin-${NAME}
-
+GOFMT_FILES?=$$(find . -name '*.go')
 COUNT?=1
 TEST?=$(shell go list ./...)
 HASHICORP_PACKER_PLUGIN_SDK_VERSION?=$(shell go list -m github.com/hashicorp/packer-plugin-sdk | cut -d " " -f2)
 
 .PHONY: dev
 
-build:
+build: fmtcheck
 	@go build -o ${BINARY}
 
 dev: build
 	@mkdir -p ~/.packer.d/plugins/
 	@mv ${BINARY} ~/.packer.d/plugins/${BINARY}
 
-test:
+test: fmtcheck
 	@go test -race -count $(COUNT) $(TEST) -timeout=3m
 
 install-packer-sdc: ## Install packer sofware development command
@@ -32,3 +32,13 @@ testacc: dev
 
 generate: install-packer-sdc
 	@go generate ./...
+
+fmtcheck:
+	@sh -c "'$(CURDIR)/scripts/gofmtcheck.sh'"
+
+lint: fmtcheck
+	golangci-lint run --timeout 15m0s
+
+fmt:
+	gofmt -w $(GOFMT_FILES)
+	gofumpt -w .
