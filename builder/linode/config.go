@@ -50,7 +50,6 @@ func createRandomRootPassword() (string, error) {
 }
 
 func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
-
 	if err := config.Decode(c, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &c.ctx,
