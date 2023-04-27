@@ -3,6 +3,7 @@ package linode
 import (
 	"context"
 	"errors"
+
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/linode/linodego"

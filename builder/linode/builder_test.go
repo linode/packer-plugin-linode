@@ -196,7 +196,6 @@ func TestBuilderPrepare_ImageLabel(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to parse int in template: %s", err)
 	}
-
 }
 
 func TestBuilderPrepare_Label(t *testing.T) {
@@ -248,7 +247,6 @@ func TestBuilderPrepare_Label(t *testing.T) {
 	if err == nil {
 		t.Fatal("should have error")
 	}
-
 }
 
 func TestBuilderPrepare_StateTimeout(t *testing.T) {

@@ -2,6 +2,7 @@ package linode
 
 import (
 	"context"
+
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/linode/linodego"
@@ -33,7 +34,6 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 		Label:       c.ImageLabel,
 		Description: c.Description,
 	})
-
 	if err != nil {
 		return handleError("Failed to create image", err)
 	}
