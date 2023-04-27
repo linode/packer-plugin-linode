@@ -1,9 +1,9 @@
 #
 # This GitHub action runs Packer go tests across
-# Linux runners.
+# MacOS runners.
 #
 
-name: "Go Test Linux"
+name: "Go Test Multi-Platform"
 
 on:
   push:
@@ -27,6 +27,35 @@ jobs:
         run: |
           echo "Found Go $(cat .go-version)"
           echo "go-version=$(cat .go-version)" >> $GITHUB_OUTPUT
+
+  darwin-go-tests:
+    needs:
+      - get-go-version
+    runs-on: macos-latest
+    name: Darwin Go tests
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ${{ needs.get-go-version.outputs.go-version }}
+      - run: |
+          echo "Testing with Go ${{ needs.get-go-version.outputs.go-version }}"
+          go test -race -count 1 ./... -timeout=3m
+
+  windows-go-tests:
+    needs:
+      - get-go-version
+    runs-on: windows-latest
+    name: Windows Go tests
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ${{ needs.get-go-version.outputs.go-version }}
+      - run: |
+          echo "Testing with Go ${{ needs.get-go-version.outputs.go-version }}"
+          go test -race -count 1 ./... -timeout=3m
+
   linux-go-tests:
     needs:
       - get-go-version
