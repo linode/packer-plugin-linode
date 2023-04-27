@@ -2,8 +2,6 @@ package linode
 
 import (
 	"context"
-	"errors"
-
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/linode/linodego"
@@ -19,6 +17,16 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 	disk := state.Get("disk").(*linodego.InstanceDisk)
 	instance := state.Get("instance").(*linodego.Instance)
 
+	handleError := func(prefix string, err error) multistep.StepAction {
+		return errorHelper(state, ui, prefix, err)
+	}
+
+	creationPoller, err := s.client.NewEventPoller(
+		ctx, instance.ID, linodego.EntityLinode, linodego.ActionDiskImagize)
+	if err != nil {
+		return handleError("Failed to create event poller", err)
+	}
+
 	ui.Say("Creating image...")
 	image, err := s.client.CreateImage(ctx, linodego.ImageCreateOptions{
 		DiskID:      disk.ID,
@@ -26,19 +34,18 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 		Description: c.Description,
 	})
 
-	if err == nil {
-		_, err = s.client.WaitForInstanceDiskStatus(ctx, instance.ID, disk.ID, linodego.DiskReady, int(c.ImageCreateTimeout.Seconds()))
-	}
-
-	if err == nil {
-		image, err = s.client.GetImage(ctx, image.ID)
-	}
-
 	if err != nil {
-		err = errors.New("Error creating image: " + err.Error())
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		return handleError("Failed to create image", err)
+	}
+
+	_, err = creationPoller.WaitForFinished(ctx, int(c.ImageCreateTimeout.Seconds()))
+	if err != nil {
+		return handleError("Failed to wait for image creation", err)
+	}
+
+	image, err = s.client.GetImage(ctx, image.ID)
+	if err != nil {
+		return handleError("Failed to get image", err)
 	}
 
 	state.Put("image", image)

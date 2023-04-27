@@ -2,8 +2,6 @@ package linode
 
 import (
 	"context"
-	"errors"
-
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/linode/linodego"
@@ -18,20 +16,18 @@ func (s *stepShutdownLinode) Run(ctx context.Context, state multistep.StateBag) 
 	ui := state.Get("ui").(packersdk.Ui)
 	instance := state.Get("instance").(*linodego.Instance)
 
+	handleError := func(prefix string, err error) multistep.StepAction {
+		return errorHelper(state, ui, prefix, err)
+	}
+
 	ui.Say("Shutting down Linode...")
 	if err := s.client.ShutdownInstance(ctx, instance.ID); err != nil {
-		err = errors.New("Error shutting down Linode: " + err.Error())
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		return handleError("Error shutting down Linode", err)
 	}
 
 	_, err := s.client.WaitForInstanceStatus(ctx, instance.ID, linodego.InstanceOffline, int(c.StateTimeout.Seconds()))
 	if err != nil {
-		err = errors.New("Error shutting down Linode: " + err.Error())
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		return handleError("Error waiting for Linode offline", err)
 	}
 
 	return multistep.ActionContinue
