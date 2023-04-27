@@ -1,6 +1,6 @@
 module github.com/linode/packer-plugin-linode
 
-go 1.18
+go 1.19
 
 require (
 	github.com/go-resty/resty/v2 v2.3.0 // indirect
