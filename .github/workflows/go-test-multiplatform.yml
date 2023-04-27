@@ -1,6 +1,6 @@
 #
 # This GitHub action runs Packer go tests across
-# MacOS runners.
+# multiple runners.
 #
 
 name: "Go Test Multi-Platform"
