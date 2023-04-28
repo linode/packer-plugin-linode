@@ -60,14 +60,7 @@ jobs:
       - uses: actions/setup-go@v4
         with:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
-      - run: |
-          go fmt ./...
-          echo "==> Checking that code complies with go fmt requirements..."
-          git diff --exit-code; if [ $$? -eq 1 ]; then \
-          echo "Found files that are not fmt'ed."; \
-          echo "You can use the command: \`go fmt ./...\` to reformat code."; \
-          exit 1; \
-          fi
+      - run: make fmtcheck
   check-generate:
     needs:
       - get-go-version
