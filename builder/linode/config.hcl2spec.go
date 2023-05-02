@@ -70,6 +70,7 @@ type FlatConfig struct {
 	PersonalAccessToken       *string           `mapstructure:"linode_token" cty:"linode_token" hcl:"linode_token"`
 	Region                    *string           `mapstructure:"region" cty:"region" hcl:"region"`
 	AuthorizedKeys            []string          `mapstructure:"authorized_keys" cty:"authorized_keys" hcl:"authorized_keys"`
+	AuthorizedUsers           []string          `mapstructure:"authorized_users" cty:"authorized_users" hcl:"authorized_users"`
 	InstanceType              *string           `mapstructure:"instance_type" cty:"instance_type" hcl:"instance_type"`
 	Label                     *string           `mapstructure:"instance_label" cty:"instance_label" hcl:"instance_label"`
 	Tags                      []string          `mapstructure:"instance_tags" cty:"instance_tags" hcl:"instance_tags"`
@@ -154,6 +155,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"linode_token":                 &hcldec.AttrSpec{Name: "linode_token", Type: cty.String, Required: false},
 		"region":                       &hcldec.AttrSpec{Name: "region", Type: cty.String, Required: false},
 		"authorized_keys":              &hcldec.AttrSpec{Name: "authorized_keys", Type: cty.List(cty.String), Required: false},
+		"authorized_users":             &hcldec.AttrSpec{Name: "authorized_users", Type: cty.List(cty.String), Required: false},
 		"instance_type":                &hcldec.AttrSpec{Name: "instance_type", Type: cty.String, Required: false},
 		"instance_label":               &hcldec.AttrSpec{Name: "instance_label", Type: cty.String, Required: false},
 		"instance_tags":                &hcldec.AttrSpec{Name: "instance_tags", Type: cty.List(cty.String), Required: false},
