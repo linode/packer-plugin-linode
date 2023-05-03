@@ -34,8 +34,8 @@ jobs:
     runs-on: macos-latest
     name: Darwin Go tests
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v3
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
         with:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
       - run: |
@@ -48,8 +48,8 @@ jobs:
     runs-on: windows-latest
     name: Windows Go tests
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v3
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
         with:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
       - run: |
@@ -62,8 +62,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Linux Go tests
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v3
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
         with:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
       - run: |
