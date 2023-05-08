@@ -9,15 +9,14 @@ require (
 	github.com/linode/linodego v0.30.0
 	github.com/zclconf/go-cty v1.10.0
 	golang.org/x/crypto v0.8.0
-	golang.org/x/oauth2 v0.1.0
+	golang.org/x/oauth2 v0.7.0
 )
 
 require github.com/mitchellh/mapstructure v1.4.1
 
 require (
 	cloud.google.com/go v0.105.0 // indirect
-	cloud.google.com/go/compute v1.12.1 // indirect
-	cloud.google.com/go/compute/metadata v0.1.1 // indirect
+	cloud.google.com/go/compute/metadata v0.2.0 // indirect
 	cloud.google.com/go/iam v0.6.0 // indirect
 	cloud.google.com/go/storage v1.27.0 // indirect
 	github.com/Azure/go-ntlmssp v0.0.0-20200615164410-66371956d46c // indirect
