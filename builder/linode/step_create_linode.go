@@ -3,7 +3,6 @@ package linode
 import (
 	"context"
 	"errors"
-	"time"
 
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
@@ -17,6 +16,10 @@ type stepCreateLinode struct {
 func (s *stepCreateLinode) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	c := state.Get("config").(*Config)
 	ui := state.Get("ui").(packersdk.Ui)
+
+	handleError := func(prefix string, err error) multistep.StepAction {
+		return errorHelper(state, ui, prefix, err)
+	}
 
 	ui.Say("Creating Linode...")
 
@@ -40,39 +43,25 @@ func (s *stepCreateLinode) Run(ctx context.Context, state multistep.StateBag) mu
 
 	instance, err := s.client.CreateInstance(ctx, createOpts)
 	if err != nil {
-		err = errors.New("Error creating Linode: " + err.Error())
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		return handleError("Failed to create Linode Instance", err)
+	}
+	state.Put("instance", instance)
+	state.Put("instance_id", instance.ID)
+
+	// wait until instance is running
+	instance, err = s.client.WaitForInstanceStatus(ctx, instance.ID, linodego.InstanceRunning, int(c.StateTimeout.Seconds()))
+	if err != nil {
+		return handleError("Failed to wait for Linode ready", err)
 	}
 	state.Put("instance", instance)
 
-	// wait until instance is running
-	for instance.Status != linodego.InstanceRunning {
-		time.Sleep(2 * time.Second)
-		if instance, err = s.client.GetInstance(ctx, instance.ID); err != nil {
-			err = errors.New("Error creating Linode: " + err.Error())
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-		state.Put("instance", instance)
-		// instance_id is the generic term used so that users can have access to the
-		// instance id inside of the provisioners, used in step_provision.
-		state.Put("instance_id", instance.ID)
-	}
-
 	disk, err := s.findDisk(ctx, instance.ID)
 	if err != nil {
-		err = errors.New("Error creating Linode: " + err.Error())
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	} else if disk == nil {
-		err := errors.New("Error creating Linode: no suitable disk was found")
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		return handleError("Failed to find instance disk", err)
+	}
+
+	if disk == nil {
+		return handleError("Failed to find instance disk", errors.New("no suitable disk was found"))
 	}
 	state.Put("disk", disk)
 	return multistep.ActionContinue

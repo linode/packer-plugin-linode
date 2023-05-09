@@ -27,13 +27,15 @@ func (s *StepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) mult
 	ui := state.Get("ui").(packersdk.Ui)
 	config := state.Get("config").(*Config)
 
+	handleError := func(prefix string, err error) multistep.StepAction {
+		return errorHelper(state, ui, prefix, err)
+	}
+
 	if config.Comm.SSHPrivateKeyFile != "" {
 		ui.Say("Using existing SSH private key")
 		privateKeyBytes, err := ioutil.ReadFile(config.Comm.SSHPrivateKeyFile)
 		if err != nil {
-			state.Put("error", fmt.Errorf(
-				"Error loading configured private key file: %s", err))
-			return multistep.ActionHalt
+			return handleError("Error loading configured private key file", err)
 		}
 
 		config.Comm.SSHPrivateKey = privateKeyBytes
@@ -45,10 +47,7 @@ func (s *StepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) mult
 	ui.Say("Creating temporary SSH key for instance...")
 	priv, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
-		err := fmt.Errorf("Error creating temporary ssh key: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		return handleError("Error creating temporary ssh key", err)
 	}
 
 	priv_blk := pem.Block{
@@ -59,10 +58,7 @@ func (s *StepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) mult
 
 	pub, err := ssh.NewPublicKey(&priv.PublicKey)
 	if err != nil {
-		err := fmt.Errorf("Error creating temporary ssh key: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+		return handleError("Error creating temporary ssh key", err)
 	}
 	config.Comm.SSHPrivateKey = pem.EncodeToMemory(&priv_blk)
 	config.Comm.SSHPublicKey = ssh.MarshalAuthorizedKey(pub)
@@ -76,16 +72,14 @@ func (s *StepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) mult
 		ui.Message(fmt.Sprintf("Saving key for debug purposes: %s", s.DebugKeyPath))
 		f, err := os.Create(s.DebugKeyPath)
 		if err != nil {
-			state.Put("error", fmt.Errorf("Error saving debug key: %s", err))
-			return multistep.ActionHalt
+			return handleError("Error saving debug key", err)
 		}
 
 		// Write out the key
 		err = pem.Encode(f, &priv_blk)
 		f.Close()
 		if err != nil {
-			state.Put("error", fmt.Errorf("Error saving debug key: %s", err))
-			return multistep.ActionHalt
+			return handleError("Error saving debug key", err)
 		}
 	}
 	return multistep.ActionContinue
