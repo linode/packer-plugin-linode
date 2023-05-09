@@ -27,6 +27,7 @@ type Config struct {
 
 	Region             string        `mapstructure:"region"`
 	AuthorizedKeys     []string      `mapstructure:"authorized_keys"`
+	AuthorizedUsers    []string      `mapstructure:"authorized_users"`
 	InstanceType       string        `mapstructure:"instance_type"`
 	Label              string        `mapstructure:"instance_label"`
 	Tags               []string      `mapstructure:"instance_tags"`

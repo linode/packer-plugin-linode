@@ -329,12 +329,14 @@ func TestBuilderPrepare_ImageCreateTimeout(t *testing.T) {
 	}
 }
 
-func TestBuilderPrepare_AuthorizedKeys(t *testing.T) {
+func TestBuilderPrepare_AuthorizedKeysAndUsers(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
 	// Test optional
 	delete(config, "authorized_keys")
+	delete(config, "authorized_users")
+
 	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
 		t.Fatalf("bad: %#v", warnings)
@@ -343,12 +345,18 @@ func TestBuilderPrepare_AuthorizedKeys(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	expected := []string{
+	expectedKeys := []string{
 		"ssh-rsa test@test",
 	}
 
+	expectedUsers := []string{
+		"my_user1",
+		"my_user2",
+	}
+
 	// Test set
-	config["authorized_keys"] = expected
+	config["authorized_keys"] = expectedKeys
+	config["authorized_users"] = expectedUsers
 	b = Builder{}
 	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
@@ -358,7 +366,10 @@ func TestBuilderPrepare_AuthorizedKeys(t *testing.T) {
 		t.Fatalf("should not have error: %s", err)
 	}
 
-	if !reflect.DeepEqual(b.config.AuthorizedKeys, expected) {
-		t.Errorf("got %v, expected %v", b.config.AuthorizedKeys, expected)
+	if !reflect.DeepEqual(b.config.AuthorizedKeys, expectedKeys) {
+		t.Errorf("got %v, expected %v", b.config.AuthorizedKeys, expectedKeys)
+	}
+	if !reflect.DeepEqual(b.config.AuthorizedUsers, expectedUsers) {
+		t.Errorf("got %v, expected %v", b.config.AuthorizedKeys, expectedUsers)
 	}
 }
