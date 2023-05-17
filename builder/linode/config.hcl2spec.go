@@ -68,6 +68,7 @@ type FlatConfig struct {
 	WinRMInsecure             *bool             `mapstructure:"winrm_insecure" cty:"winrm_insecure" hcl:"winrm_insecure"`
 	WinRMUseNTLM              *bool             `mapstructure:"winrm_use_ntlm" cty:"winrm_use_ntlm" hcl:"winrm_use_ntlm"`
 	PersonalAccessToken       *string           `mapstructure:"linode_token" cty:"linode_token" hcl:"linode_token"`
+	Interfaces                []FlatInterfaces  `mapstructure:"interface" cty:"interface" hcl:"interface"`
 	Region                    *string           `mapstructure:"region" cty:"region" hcl:"region"`
 	AuthorizedKeys            []string          `mapstructure:"authorized_keys" cty:"authorized_keys" hcl:"authorized_keys"`
 	AuthorizedUsers           []string          `mapstructure:"authorized_users" cty:"authorized_users" hcl:"authorized_users"`
@@ -76,10 +77,13 @@ type FlatConfig struct {
 	Tags                      []string          `mapstructure:"instance_tags" cty:"instance_tags" hcl:"instance_tags"`
 	Image                     *string           `mapstructure:"image" cty:"image" hcl:"image"`
 	SwapSize                  *int              `mapstructure:"swap_size" cty:"swap_size" hcl:"swap_size"`
+	PrivateIP                 *bool             `mapstructure:"private_ip" cty:"private_ip" hcl:"private_ip"`
 	RootPass                  *string           `mapstructure:"root_pass" cty:"root_pass" hcl:"root_pass"`
 	ImageLabel                *string           `mapstructure:"image_label" cty:"image_label" hcl:"image_label"`
 	Description               *string           `mapstructure:"image_description" cty:"image_description" hcl:"image_description"`
 	StateTimeout              *string           `mapstructure:"state_timeout" required:"false" cty:"state_timeout" hcl:"state_timeout"`
+	StackScriptData           map[string]string `mapstructure:"stackscript_data" cty:"stackscript_data" hcl:"stackscript_data"`
+	StackScriptID             *int              `mapstructure:"stackscript_id" cty:"stackscript_id" hcl:"stackscript_id"`
 	ImageCreateTimeout        *string           `mapstructure:"image_create_timeout" required:"false" cty:"image_create_timeout" hcl:"image_create_timeout"`
 }
 
@@ -153,6 +157,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"winrm_insecure":               &hcldec.AttrSpec{Name: "winrm_insecure", Type: cty.Bool, Required: false},
 		"winrm_use_ntlm":               &hcldec.AttrSpec{Name: "winrm_use_ntlm", Type: cty.Bool, Required: false},
 		"linode_token":                 &hcldec.AttrSpec{Name: "linode_token", Type: cty.String, Required: false},
+		"interface":                    &hcldec.BlockListSpec{TypeName: "interface", Nested: hcldec.ObjectSpec((*FlatInterfaces)(nil).HCL2Spec())},
 		"region":                       &hcldec.AttrSpec{Name: "region", Type: cty.String, Required: false},
 		"authorized_keys":              &hcldec.AttrSpec{Name: "authorized_keys", Type: cty.List(cty.String), Required: false},
 		"authorized_users":             &hcldec.AttrSpec{Name: "authorized_users", Type: cty.List(cty.String), Required: false},
@@ -161,11 +166,41 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"instance_tags":                &hcldec.AttrSpec{Name: "instance_tags", Type: cty.List(cty.String), Required: false},
 		"image":                        &hcldec.AttrSpec{Name: "image", Type: cty.String, Required: false},
 		"swap_size":                    &hcldec.AttrSpec{Name: "swap_size", Type: cty.Number, Required: false},
+		"private_ip":                   &hcldec.AttrSpec{Name: "private_ip", Type: cty.Bool, Required: false},
 		"root_pass":                    &hcldec.AttrSpec{Name: "root_pass", Type: cty.String, Required: false},
 		"image_label":                  &hcldec.AttrSpec{Name: "image_label", Type: cty.String, Required: false},
 		"image_description":            &hcldec.AttrSpec{Name: "image_description", Type: cty.String, Required: false},
 		"state_timeout":                &hcldec.AttrSpec{Name: "state_timeout", Type: cty.String, Required: false},
+		"stackscript_data":             &hcldec.AttrSpec{Name: "stackscript_data", Type: cty.Map(cty.String), Required: false},
+		"stackscript_id":               &hcldec.AttrSpec{Name: "stackscript_id", Type: cty.Number, Required: false},
 		"image_create_timeout":         &hcldec.AttrSpec{Name: "image_create_timeout", Type: cty.String, Required: false},
+	}
+	return s
+}
+
+// FlatInterfaces is an auto-generated flat version of Interfaces.
+// Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
+type FlatInterfaces struct {
+	Purpose     *string `mapstructure:"purpose" cty:"purpose" hcl:"purpose"`
+	Label       *string `mapstructure:"label" cty:"label" hcl:"label"`
+	IPAMAddress *string `mapstructure:"ipam_address" cty:"ipam_address" hcl:"ipam_address"`
+}
+
+// FlatMapstructure returns a new FlatInterfaces.
+// FlatInterfaces is an auto-generated flat version of Interfaces.
+// Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
+func (*Interfaces) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatInterfaces)
+}
+
+// HCL2Spec returns the hcl spec of a Interfaces.
+// This spec is used by HCL to read the fields of Interfaces.
+// The decoded values from this spec will then be applied to a FlatInterfaces.
+func (*FlatInterfaces) HCL2Spec() map[string]hcldec.Spec {
+	s := map[string]hcldec.Spec{
+		"purpose":      &hcldec.AttrSpec{Name: "purpose", Type: cty.String, Required: false},
+		"label":        &hcldec.AttrSpec{Name: "label", Type: cty.String, Required: false},
+		"ipam_address": &hcldec.AttrSpec{Name: "ipam_address", Type: cty.String, Required: false},
 	}
 	return s
 }
