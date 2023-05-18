@@ -373,3 +373,132 @@ func TestBuilderPrepare_AuthorizedKeysAndUsers(t *testing.T) {
 		t.Errorf("got %v, expected %v", b.config.AuthorizedKeys, expectedUsers)
 	}
 }
+
+func TestBuilderPrepare_PrivateIP(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test optional
+	delete(config, "private_ip")
+
+	_, warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expectedPrivateIP := true
+	config["private_ip"] = expectedPrivateIP
+
+	b = Builder{}
+	_, warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if !reflect.DeepEqual(b.config.PrivateIP, expectedPrivateIP) {
+		t.Errorf("got %v, expected %v", b.config.PrivateIP, expectedPrivateIP)
+	}
+}
+
+func TestBuilderPrepare_StackScripts(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test optional
+	delete(config, "stackscript_id")
+	delete(config, "stackscript_data")
+
+	_, warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expectedStackScriptID := 123
+	expectedStackScriptData := map[string]string{"test_data": "test_value"}
+
+	// Test set
+	config["stackscript_id"] = expectedStackScriptID
+	config["stackscript_data"] = expectedStackScriptData
+	b = Builder{}
+	_, warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if !reflect.DeepEqual(b.config.StackScriptID, expectedStackScriptID) {
+		t.Errorf(
+			"got %v, expected %v",
+			b.config.StackScriptID,
+			expectedStackScriptID,
+		)
+	}
+	if !reflect.DeepEqual(b.config.StackScriptData, expectedStackScriptData) {
+		t.Errorf(
+			"got %v, expected %v",
+			b.config.StackScriptData,
+			expectedStackScriptData,
+		)
+	}
+}
+
+func TestBuilderPrepare_NetworkInterfaces(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test optional
+	delete(config, "interface")
+	delete(config, "authorized_users")
+
+	_, warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expectedInterfaces := []Interface{
+		{
+			Purpose:     "public",
+			Label:       "",
+			IPAMAddress: "",
+		},
+		{
+			Purpose:     "vlan",
+			Label:       "vlan-1",
+			IPAMAddress: "10.0.0.1/24",
+		},
+		{
+			Purpose:     "vlan",
+			Label:       "vlan-2",
+			IPAMAddress: "10.0.0.2/24",
+		},
+	}
+
+	// Test set
+	config["interface"] = expectedInterfaces
+	b = Builder{}
+	_, warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if !reflect.DeepEqual(b.config.Interfaces, expectedInterfaces) {
+		t.Errorf("got %v, expected %v", b.config.Interfaces, expectedInterfaces)
+	}
+}
