@@ -68,7 +68,7 @@ type FlatConfig struct {
 	WinRMInsecure             *bool             `mapstructure:"winrm_insecure" cty:"winrm_insecure" hcl:"winrm_insecure"`
 	WinRMUseNTLM              *bool             `mapstructure:"winrm_use_ntlm" cty:"winrm_use_ntlm" hcl:"winrm_use_ntlm"`
 	PersonalAccessToken       *string           `mapstructure:"linode_token" cty:"linode_token" hcl:"linode_token"`
-	Interfaces                []FlatInterfaces  `mapstructure:"interface" cty:"interface" hcl:"interface"`
+	Interfaces                []FlatInterface   `mapstructure:"interface" cty:"interface" hcl:"interface"`
 	Region                    *string           `mapstructure:"region" cty:"region" hcl:"region"`
 	AuthorizedKeys            []string          `mapstructure:"authorized_keys" cty:"authorized_keys" hcl:"authorized_keys"`
 	AuthorizedUsers           []string          `mapstructure:"authorized_users" cty:"authorized_users" hcl:"authorized_users"`
@@ -157,7 +157,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"winrm_insecure":               &hcldec.AttrSpec{Name: "winrm_insecure", Type: cty.Bool, Required: false},
 		"winrm_use_ntlm":               &hcldec.AttrSpec{Name: "winrm_use_ntlm", Type: cty.Bool, Required: false},
 		"linode_token":                 &hcldec.AttrSpec{Name: "linode_token", Type: cty.String, Required: false},
-		"interface":                    &hcldec.BlockListSpec{TypeName: "interface", Nested: hcldec.ObjectSpec((*FlatInterfaces)(nil).HCL2Spec())},
+		"interface":                    &hcldec.BlockListSpec{TypeName: "interface", Nested: hcldec.ObjectSpec((*FlatInterface)(nil).HCL2Spec())},
 		"region":                       &hcldec.AttrSpec{Name: "region", Type: cty.String, Required: false},
 		"authorized_keys":              &hcldec.AttrSpec{Name: "authorized_keys", Type: cty.List(cty.String), Required: false},
 		"authorized_users":             &hcldec.AttrSpec{Name: "authorized_users", Type: cty.List(cty.String), Required: false},
@@ -178,25 +178,25 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 	return s
 }
 
-// FlatInterfaces is an auto-generated flat version of Interfaces.
+// FlatInterface is an auto-generated flat version of Interface.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
-type FlatInterfaces struct {
+type FlatInterface struct {
 	Purpose     *string `mapstructure:"purpose" cty:"purpose" hcl:"purpose"`
 	Label       *string `mapstructure:"label" cty:"label" hcl:"label"`
 	IPAMAddress *string `mapstructure:"ipam_address" cty:"ipam_address" hcl:"ipam_address"`
 }
 
-// FlatMapstructure returns a new FlatInterfaces.
-// FlatInterfaces is an auto-generated flat version of Interfaces.
+// FlatMapstructure returns a new FlatInterface.
+// FlatInterface is an auto-generated flat version of Interface.
 // Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
-func (*Interfaces) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
-	return new(FlatInterfaces)
+func (*Interface) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatInterface)
 }
 
-// HCL2Spec returns the hcl spec of a Interfaces.
-// This spec is used by HCL to read the fields of Interfaces.
-// The decoded values from this spec will then be applied to a FlatInterfaces.
-func (*FlatInterfaces) HCL2Spec() map[string]hcldec.Spec {
+// HCL2Spec returns the hcl spec of a Interface.
+// This spec is used by HCL to read the fields of Interface.
+// The decoded values from this spec will then be applied to a FlatInterface.
+func (*FlatInterface) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"purpose":      &hcldec.AttrSpec{Name: "purpose", Type: cty.String, Required: false},
 		"label":        &hcldec.AttrSpec{Name: "label", Type: cty.String, Required: false},

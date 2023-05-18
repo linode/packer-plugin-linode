@@ -13,7 +13,7 @@ type stepCreateLinode struct {
 	client linodego.Client
 }
 
-func flattenConfigInterface(i Interfaces) linodego.InstanceConfigInterface {
+func flattenConfigInterface(i Interface) linodego.InstanceConfigInterface {
 	return linodego.InstanceConfigInterface{
 		IPAMAddress: i.IPAMAddress,
 		Label:       i.Label,

@@ -1,4 +1,4 @@
-//go:generate packer-sdc mapstructure-to-hcl2 -type Config,Interfaces
+//go:generate packer-sdc mapstructure-to-hcl2 -type Config,Interface
 
 package linode
 
@@ -18,7 +18,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 )
 
-type Interfaces struct {
+type Interface struct {
 	Purpose     string `mapstructure:"purpose"`
 	Label       string `mapstructure:"label"`
 	IPAMAddress string `mapstructure:"ipam_address"`
@@ -31,7 +31,7 @@ type Config struct {
 
 	PersonalAccessToken string `mapstructure:"linode_token"`
 
-	Interfaces         []Interfaces      `mapstructure:"interface"`
+	Interfaces         []Interface       `mapstructure:"interface"`
 	Region             string            `mapstructure:"region"`
 	AuthorizedKeys     []string          `mapstructure:"authorized_keys"`
 	AuthorizedUsers    []string          `mapstructure:"authorized_users"`
