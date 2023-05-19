@@ -115,11 +115,70 @@ can also be supplied to override the typical auto-generated key:
 - `private_ip` (bool) - If true, the created Linode will have private networking
   enabled and assigned a private IPv4 address.
 
-## Basic Example
+## Examples
+
+### Basic Example
 
 Here is a Linode builder example. The `linode_token` should be replaced with an
 actual [Linode Personal Access
-Token](https://www.linode.com/docs/platform/api/getting-started-with-the-linode-api/#get-an-access-token).
+Token](https://www.linode.com/docs/platform/api/getting-started-with-the-linode-api/#get-an-access-token)
+or in the config file or the environmental variable, `LINODE_TOKEN`.
+
+<Tabs>
+<Tab heading="HCL2">
+
+```hcl
+
+locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }
+
+source "linode" "example" {
+  image             = "linode/debian11"
+  image_description = "My Private Image"
+  image_label       = "private-image-${local.timestamp}"
+  instance_label    = "temporary-linode-${local.timestamp}"
+  instance_type     = "g6-nanode-1"
+  linode_token      = "YOUR API TOKEN"
+  region            = "us-east"
+  ssh_username      = "root"
+}
+
+build {
+  sources = ["source.linode.example"]
+}
+
+```
+
+</Tab>
+<Tab heading="JSON">
+
+```json
+{
+  "source": {
+    "linode": {
+      "example": {
+        "image": "linode/debian11",
+        "linode_token": "YOUR API TOKEN",
+        "region": "us-east",
+        "instance_type": "g6-nanode-1",
+        "instance_label": "temporary-linode-{{timestamp}}",
+        "image_label": "private-image-{{timestamp}}",
+        "image_description": "My Private Image",
+        "ssh_username": "root"
+      }
+    }
+  },
+  "build": {
+    "sources": [
+      "source.linode.example"
+    ]
+  }
+}
+```
+
+</Tab>
+</Tabs>
+
+### Complicated Example
 
 <Tabs>
 <Tab heading="HCL2">
