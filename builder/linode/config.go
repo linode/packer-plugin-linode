@@ -1,4 +1,4 @@
-//go:generate packer-sdc mapstructure-to-hcl2 -type Config
+//go:generate packer-sdc mapstructure-to-hcl2 -type Config,Interface
 
 package linode
 
@@ -18,6 +18,12 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 )
 
+type Interface struct {
+	Purpose     string `mapstructure:"purpose"`
+	Label       string `mapstructure:"label"`
+	IPAMAddress string `mapstructure:"ipam_address"`
+}
+
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	ctx                 interpolate.Context
@@ -25,26 +31,30 @@ type Config struct {
 
 	PersonalAccessToken string `mapstructure:"linode_token"`
 
-	Region             string        `mapstructure:"region"`
-	AuthorizedKeys     []string      `mapstructure:"authorized_keys"`
-	AuthorizedUsers    []string      `mapstructure:"authorized_users"`
-	InstanceType       string        `mapstructure:"instance_type"`
-	Label              string        `mapstructure:"instance_label"`
-	Tags               []string      `mapstructure:"instance_tags"`
-	Image              string        `mapstructure:"image"`
-	SwapSize           int           `mapstructure:"swap_size"`
-	RootPass           string        `mapstructure:"root_pass"`
-	ImageLabel         string        `mapstructure:"image_label"`
-	Description        string        `mapstructure:"image_description"`
-	StateTimeout       time.Duration `mapstructure:"state_timeout" required:"false"`
-	ImageCreateTimeout time.Duration `mapstructure:"image_create_timeout" required:"false"`
+	Interfaces         []Interface       `mapstructure:"interface"`
+	Region             string            `mapstructure:"region"`
+	AuthorizedKeys     []string          `mapstructure:"authorized_keys"`
+	AuthorizedUsers    []string          `mapstructure:"authorized_users"`
+	InstanceType       string            `mapstructure:"instance_type"`
+	Label              string            `mapstructure:"instance_label"`
+	Tags               []string          `mapstructure:"instance_tags"`
+	Image              string            `mapstructure:"image"`
+	SwapSize           int               `mapstructure:"swap_size"`
+	PrivateIP          bool              `mapstructure:"private_ip"`
+	RootPass           string            `mapstructure:"root_pass"`
+	ImageLabel         string            `mapstructure:"image_label"`
+	Description        string            `mapstructure:"image_description"`
+	StateTimeout       time.Duration     `mapstructure:"state_timeout" required:"false"`
+	StackScriptData    map[string]string `mapstructure:"stackscript_data"`
+	StackScriptID      int               `mapstructure:"stackscript_id"`
+	ImageCreateTimeout time.Duration     `mapstructure:"image_create_timeout" required:"false"`
 }
 
 func createRandomRootPassword() (string, error) {
 	rawRootPass := make([]byte, 50)
 	_, err := rand.Read(rawRootPass)
 	if err != nil {
-		return "", fmt.Errorf("Failed to generate random password")
+		return "", fmt.Errorf("failed to generate random password")
 	}
 	rootPass := base64.StdEncoding.EncodeToString(rawRootPass)
 	return rootPass, nil

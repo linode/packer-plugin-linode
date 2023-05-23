@@ -13,6 +13,14 @@ type stepCreateLinode struct {
 	client linodego.Client
 }
 
+func flattenConfigInterface(i Interface) linodego.InstanceConfigInterface {
+	return linodego.InstanceConfigInterface{
+		IPAMAddress: i.IPAMAddress,
+		Label:       i.Label,
+		Purpose:     linodego.ConfigInterfacePurpose(i.Purpose),
+	}
+}
+
 func (s *stepCreateLinode) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	c := state.Get("config").(*Config)
 	ui := state.Get("ui").(packersdk.Ui)
@@ -23,11 +31,20 @@ func (s *stepCreateLinode) Run(ctx context.Context, state multistep.StateBag) mu
 
 	ui.Say("Creating Linode...")
 
+	interfaces := make([]linodego.InstanceConfigInterface, len(c.Interfaces))
+	for i, v := range c.Interfaces {
+		interfaces[i] = flattenConfigInterface(v)
+	}
+
 	createOpts := linodego.InstanceCreateOptions{
 		RootPass:        c.Comm.Password(),
 		AuthorizedKeys:  []string{},
 		AuthorizedUsers: []string{},
+		Interfaces:      interfaces,
+		PrivateIP:       c.PrivateIP,
 		Region:          c.Region,
+		StackScriptID:   c.StackScriptID,
+		StackScriptData: c.StackScriptData,
 		Type:            c.InstanceType,
 		Label:           c.Label,
 		Image:           c.Image,
