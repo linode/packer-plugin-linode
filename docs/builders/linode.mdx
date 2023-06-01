@@ -60,8 +60,9 @@ can also be supplied to override the typical auto-generated key:
 ### Required
 
 - `linode_token` (string) - The client TOKEN to use to access your account.
- Alternatively, you can set your token as an environment variable named
-  `LINODE_TOKEN`.
+  Alternatively, you can set your token as an environment variable named
+  `LINODE_TOKEN`. Saving the token in the environment or centralized vaults
+  can reduce the risk of the token being leaked from the codebase.
 
 - `image` (string) - An Image ID to deploy the Disk from. Official Linode
   Images start with `linode/`, while user Images start with `private/`. See
@@ -114,6 +115,10 @@ can also be supplied to override the typical auto-generated key:
 
 - `private_ip` (bool) - If true, the created Linode will have private networking
   enabled and assigned a private IPv4 address.
+
+- `root_pass` (string) - The root password of the Linode instance for building the image.
+  Please note that when you create a new Linode instance with a private image, you will
+  be required to setup a new root password.
 
 ## Examples
 
