@@ -1,8 +1,9 @@
 #
-# This GitHub action runs basic linting checks for Packer.
+# This GitHub action runs Packer go tests across
+# multiple runners.
 #
 
-name: "Go Validate"
+name: "Go Test Multi-Platform"
 
 on:
   push:
@@ -26,51 +27,45 @@ jobs:
         run: |
           echo "Found Go $(cat .go-version)"
           echo "go-version=$(cat .go-version)" >> $GITHUB_OUTPUT
-  check-mod-tidy:
+
+  darwin-go-tests:
     needs:
       - get-go-version
-    runs-on: ubuntu-latest
-    name: Go Mod Tidy
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v4
-        with:
-          go-version: ${{ needs.get-go-version.outputs.go-version }}
-      - run: go mod tidy
-  check-lint:
-    needs:
-      - get-go-version
-    runs-on: ubuntu-latest
-    name: Lint check
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v4
-        with:
-          go-version: ${{ needs.get-go-version.outputs.go-version }}
-      - uses: golangci/golangci-lint-action@v3
-        with:
-          only-new-issues: true
-  check-fmt:
-    needs:
-      - get-go-version
-    runs-on: ubuntu-latest
-    name: Gofmt check
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v4
-        with:
-          go-version: ${{ needs.get-go-version.outputs.go-version }}
-      - run: make fmtcheck
-  check-generate:
-    needs:
-      - get-go-version
-    runs-on: ubuntu-latest
-    name: Generate check
+    runs-on: macos-latest
+    name: Darwin Go tests
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v4
         with:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
       - run: |
-          export PATH=$PATH:$(go env GOPATH)/bin
-          make generate
+          echo "Testing with Go ${{ needs.get-go-version.outputs.go-version }}"
+          go test -race -count 1 ./... -timeout=3m
+
+  windows-go-tests:
+    needs:
+      - get-go-version
+    runs-on: windows-latest
+    name: Windows Go tests
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: ${{ needs.get-go-version.outputs.go-version }}
+      - run: |
+          echo "Testing with Go ${{ needs.get-go-version.outputs.go-version }}"
+          go test -race -count 1 ./... -timeout=3m
+
+  linux-go-tests:
+    needs:
+      - get-go-version
+    runs-on: ubuntu-latest
+    name: Linux Go tests
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: ${{ needs.get-go-version.outputs.go-version }}
+      - run: |
+          echo "Testing with Go ${{ needs.get-go-version.outputs.go-version }}"
+          go test -race -count 1 ./... -timeout=3m
