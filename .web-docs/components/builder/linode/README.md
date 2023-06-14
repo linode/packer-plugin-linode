@@ -1,12 +1,3 @@
----
-description: |
-  The linode Packer builder is able to create new images for use with Linode.
-page_title: Linode - Builders
-nav_title: Linode
----
-
-# Linode Builder
-
 Type: `linode`
 Artifact BuilderId: `packer.linode`
 
@@ -48,7 +39,10 @@ In addition to the options listed here, a
 builder. In addition to the options defined there, a private key file
 can also be supplied to override the typical auto-generated key:
 
-@include 'packer-plugin-sdk/communicator/SSH-Private-Key-File-not-required.mdx'
+- `ssh_private_key_file` (string) - Path to a PEM encoded private key file to use to authenticate with SSH.
+  The `~` can be used in path and will be expanded to the home directory
+  of current user.
+
 
 <!--
   Linode.com has DDOS protection that returns 403 for the markdown link checker
@@ -94,7 +88,7 @@ can also be supplied to override the typical auto-generated key:
 
 - `swap_size` (int) - The disk size (MiB) allocated for swap space.
 
-- `interface` ([](Interface)[#interface]) - Network Interfaces
+- `interface` ([]{purpose string, label string, ipam_address string}) - Network Interfaces
   to add to this Linode’s Configuration Profile. Singular repeatable block containing a `purpose`,
   a `label`, and an `ipam_address` field.
 
@@ -119,30 +113,6 @@ can also be supplied to override the typical auto-generated key:
 - `root_pass` (string) - The root password of the Linode instance for building the image.
   Please note that when you create a new Linode instance with a private image, you will
   be required to setup a new root password.
-
-#### Interface
-
-This section outlines the fields configurable for a single interface object.
-
-- `purpose` (string) - The purpose of this interface. (public, vlan, vpc)
-
-- `primary` (bool) - Whether this interface is a primary interface.
-
-VLAN-specific fields:
-
-- `label` (string) - The label of the VLAN this interface relates to.
-
-- `ipam_address` (string) - This Network Interface’s private IP address in CIDR notation.
-
-VPC-specific fields:
-
-- `subnet_id` (int) - The ID of the VPC Subnet this interface references.
-
-- `ipv4` (block) - The IPv4 configuration of this VPC interface.
-
-    - `vpc` (string) - The IPv4 address from the VPC subnet to use for this interface.
-
-    - `nat_1_1` (string) - The public IPv4 address assigned to this Linode to be 1:1 NATed with the VPC IPv4 address.
 
 ## Examples
 
@@ -231,15 +201,20 @@ source "linode" "example" {
 
   interface {
     purpose       = "public"
+    label         = ""
+    ipam_address  = ""
   }
 
   interface {
-    purpose       = "vpc"
-    subnet_id     = 123
-    ipv4 {
-        vpc = "10.0.0.2"
-        nat_1_1 = "any"
-    }
+    purpose       = "vlan"
+    label         = "vlan-1"
+    ipam_address  = "10.0.0.1/24"
+  }
+
+  interface {
+    purpose       = "vlan"
+    label         = "vlan-2"
+    ipam_address  = "10.0.0.2/24"
   }
 }
 
@@ -301,4 +276,3 @@ build {
   }
 }
 ```
-
