@@ -11,7 +11,7 @@ require (
 	golang.org/x/oauth2 v0.10.0
 )
 
-require github.com/mitchellh/mapstructure v1.4.1
+require github.com/mitchellh/mapstructure v1.5.0
 
 require (
 	cloud.google.com/go v0.110.2 // indirect
