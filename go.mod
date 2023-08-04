@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/hashicorp/hcl/v2 v2.16.2
 	github.com/hashicorp/packer-plugin-sdk v0.5.1
-	github.com/linode/linodego v1.19.0
+	github.com/linode/linodego v1.20.0
 	github.com/zclconf/go-cty v1.12.1
 	golang.org/x/crypto v0.11.0
 	golang.org/x/oauth2 v0.10.0
@@ -82,7 +82,7 @@ require (
 	github.com/ugorji/go/codec v1.2.6 // indirect
 	github.com/ulikunitz/xz v0.5.10 // indirect
 	go.opencensus.io v0.24.0 // indirect
-	golang.org/x/net v0.12.0 // indirect
+	golang.org/x/net v0.13.0 // indirect
 	golang.org/x/sys v0.10.0 // indirect
 	golang.org/x/term v0.10.0 // indirect
 	golang.org/x/text v0.11.0 // indirect
