@@ -20,7 +20,7 @@ jobs:
     outputs:
       go-version: ${{ steps.get-go-version.outputs.go-version }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: 'Determine Go version'
         id: get-go-version
         run: |
@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Go Mod Tidy
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-go@v4
         with:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Lint check
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-go@v4
         with:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
@@ -56,7 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Gofmt check
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-go@v4
         with:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
@@ -67,7 +67,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Generate check
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-go@v4
         with:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
