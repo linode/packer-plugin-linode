@@ -238,20 +238,12 @@ source "linode" "example" {
 
   interface {
     purpose       = "public"
-    label         = ""
-    ipam_address  = ""
   }
 
   interface {
     purpose       = "vlan"
     label         = "vlan-1"
     ipam_address  = "10.0.0.1/24"
-  }
-
-  interface {
-    purpose       = "vlan"
-    label         = "vlan-2"
-    ipam_address  = "10.0.0.2/24"
   }
 }
 
