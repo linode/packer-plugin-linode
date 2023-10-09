@@ -181,9 +181,13 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 // FlatInterface is an auto-generated flat version of Interface.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatInterface struct {
-	Purpose     *string `mapstructure:"purpose" cty:"purpose" hcl:"purpose"`
-	Label       *string `mapstructure:"label" cty:"label" hcl:"label"`
-	IPAMAddress *string `mapstructure:"ipam_address" cty:"ipam_address" hcl:"ipam_address"`
+	Purpose     *string            `mapstructure:"purpose" cty:"purpose" hcl:"purpose"`
+	Label       *string            `mapstructure:"label" cty:"label" hcl:"label"`
+	IPAMAddress *string            `mapstructure:"ipam_address" cty:"ipam_address" hcl:"ipam_address"`
+	Primary     *bool              `mapstructure:"primary" cty:"primary" hcl:"primary"`
+	SubnetID    *int               `mapstructure:"subnet_id" cty:"subnet_id" hcl:"subnet_id"`
+	IPv4        *FlatInterfaceIPv4 `mapstructure:"ipv4" cty:"ipv4" hcl:"ipv4"`
+	IPRanges    []string           `mapstructure:"ip_ranges" cty:"ip_ranges" hcl:"ip_ranges"`
 }
 
 // FlatMapstructure returns a new FlatInterface.
@@ -201,6 +205,10 @@ func (*FlatInterface) HCL2Spec() map[string]hcldec.Spec {
 		"purpose":      &hcldec.AttrSpec{Name: "purpose", Type: cty.String, Required: false},
 		"label":        &hcldec.AttrSpec{Name: "label", Type: cty.String, Required: false},
 		"ipam_address": &hcldec.AttrSpec{Name: "ipam_address", Type: cty.String, Required: false},
+		"primary":      &hcldec.AttrSpec{Name: "primary", Type: cty.Bool, Required: false},
+		"subnet_id":    &hcldec.AttrSpec{Name: "subnet_id", Type: cty.Number, Required: false},
+		"ipv4":         &hcldec.BlockSpec{TypeName: "ipv4", Nested: hcldec.ObjectSpec((*FlatInterfaceIPv4)(nil).HCL2Spec())},
+		"ip_ranges":    &hcldec.AttrSpec{Name: "ip_ranges", Type: cty.List(cty.String), Required: false},
 	}
 	return s
 }

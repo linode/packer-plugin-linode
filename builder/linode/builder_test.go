@@ -469,11 +469,12 @@ func TestBuilderPrepare_NetworkInterfaces(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
+	subnetID := 12345
+
 	expectedInterfaces := []Interface{
 		{
-			Purpose:     "public",
-			Label:       "",
-			IPAMAddress: "",
+			Purpose: "public",
+			Primary: true,
 		},
 		{
 			Purpose:     "vlan",
@@ -481,9 +482,13 @@ func TestBuilderPrepare_NetworkInterfaces(t *testing.T) {
 			IPAMAddress: "10.0.0.1/24",
 		},
 		{
-			Purpose:     "vlan",
-			Label:       "vlan-2",
-			IPAMAddress: "10.0.0.2/24",
+			Purpose:  "vpc",
+			SubnetID: &subnetID,
+			IPv4: &InterfaceIPv4{
+				VPC:     "10.0.0.2",
+				NAT1To1: "any",
+			},
+			IPRanges: []string{"10.0.0.5/32"},
 		},
 	}
 

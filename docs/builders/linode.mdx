@@ -120,6 +120,32 @@ can also be supplied to override the typical auto-generated key:
   Please note that when you create a new Linode instance with a private image, you will
   be required to setup a new root password.
 
+#### Interface
+
+This section outlines the fields configurable for a single interface object.
+
+- `purpose` (string) - The purpose of this interface. (public, vlan, vpc)
+
+- `primary` (bool) - Whether this interface is a primary interface.
+
+VLAN-specific fields:
+
+- `label` (string) - The label of the VLAN this interface relates to.
+
+- `ipam_address` (string) - This Network Interface’s private IP address in CIDR notation.
+
+VPC-specific fields:
+
+- `subnet_id` (int) - The ID of the VPC Subnet this interface references.
+
+- `ipv4` (block) - The IPv4 configuration of this VPC interface.
+
+    - `vpc` (string) - The IPv4 address from the VPC subnet to use for this interface.
+
+    - `nat_1_1` (string) - The public IPv4 address assigned to this Linode to be 1:1 NATed with the VPC IPv4 address.
+
+- `ip_ranges` (string) - A list of IPv4 ranges inside the VPC Subnet where packets should be routed to the VPC interface.
+
 ## Examples
 
 ### Basic Example
