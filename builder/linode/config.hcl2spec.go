@@ -212,3 +212,28 @@ func (*FlatInterface) HCL2Spec() map[string]hcldec.Spec {
 	}
 	return s
 }
+
+// FlatInterfaceIPv4 is an auto-generated flat version of InterfaceIPv4.
+// Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
+type FlatInterfaceIPv4 struct {
+	VPC     *string `mapstructure:"vpc" cty:"vpc" hcl:"vpc"`
+	NAT1To1 *string `mapstructure:"nat_1_1" cty:"nat_1_1" hcl:"nat_1_1"`
+}
+
+// FlatMapstructure returns a new FlatInterfaceIPv4.
+// FlatInterfaceIPv4 is an auto-generated flat version of InterfaceIPv4.
+// Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
+func (*InterfaceIPv4) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatInterfaceIPv4)
+}
+
+// HCL2Spec returns the hcl spec of a InterfaceIPv4.
+// This spec is used by HCL to read the fields of InterfaceIPv4.
+// The decoded values from this spec will then be applied to a FlatInterfaceIPv4.
+func (*FlatInterfaceIPv4) HCL2Spec() map[string]hcldec.Spec {
+	s := map[string]hcldec.Spec{
+		"vpc":     &hcldec.AttrSpec{Name: "vpc", Type: cty.String, Required: false},
+		"nat_1_1": &hcldec.AttrSpec{Name: "nat_1_1", Type: cty.String, Required: false},
+	}
+	return s
+}

@@ -1,4 +1,4 @@
-//go:generate packer-sdc mapstructure-to-hcl2 -type Config,Interface
+//go:generate packer-sdc mapstructure-to-hcl2 -type Config,Interface,InterfaceIPv4
 
 package linode
 
