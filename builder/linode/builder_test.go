@@ -488,7 +488,6 @@ func TestBuilderPrepare_NetworkInterfaces(t *testing.T) {
 				VPC:     "10.0.0.2",
 				NAT1To1: "any",
 			},
-			IPRanges: []string{"10.0.0.5/32"},
 		},
 	}
 

@@ -187,7 +187,6 @@ type FlatInterface struct {
 	Primary     *bool              `mapstructure:"primary" cty:"primary" hcl:"primary"`
 	SubnetID    *int               `mapstructure:"subnet_id" cty:"subnet_id" hcl:"subnet_id"`
 	IPv4        *FlatInterfaceIPv4 `mapstructure:"ipv4" cty:"ipv4" hcl:"ipv4"`
-	IPRanges    []string           `mapstructure:"ip_ranges" cty:"ip_ranges" hcl:"ip_ranges"`
 }
 
 // FlatMapstructure returns a new FlatInterface.
@@ -208,7 +207,6 @@ func (*FlatInterface) HCL2Spec() map[string]hcldec.Spec {
 		"primary":      &hcldec.AttrSpec{Name: "primary", Type: cty.Bool, Required: false},
 		"subnet_id":    &hcldec.AttrSpec{Name: "subnet_id", Type: cty.Number, Required: false},
 		"ipv4":         &hcldec.BlockSpec{TypeName: "ipv4", Nested: hcldec.ObjectSpec((*FlatInterfaceIPv4)(nil).HCL2Spec())},
-		"ip_ranges":    &hcldec.AttrSpec{Name: "ip_ranges", Type: cty.List(cty.String), Required: false},
 	}
 	return s
 }

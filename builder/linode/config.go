@@ -30,7 +30,6 @@ type Interface struct {
 	Primary     bool           `mapstructure:"primary"`
 	SubnetID    *int           `mapstructure:"subnet_id"`
 	IPv4        *InterfaceIPv4 `mapstructure:"ipv4"`
-	IPRanges    []string       `mapstructure:"ip_ranges"`
 }
 
 type Config struct {

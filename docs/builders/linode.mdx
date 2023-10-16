@@ -144,8 +144,6 @@ VPC-specific fields:
 
     - `nat_1_1` (string) - The public IPv4 address assigned to this Linode to be 1:1 NATed with the VPC IPv4 address.
 
-- `ip_ranges` (string) - A list of IPv4 ranges inside the VPC Subnet where packets should be routed to the VPC interface.
-
 ## Examples
 
 ### Basic Example
@@ -241,9 +239,12 @@ source "linode" "example" {
   }
 
   interface {
-    purpose       = "vlan"
-    label         = "vlan-1"
-    ipam_address  = "10.0.0.1/24"
+    purpose       = "vpc"
+    subnet_id     = 123
+    ipv4 {
+        vpc = "10.0.0.14"
+        nat_1_1 = "any"
+    }
   }
 }
 
