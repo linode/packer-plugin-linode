@@ -100,3 +100,6 @@ require (
 )
 
 replace github.com/zclconf/go-cty => github.com/nywilken/go-cty v1.12.1 // added by packer-sdc fix as noted in github.com/hashicorp/packer-plugin-sdk/issues/187
+
+// Temporary replacement for linodego proj/vpc
+replace github.com/linode/linodego => github.com/linode/linodego v1.22.1-0.20230926172253-9eee757b17a6

@@ -13,11 +13,25 @@ type stepCreateLinode struct {
 	client linodego.Client
 }
 
-func flattenConfigInterface(i Interface) linodego.InstanceConfigInterface {
-	return linodego.InstanceConfigInterface{
+func flattenConfigInterfaceIPv4(i *InterfaceIPv4) *linodego.VPCIPv4 {
+	if i == nil {
+		return nil
+	}
+
+	return &linodego.VPCIPv4{
+		VPC:     i.VPC,
+		NAT1To1: i.NAT1To1,
+	}
+}
+
+func flattenConfigInterface(i Interface) linodego.InstanceConfigInterfaceCreateOptions {
+	return linodego.InstanceConfigInterfaceCreateOptions{
 		IPAMAddress: i.IPAMAddress,
 		Label:       i.Label,
 		Purpose:     linodego.ConfigInterfacePurpose(i.Purpose),
+		Primary:     i.Primary,
+		SubnetID:    i.SubnetID,
+		IPv4:        flattenConfigInterfaceIPv4(i.IPv4),
 	}
 }
 
@@ -31,7 +45,7 @@ func (s *stepCreateLinode) Run(ctx context.Context, state multistep.StateBag) mu
 
 	ui.Say("Creating Linode...")
 
-	interfaces := make([]linodego.InstanceConfigInterface, len(c.Interfaces))
+	interfaces := make([]linodego.InstanceConfigInterfaceCreateOptions, len(c.Interfaces))
 	for i, v := range c.Interfaces {
 		interfaces[i] = flattenConfigInterface(v)
 	}
