@@ -1,4 +1,4 @@
-//go:generate packer-sdc mapstructure-to-hcl2 -type Config,Interface
+//go:generate packer-sdc mapstructure-to-hcl2 -type Config,Interface,InterfaceIPv4
 
 package linode
 
@@ -18,10 +18,18 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 )
 
+type InterfaceIPv4 struct {
+	VPC     string `mapstructure:"vpc"`
+	NAT1To1 string `mapstructure:"nat_1_1"`
+}
+
 type Interface struct {
-	Purpose     string `mapstructure:"purpose"`
-	Label       string `mapstructure:"label"`
-	IPAMAddress string `mapstructure:"ipam_address"`
+	Purpose     string         `mapstructure:"purpose"`
+	Label       string         `mapstructure:"label"`
+	IPAMAddress string         `mapstructure:"ipam_address"`
+	Primary     bool           `mapstructure:"primary"`
+	SubnetID    *int           `mapstructure:"subnet_id"`
+	IPv4        *InterfaceIPv4 `mapstructure:"ipv4"`
 }
 
 type Config struct {
