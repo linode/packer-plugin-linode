@@ -11,23 +11,6 @@ foundation of new servers that are launched within Linode.
 The builder does _not_ manage images. Once it creates an image, it is up to you
 to use it or delete it.
 
-## Installation
-
-To install this plugin using Packer v1.7.0 or later, copy and paste this code into your Packer configuration.
-
-Then, run [`packer init`](https://www.packer.io/docs/commands/init).
-
-```hcl
-packer {
-  required_plugins {
-    linode = {
-      version = ">= 1.0.1"
-      source  = "github.com/linode/linode"
-    }
-  }
-}
-```
-
 ## Configuration Reference
 
 There are many configuration options available for the builder. They are
@@ -88,7 +71,7 @@ can also be supplied to override the typical auto-generated key:
 
 - `swap_size` (int) - The disk size (MiB) allocated for swap space.
 
-- `interface` ([]{purpose string, label string, ipam_address string}) - Network Interfaces
+- `interface` ([](Interface)[#interface]) - Network Interfaces
   to add to this Linode’s Configuration Profile. Singular repeatable block containing a `purpose`,
   a `label`, and an `ipam_address` field.
 
@@ -113,6 +96,30 @@ can also be supplied to override the typical auto-generated key:
 - `root_pass` (string) - The root password of the Linode instance for building the image.
   Please note that when you create a new Linode instance with a private image, you will
   be required to setup a new root password.
+
+#### Interface
+
+This section outlines the fields configurable for a single interface object.
+
+- `purpose` (string) - The purpose of this interface. (public, vlan, vpc)
+
+- `primary` (bool) - Whether this interface is a primary interface.
+
+VLAN-specific fields:
+
+- `label` (string) - The label of the VLAN this interface relates to.
+
+- `ipam_address` (string) - This Network Interface’s private IP address in CIDR notation.
+
+VPC-specific fields:
+
+- `subnet_id` (int) - The ID of the VPC Subnet this interface references.
+
+- `ipv4` (block) - The IPv4 configuration of this VPC interface.
+
+    - `vpc` (string) - The IPv4 address from the VPC subnet to use for this interface.
+
+    - `nat_1_1` (string) - The public IPv4 address assigned to this Linode to be 1:1 NATed with the VPC IPv4 address.
 
 ## Examples
 
@@ -201,20 +208,15 @@ source "linode" "example" {
 
   interface {
     purpose       = "public"
-    label         = ""
-    ipam_address  = ""
   }
 
   interface {
-    purpose       = "vlan"
-    label         = "vlan-1"
-    ipam_address  = "10.0.0.1/24"
-  }
-
-  interface {
-    purpose       = "vlan"
-    label         = "vlan-2"
-    ipam_address  = "10.0.0.2/24"
+    purpose       = "vpc"
+    subnet_id     = 123
+    ipv4 {
+        vpc = "10.0.0.2"
+        nat_1_1 = "any"
+    }
   }
 }
 
