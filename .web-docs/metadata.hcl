@@ -3,7 +3,7 @@
 integration {
   name = "Linode"
   description = "TODO"
-  identifier = "packer/BrandonRomano/linode"
+  identifier = "packer/linode/linode"
   component {
     type = "builder"
     name = "Linode"
