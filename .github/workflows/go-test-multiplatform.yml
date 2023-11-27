@@ -133,12 +133,12 @@ jobs:
           --branch_name "${{ env.RELEASE_VERSION }}" \
           --gha_run_id "$GITHUB_RUN_ID" \
           --gha_run_number "$GITHUB_RUN_NUMBER" \
-          --xmlfile "$REPORT_FILENAME"
+          --xmlfile "${{ env.REPORT_FILENAME }}"
 
       # Upload test results to the bucket
       - name: Upload test results to bucket
         run: |
-          python3 scripts/test_report_upload_script.py "$REPORT_FILENAME"
+          python3 scripts/test_report_upload_script.py "${{ env.REPORT_FILENAME }}"
         env:
           LINODE_CLI_OBJ_ACCESS_KEY: ${{ secrets.LINODE_CLI_OBJ_ACCESS_KEY }}
           LINODE_CLI_OBJ_SECRET_KEY: ${{ secrets.LINODE_CLI_OBJ_SECRET_KEY }}
