@@ -15,6 +15,9 @@ on:
 permissions:
   contents: read
 
+env:
+  REPORT_FILENAME:
+
 jobs:
   get-go-version:
     runs-on: ubuntu-latest
@@ -62,7 +65,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       EXIT_STATUS: 0
-      REPORT_FILENAME:
     name: Linux Go tests
     steps:
       - uses: actions/checkout@v4
