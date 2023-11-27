@@ -89,7 +89,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: test-report-file
-          path: ${{ github.workspace }}/$REPORT_FILENAME
+          path: $REPORT_FILENAME
 
       - name: Test Execution Status Handler
         run: |
