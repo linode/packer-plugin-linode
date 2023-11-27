@@ -60,10 +60,9 @@ jobs:
     needs:
       - get-go-version
     runs-on: ubuntu-latest
-    container:
-      options: --user 1001
     env:
       EXIT_STATUS: 0
+      REPORT_FILENAME:
     name: Linux Go tests
     steps:
       - uses: actions/checkout@v4
@@ -89,8 +88,8 @@ jobs:
       - name: Upload test report
         uses: actions/upload-artifact@v3
         with:
-          name: test-reports
-          path: ${{ github.workspace }}
+          name: test-report-file
+          path: ${{ github.workspace }}/$REPORT_FILENAME
 
       - name: Test Execution Status Handler
         run: |
@@ -104,7 +103,6 @@ jobs:
   process-upload-report:
     needs: linux-go-tests
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -113,7 +111,7 @@ jobs:
       - name: Download test report
         uses: actions/download-artifact@v3
         with:
-          name: test-reports
+          name: test-report-file
 
       - name: Setup Python
         uses: actions/setup-python@v4
