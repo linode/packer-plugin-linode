@@ -60,6 +60,9 @@ jobs:
     needs:
       - get-go-version
     runs-on: ubuntu-latest
+    container:
+      image: cypress/browsers:node16.5.0-chrome94-ff93
+      options: --user 1001
     env:
       EXIT_STATUS: 0
     name: Linux Go tests
