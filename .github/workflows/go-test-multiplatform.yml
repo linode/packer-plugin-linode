@@ -75,20 +75,24 @@ jobs:
 
       - name: Set report filename
         id: set-report-filename
-        run: echo "REPORT_FILENAME=$(date +'%Y%m%d%H%M')_packer_test_report.xml" >> $GITHUB_ENV
+        run: |
+          report_filename=$(date +'%Y%m%d%H%M')_packer_test_report.xml
+          echo "REPORT_FILENAME=$report_filename" >> $GITHUB_ENV
+          echo "::set-output name=report-filename::$report_filename"
 
       - name: Run integration tests
         run: |
           echo "Testing with Go ${{ needs.get-go-version.outputs.go-version }}"
-          if ! go test -race -count 1 ./... -timeout=3m | go-junit-report -set-exit-code > test_report.xml; then
+          if ! go test -race -count 1 ./... -timeout=3m | go-junit-report -set-exit-code > "$REPORT_FILENAME"; then
             echo "EXIT_STATUS=1" >> $GITHUB_ENV
           fi
           cat test_report.xml
+
       - name: Upload test report
         uses: actions/upload-artifact@v3
         with:
           name: test-report-file
-          path: test_report.xml
+          path: "${{ github.workspace }}/${{ needs.run-tests.outputs.report-filename }}"
 
       - name: Test Execution Status Handler
         run: |
@@ -130,12 +134,12 @@ jobs:
           --branch_name "${{ env.RELEASE_VERSION }}" \
           --gha_run_id "$GITHUB_RUN_ID" \
           --gha_run_number "$GITHUB_RUN_NUMBER" \
-          --xmlfile "test-reports/$REPORT_FILENAME"
+          --xmlfile "$REPORT_FILENAME"
 
       # Upload test results to the bucket
       - name: Upload test results to bucket
         run: |
-          python3 scripts/test_report_upload_script.py "test-reports/$REPORT_FILENAME"
+          python3 scripts/test_report_upload_script.py "$REPORT_FILENAME"
         env:
           LINODE_CLI_OBJ_ACCESS_KEY: ${{ secrets.LINODE_CLI_OBJ_ACCESS_KEY }}
           LINODE_CLI_OBJ_SECRET_KEY: ${{ secrets.LINODE_CLI_OBJ_SECRET_KEY }}
