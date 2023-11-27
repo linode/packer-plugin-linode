@@ -7,7 +7,6 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
@@ -33,7 +32,7 @@ func (s *StepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) mult
 
 	if config.Comm.SSHPrivateKeyFile != "" {
 		ui.Say("Using existing SSH private key")
-		privateKeyBytes, err := ioutil.ReadFile(config.Comm.SSHPrivateKeyFile)
+		privateKeyBytes, err := os.ReadFile(config.Comm.SSHPrivateKeyFile)
 		if err != nil {
 			return handleError("Error loading configured private key file", err)
 		}

@@ -24,7 +24,6 @@ func TestPrepare(t *testing.T) {
 	}
 
 	warnings, err := config.Prepare()
-
 	if err != nil {
 		t.Errorf("Prepare failed with error: %v", err)
 	}
