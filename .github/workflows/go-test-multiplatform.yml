@@ -82,8 +82,7 @@ jobs:
       - name: Run integration tests
         run: |
           echo "Testing with Go ${{ needs.get-go-version.outputs.go-version }}"
-          mkdir test_reports
-          if ! go test -race -count 1 ./... -timeout=3m | go-junit-report -set-exit-code > "test_reports/$REPORT_FILENAME"; then
+          if ! go test -race -count 1 ./... -timeout=3m | go-junit-report -set-exit-code > "$REPORT_FILENAME"; then
             echo "EXIT_STATUS=1" >> $GITHUB_ENV
           fi
           cat "$REPORT_FILENAME"
@@ -92,7 +91,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: test-report-file
-          path: "${{ github.workspace }}/test_reports"
+          path: "${{ env.REPORT_FILENAME }}"
 
       - name: Test Execution Status Handler
         run: |
@@ -134,12 +133,12 @@ jobs:
           --branch_name "${{ env.RELEASE_VERSION }}" \
           --gha_run_id "$GITHUB_RUN_ID" \
           --gha_run_number "$GITHUB_RUN_NUMBER" \
-          --xmlfile "test_reports/$REPORT_FILENAME"
+          --xmlfile "$REPORT_FILENAME"
 
       # Upload test results to the bucket
       - name: Upload test results to bucket
         run: |
-          python3 scripts/test_report_upload_script.py "test_reports/$REPORT_FILENAME"
+          python3 scripts/test_report_upload_script.py "$REPORT_FILENAME"
         env:
           LINODE_CLI_OBJ_ACCESS_KEY: ${{ secrets.LINODE_CLI_OBJ_ACCESS_KEY }}
           LINODE_CLI_OBJ_SECRET_KEY: ${{ secrets.LINODE_CLI_OBJ_SECRET_KEY }}
