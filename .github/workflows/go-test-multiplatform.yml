@@ -131,16 +131,18 @@ jobs:
       # Add additional information to XML report
       - name: Add additional information to XML report
         run: |
+          filename=$(ls | grep -E '^[0-9]{12}_packer_test_report\.xml$') 
           python scripts/add_to_xml_test_report.py \
           --branch_name "${{ env.RELEASE_VERSION }}" \
           --gha_run_id "$GITHUB_RUN_ID" \
           --gha_run_number "$GITHUB_RUN_NUMBER" \
-          --xmlfile "${{ env.REPORT_FILENAME }}"
+          --xmlfile "${filename}"
 
       # Upload test results to the bucket
       - name: Upload test results to bucket
         run: |
-          python3 scripts/test_report_upload_script.py "${{ env.REPORT_FILENAME }}"
+          filename=$(ls | grep -E '^[0-9]{12}_packer_test_report\.xml$')
+          python3 scripts/test_report_upload_script.py "${filename}"
         env:
           LINODE_CLI_OBJ_ACCESS_KEY: ${{ secrets.LINODE_CLI_OBJ_ACCESS_KEY }}
           LINODE_CLI_OBJ_SECRET_KEY: ${{ secrets.LINODE_CLI_OBJ_SECRET_KEY }}
