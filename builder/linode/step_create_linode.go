@@ -32,6 +32,7 @@ func flattenConfigInterface(i Interface) linodego.InstanceConfigInterfaceCreateO
 		Primary:     i.Primary,
 		SubnetID:    i.SubnetID,
 		IPv4:        flattenConfigInterfaceIPv4(i.IPv4),
+		IPRanges:    i.IPRanges,
 	}
 }
 
