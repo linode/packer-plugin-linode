@@ -27,5 +27,5 @@ $ packer plugins install github.com/linode/linode
 
 #### Builders
 
-- [linode](/packer/integrations/linode/latest/components/builder/linode) - The Linode Builder creates [Linode Images](https://www.linode.com/docs/guides/linode-images/) for use on [Linode](https://www.linode.com/).
+- [linode](/packer/integrations/linode/linode/latest/components/builder/linode) - The Linode Builder creates [Linode Images](https://www.linode.com/docs/guides/linode-images/) for use on [Linode](https://www.linode.com/).
 
