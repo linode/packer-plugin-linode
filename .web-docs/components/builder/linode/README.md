@@ -1,12 +1,3 @@
----
-description: |
-  The linode Packer builder is able to create new images for use with Linode.
-page_title: Linode - Builders
-nav_title: Linode
----
-
-# Linode Builder
-
 Type: `linode`
 Artifact BuilderId: `packer.linode`
 
@@ -31,7 +22,10 @@ In addition to the options listed here, a
 builder. In addition to the options defined there, a private key file
 can also be supplied to override the typical auto-generated key:
 
-@include 'packer-plugin-sdk/communicator/SSH-Private-Key-File-not-required.mdx'
+- `ssh_private_key_file` (string) - Path to a PEM encoded private key file to use to authenticate with SSH.
+  The `~` can be used in path and will be expanded to the home directory
+  of current user.
+
 
 <!--
   Linode.com has DDOS protection that returns 403 for the markdown link checker
@@ -284,4 +278,3 @@ build {
   }
 }
 ```
-
