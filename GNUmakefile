@@ -28,7 +28,7 @@ testacc: dev
 
 generate: install-packer-sdc
 	@go generate ./...
-	@if [ -d ".docs" ]; then rm -r ".docs"; fi
+	@rm -rf .docs
 	@packer-sdc renderdocs -src "docs" -partials docs-partials/ -dst ".docs/"
 	@./.web-docs/scripts/compile-to-webdocs.sh "." ".docs" ".web-docs" "linode"
 	@rm -r ".docs"
