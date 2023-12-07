@@ -33,7 +33,7 @@ jobs:
     name: Go Mod Tidy
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         with:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
       - run: go mod tidy
@@ -44,7 +44,7 @@ jobs:
     name: Lint check
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         with:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
       - uses: golangci/golangci-lint-action@v3
@@ -57,7 +57,7 @@ jobs:
     name: Gofmt check
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         with:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
       - run: make fmtcheck
@@ -68,7 +68,7 @@ jobs:
     name: Generate check
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         with:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
       - run: |
