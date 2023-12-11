@@ -12,7 +12,7 @@ import (
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
 		"linode_token":  "bar",
-		"region":        "us-east",
+		"region":        "us-ord",
 		"instance_type": "g6-nanode-1",
 		"ssh_username":  "root",
 		"image":         "linode/alpine3.9",
@@ -71,7 +71,7 @@ func TestBuilderPrepare_Region(t *testing.T) {
 		t.Fatalf("should error")
 	}
 
-	expected := "us-east"
+	expected := "us-ord"
 
 	// Test set
 	config["region"] = expected
