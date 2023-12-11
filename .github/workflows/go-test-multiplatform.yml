@@ -1,7 +1,6 @@
 #
 # This GitHub action runs Packer go tests across
 # multiple runners.
-# only test results from ubuntu-latest environment will be posted to test obj storage bucket after GHA execution
 #
 
 name: "Go Test Multi-Platform"
@@ -16,6 +15,9 @@ on:
 permissions:
   contents: read
 
+env:
+  REPORT_FILENAME:
+
 jobs:
   get-go-version:
     runs-on: ubuntu-latest
@@ -28,25 +30,6 @@ jobs:
         run: |
           echo "Found Go $(cat .go-version)"
           echo "go-version=$(cat .go-version)" >> $GITHUB_OUTPUT
-    get-test-dependencies:
-      runs-on: ubuntu-latest
-      steps:
-        - name: Install system deps
-          run: sudo apt-get install -y build-essential
-
-        - name: Setup Python
-          uses: actions/setup-python@v4
-          with:
-            python-version: '3.x'
-
-        - name: Install Python deps
-          run: pip3 install requests wheel boto3
-
-        - name: Set release version env
-          run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
-
-        - name: Install go-junit-report
-          run: go install github.com/jstemmer/go-junit-report/v2@latest
 
   darwin-go-tests:
     needs:
@@ -55,14 +38,12 @@ jobs:
     name: Darwin Go tests
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         with:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
       - run: |
           echo "Testing with Go ${{ needs.get-go-version.outputs.go-version }}"
-          filename=$(ls | grep -E '^[0-9]{12}_packer_test_report\.json')
-
-          go test -race -count 1 ./... -timeout=3m -v
+          go test -race -count 1 ./... -timeout=3m
 
   windows-go-tests:
     needs:
@@ -71,49 +52,84 @@ jobs:
     name: Windows Go tests
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         with:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
       - run: |
           echo "Testing with Go ${{ needs.get-go-version.outputs.go-version }}"
-          filename=$(ls | grep -E '^[0-9]{12}_packer_test_report\.json')
-
-          go test -race -count 1 ./... -timeout=3m -v
+          go test -race -count 1 ./... -timeout=3m
 
   linux-go-tests:
     needs:
       - get-go-version
-      - get-test-dependencies
     runs-on: ubuntu-latest
+    env:
+      EXIT_STATUS: 0
     name: Linux Go tests
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         with:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
-      - run: |
-          echo "Testing with Go ${{ needs.get-go-version.outputs.go-version }}"
-          filename=$(ls | grep -E '^[0-9]{12}_packer_test_report\.json')
 
-          go test -race -count 1 ./... -timeout=3m -v -json | tee "$filename"
+      - name: Install go-junit-report
+        run: go install github.com/jstemmer/go-junit-report/v2@latest
 
-      - name: Convert JSON Report to XML
+      - name: Set report filename
+        id: set-report-filename
         run: |
-          filename=$(ls | grep -E '^[0-9]{12}_packer_test_report\.json')
-          
-          if [ -f "$filename" ]; then
-            go_junit_report_dir=$(go env GOPATH)/bin
-            export PATH="$PATH:$go_junit_report_dir"
-            xml_filename=$(echo "$filename" | sed 's/\.json$/.xml/')
-            go-junit-report < "$filename" > "$xml_filename"
-            echo "Conversion from JSON to XML completed successfully."
-          else
-            echo "JSON test report file not found."
-            exit 1
-          fi
-        env:
-          GO111MODULE: on
+          report_filename=$(date +'%Y%m%d%H%M')_packer_test_report.xml
+          echo "REPORT_FILENAME=$report_filename" >> $GITHUB_ENV
 
+      - name: Run integration tests
+        run: |
+          echo "Testing with Go ${{ needs.get-go-version.outputs.go-version }}"
+          if ! go test -race -count 1 ./... -timeout=3m | go-junit-report -set-exit-code > "$REPORT_FILENAME"; then
+            echo "EXIT_STATUS=1" >> $GITHUB_ENV
+          fi
+          cat "$REPORT_FILENAME"
+
+      - name: Upload test report
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-report-file
+          path: "${{ env.REPORT_FILENAME }}"
+
+      - name: Test Execution Status Handler
+        run: |
+          if [[ "$EXIT_STATUS" != 0 ]]; then
+            echo "Test execution contains failure(s), check Run Integration tests step above"
+            exit $EXIT_STATUS 
+          else
+            echo "Tests passed!"
+          fi
+
+  process-upload-report:
+    needs: linux-go-tests
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.event.ref == 'refs/heads/main' || github.event.ref == 'refs/heads/dev')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Download the artifact generated by the 'linux-go-tests' job
+      - name: Download test report
+        uses: actions/download-artifact@v3
+        with:
+          name: test-report-file
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Python deps
+        run: pip3 install requests wheel boto3
+
+      - name: Set release version env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+      # Add additional information to XML report
       - name: Add additional information to XML report
         run: |
           filename=$(ls | grep -E '^[0-9]{12}_packer_test_report\.xml$') 
@@ -123,10 +139,12 @@ jobs:
           --gha_run_number "$GITHUB_RUN_NUMBER" \
           --xmlfile "${filename}"
 
+      # Upload test results to the bucket
       - name: Upload test results to bucket
+        run: |
+          filename=$(ls | grep -E '^[0-9]{12}_packer_test_report\.xml$')
+          python3 scripts/test_report_upload_script.py "${filename}"
         env:
           LINODE_CLI_OBJ_ACCESS_KEY: ${{ secrets.LINODE_CLI_OBJ_ACCESS_KEY }}
           LINODE_CLI_OBJ_SECRET_KEY: ${{ secrets.LINODE_CLI_OBJ_SECRET_KEY }}
-        run: |
-          report_filename=$(ls | grep -E '^[0-9]{12}_packer_test_report\.xml$')
-          python3 scripts/test_report_upload_script.py "${report_filename}"
+
