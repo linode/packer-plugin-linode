@@ -90,7 +90,7 @@ jobs:
           cat "$REPORT_FILENAME"
 
       - name: Upload test report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-report-file
           path: "${{ env.REPORT_FILENAME }}"
