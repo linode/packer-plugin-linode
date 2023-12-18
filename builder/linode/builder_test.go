@@ -15,7 +15,7 @@ func testConfig() map[string]interface{} {
 		"region":        "us-ord",
 		"instance_type": "g6-nanode-1",
 		"ssh_username":  "root",
-		"image":         "linode/alpine3.9",
+		"image":         "linode/debian12",
 	}
 }
 
@@ -135,7 +135,7 @@ func TestBuilderPrepare_Image(t *testing.T) {
 		t.Fatal("should error")
 	}
 
-	expected := "linode/alpine3.9"
+	expected := "linode/debian12"
 
 	// Test set
 	config["image"] = expected
