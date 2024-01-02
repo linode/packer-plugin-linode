@@ -18,7 +18,7 @@ func TestPrepare(t *testing.T) {
 		ctx:                 interpolate.Context{},
 		Comm:                communicator.Config{SSH: data},
 		PersonalAccessToken: "test-linode-access-token",
-		Region:              "us-east",
+		Region:              "us-ord",
 		InstanceType:        "g6-standard-1",
 		Image:               "linode/debian10",
 	}
