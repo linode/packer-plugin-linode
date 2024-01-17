@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/hashicorp/hcl/v2 v2.19.1
 	github.com/hashicorp/packer-plugin-sdk v0.5.2
-	github.com/linode/linodego v1.27.0
+	github.com/linode/linodego v1.27.1
 	github.com/zclconf/go-cty v1.13.3
 	golang.org/x/crypto v0.18.0
 	golang.org/x/oauth2 v0.16.0
@@ -31,7 +31,7 @@ require (
 	github.com/dylanmei/iso8601 v0.1.0 // indirect
 	github.com/fatih/color v1.14.1 // indirect
 	github.com/go-jose/go-jose/v3 v3.0.1 // indirect
-	github.com/go-resty/resty/v2 v2.9.1 // indirect
+	github.com/go-resty/resty/v2 v2.11.0 // indirect
 	github.com/gofrs/flock v0.8.1 // indirect
 	github.com/gofrs/uuid v4.0.0+incompatible // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
