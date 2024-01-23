@@ -64,7 +64,7 @@ func TestArtifactState_StateData(t *testing.T) {
 }
 
 func TestArtifactState_hcpPackerRegistryMetadata(t *testing.T) {
-	region := "us-east"
+	region := "us-ord"
 	artifact := &Artifact{
 		ImageID:    "test-image",
 		ImageLabel: "test-image-label",
@@ -91,7 +91,7 @@ func TestArtifactState_hcpPackerRegistryMetadata(t *testing.T) {
 	expected := registryimage.Image{
 		ImageID:        "test-image",
 		ProviderName:   "linode",
-		ProviderRegion: "us-east",
+		ProviderRegion: "us-ord",
 		SourceImageID:  "linode/debian9",
 		Labels: map[string]string{
 			"source_image": "linode/debian9",

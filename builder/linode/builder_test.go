@@ -12,10 +12,10 @@ import (
 func testConfig() map[string]interface{} {
 	return map[string]interface{}{
 		"linode_token":  "bar",
-		"region":        "us-east",
+		"region":        "us-ord",
 		"instance_type": "g6-nanode-1",
 		"ssh_username":  "root",
-		"image":         "linode/alpine3.9",
+		"image":         "linode/debian12",
 	}
 }
 
@@ -71,7 +71,7 @@ func TestBuilderPrepare_Region(t *testing.T) {
 		t.Fatalf("should error")
 	}
 
-	expected := "us-east"
+	expected := "us-ord"
 
 	// Test set
 	config["region"] = expected
@@ -135,7 +135,7 @@ func TestBuilderPrepare_Image(t *testing.T) {
 		t.Fatal("should error")
 	}
 
-	expected := "linode/alpine3.9"
+	expected := "linode/debian12"
 
 	// Test set
 	config["image"] = expected
