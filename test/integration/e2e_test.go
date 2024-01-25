@@ -3,14 +3,15 @@ package integration
 import (
 	"context"
 	"fmt"
-	"github.com/linode/linodego"
-	"github.com/stretchr/testify/assert"
-	"golang.org/x/oauth2"
 	"net/http"
 	"os"
 	"os/exec"
 	"strings"
 	"testing"
+
+	"github.com/linode/linodego"
+	"github.com/stretchr/testify/assert"
+	"golang.org/x/oauth2"
 )
 
 const (
@@ -27,7 +28,6 @@ func TestBuildPackerImage(t *testing.T) {
 	// Run the Packer build command from terminal
 	cmd := exec.Command("packer", "build", packerTemplate)
 	output, err := cmd.CombinedOutput()
-
 	// Check if the Packer build was successful
 	if err != nil {
 		t.Fatalf("Error building Packer image: %v\nOutput:\n%s", err, output)
