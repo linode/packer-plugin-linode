@@ -1,0 +1,18 @@
+{
+  "variables": {
+    "linode_token": "{{env `LINODE_TOKEN`}}"
+  },
+  "builders": [{
+    "type": "linode",
+    "linode_token": "{{ user `linode_token` }}",
+    "image": "linode/debian9",
+    "region": "us-east",
+    "instance_type": "g6-nanode-1",
+    "instance_label": "test-instance-{{timestamp}}",
+
+    "image_label": "test-packer-image-{{timestamp}}",
+    "image_description": "My Test Image Description",
+
+    "ssh_username": "root"
+  }]
+}

@@ -43,7 +43,7 @@ jobs:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
       - run: |
           echo "Testing with Go ${{ needs.get-go-version.outputs.go-version }}"
-          go test -race -count 1 ./... -timeout=3m
+          go test -race -count 1 ./builder/linode/... -timeout=3m
 
   windows-go-tests:
     needs:
@@ -57,7 +57,7 @@ jobs:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
       - run: |
           echo "Testing with Go ${{ needs.get-go-version.outputs.go-version }}"
-          go test -race -count 1 ./... -timeout=3m
+          go test -race -count 1 ./builder/linode/... -timeout=3m
 
   linux-go-tests:
     needs:
@@ -81,15 +81,15 @@ jobs:
           report_filename=$(date +'%Y%m%d%H%M')_packer_test_report.xml
           echo "REPORT_FILENAME=$report_filename" >> $GITHUB_ENV
 
-      - name: Run integration tests
+      - name: Run integration and unit tests
         run: |
           echo "Testing with Go ${{ needs.get-go-version.outputs.go-version }}"
-          if ! go test -race -count 1 ./... -timeout=3m -v | go-junit-report -set-exit-code > "$REPORT_FILENAME"; then
+          if ! make test | go-junit-report -set-exit-code > "$REPORT_FILENAME"; then
             echo "EXIT_STATUS=1" >> $GITHUB_ENV
           fi
           cat "$REPORT_FILENAME"
 
-      - name: Upload test report
+      - name: Upload test report as artifact
         uses: actions/upload-artifact@v4
         with:
           name: test-report-file
@@ -133,7 +133,7 @@ jobs:
       - name: Add additional information to XML report
         run: |
           filename=$(ls | grep -E '^[0-9]{12}_packer_test_report\.xml$') 
-          python scripts/add_to_xml_test_report.py \
+          python tod_scripts/add_to_xml_test_report.py \
           --branch_name "${{ env.RELEASE_VERSION }}" \
           --gha_run_id "$GITHUB_RUN_ID" \
           --gha_run_number "$GITHUB_RUN_NUMBER" \
@@ -143,7 +143,7 @@ jobs:
       - name: Upload test results to bucket
         run: |
           filename=$(ls | grep -E '^[0-9]{12}_packer_test_report\.xml$')
-          python3 scripts/test_report_upload_script.py "${filename}"
+          python3 tod_scripts/test_report_upload_script.py "${filename}"
         env:
           LINODE_CLI_OBJ_ACCESS_KEY: ${{ secrets.LINODE_CLI_OBJ_ACCESS_KEY }}
           LINODE_CLI_OBJ_SECRET_KEY: ${{ secrets.LINODE_CLI_OBJ_SECRET_KEY }}
