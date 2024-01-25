@@ -88,6 +88,8 @@ jobs:
             echo "EXIT_STATUS=1" >> $GITHUB_ENV
           fi
           cat "$REPORT_FILENAME"
+        env:
+          LINODE_TOKEN: ${{ secrets.LINODE_TOKEN }}
 
       - name: Upload test report as artifact
         uses: actions/upload-artifact@v4
