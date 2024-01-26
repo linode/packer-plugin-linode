@@ -471,6 +471,8 @@ func TestBuilderPrepare_NetworkInterfaces(t *testing.T) {
 
 	subnetID := 12345
 
+	anyStr := "any"
+
 	expectedInterfaces := []Interface{
 		{
 			Purpose: "public",
@@ -486,7 +488,7 @@ func TestBuilderPrepare_NetworkInterfaces(t *testing.T) {
 			SubnetID: &subnetID,
 			IPv4: &InterfaceIPv4{
 				VPC:     "10.0.0.2",
-				NAT1To1: "any",
+				NAT1To1: &anyStr,
 			},
 			IPRanges: []string{"10.0.0.3/32"},
 		},
