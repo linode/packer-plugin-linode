@@ -43,22 +43,16 @@ func TestBuildPackerImage(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error asserting Linode builder image: %v", err)
 	}
+
+	if err := teardown(); err != nil {
+		fmt.Printf("Error during deleting image after test execution: %v\n", err)
+	}
 }
 
 func assertLinodeImage(imageLabelPrefix string, t *testing.T) error {
-	linodeToken := os.Getenv("LINODE_TOKEN")
+	client := getLinodegoClient()
 
-	tokenSource := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: linodeToken})
-
-	oauth2Client := &http.Client{
-		Transport: &oauth2.Transport{
-			Source: tokenSource,
-		},
-	}
-
-	linodeClient := linodego.NewClient(oauth2Client)
-
-	images, err := linodeClient.ListImages(context.Background(), nil)
+	images, err := client.ListImages(context.Background(), nil)
 	if err != nil {
 		return fmt.Errorf("error listing Linode images: %v", err)
 	}
@@ -85,4 +79,37 @@ func assertLinodeImage(imageLabelPrefix string, t *testing.T) error {
 	assert.Equal(t, expectedImageDescription, targetImage.Description, "unexpected image description")
 
 	return nil
+}
+
+func teardown() error {
+	client := getLinodegoClient()
+	images, err := client.ListImages(context.Background(), nil)
+	if err != nil {
+		return fmt.Errorf("error listing Linode images: %v", err)
+	}
+
+	for _, image := range images {
+		if image.Label != "" && strings.HasPrefix(image.Label, "test-packer-image-") {
+			err = client.DeleteImage(context.Background(), image.ID)
+			if err != nil {
+				return fmt.Errorf("error during Linode image deletion: %v", err)
+			}
+		}
+	}
+
+	return nil
+}
+
+func getLinodegoClient() linodego.Client {
+	linodeToken := os.Getenv("LINODE_TOKEN")
+
+	tokenSource := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: linodeToken})
+	oauth2Client := &http.Client{
+		Transport: &oauth2.Transport{
+			Source: tokenSource,
+		},
+	}
+	linodeClient := linodego.NewClient(oauth2Client)
+
+	return linodeClient
 }
