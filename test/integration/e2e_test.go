@@ -44,9 +44,11 @@ func TestBuildPackerImage(t *testing.T) {
 		t.Fatalf("Error asserting Linode builder image: %v", err)
 	}
 
-	if err := teardown(); err != nil {
-		fmt.Printf("Error during deleting image after test execution: %v\n", err)
-	}
+	defer func() {
+		if err := teardown(); err != nil {
+			fmt.Printf("Error during deleting image after test execution: %v\n", err)
+		}
+	}()
 }
 
 func assertLinodeImage(imageLabelPrefix string, t *testing.T) error {
