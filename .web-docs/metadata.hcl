@@ -4,6 +4,7 @@ integration {
   name = "Linode"
   description = "Create Linode Images for use with Linode."
   identifier = "packer/linode/linode"
+  flags = ["hcp-ready"]
   component {
     type = "builder"
     name = "Linode"
