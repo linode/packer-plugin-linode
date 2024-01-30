@@ -25,6 +25,12 @@ func TestBuildPackerImage(t *testing.T) {
 		t.Fatal("Linode token is not set. Please set LINODE_TOKEN as environment variable.")
 	}
 
+	defer func() {
+		if err := teardown(); err != nil {
+			fmt.Printf("Error during deleting image after test execution: %v\n", err)
+		}
+	}()
+
 	// Run the Packer build command from terminal
 	cmd := exec.Command("packer", "build", packerTemplate)
 	output, err := cmd.CombinedOutput()
@@ -43,12 +49,6 @@ func TestBuildPackerImage(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error asserting Linode builder image: %v", err)
 	}
-
-	defer func() {
-		if err := teardown(); err != nil {
-			fmt.Printf("Error during deleting image after test execution: %v\n", err)
-		}
-	}()
 }
 
 func assertLinodeImage(imageLabelPrefix string, t *testing.T) error {
