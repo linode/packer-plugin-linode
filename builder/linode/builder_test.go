@@ -15,7 +15,7 @@ func testConfig() map[string]interface{} {
 		"region":        "us-ord",
 		"instance_type": "g6-nanode-1",
 		"ssh_username":  "root",
-		"image":         "linode/debian12",
+		"image":         "linode/debian11",
 	}
 }
 
@@ -505,5 +505,43 @@ func TestBuilderPrepare_NetworkInterfaces(t *testing.T) {
 
 	if !reflect.DeepEqual(b.config.Interfaces, expectedInterfaces) {
 		t.Errorf("got %v, expected %v", b.config.Interfaces, expectedInterfaces)
+	}
+}
+
+func TestBuilderPrepare_CloudInit(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test default
+	delete(config, "cloud_init")
+
+	_, warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error; got %v", err)
+	}
+
+	if b.config.CloudInit {
+		t.Fatalf("expected default to be false; got true")
+	}
+
+	// Const to silence warnings
+	const expected = true
+
+	// Test set
+	config["cloud_init"] = expected
+	b = Builder{}
+	_, warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if b.config.CloudInit != expected {
+		t.Errorf("found %s, expected %t", b.config.Region, expected)
 	}
 }
