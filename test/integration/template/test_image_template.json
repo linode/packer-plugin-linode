@@ -1,6 +1,7 @@
 {
   "variables": {
-    "linode_token": "{{env `LINODE_TOKEN`}}"
+    "linode_token": "{{env `LINODE_TOKEN`}}",
+    "instance_image_label": "{{env `LINODE_IMAGE_LABEL`}}"
   },
   "builders": [{
     "type": "linode",
@@ -10,7 +11,7 @@
     "instance_type": "g6-nanode-1",
     "instance_label": "test-instance-{{timestamp}}",
 
-    "image_label": "test-packer-image-{{timestamp}}",
+    "image_label": "{{ user `instance_image_label` }}",
     "image_description": "My Test Image Description",
 
     "ssh_username": "root"
