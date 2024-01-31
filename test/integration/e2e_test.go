@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -26,9 +27,8 @@ func TestBuildPackerImage(t *testing.T) {
 		t.Fatal("Linode token is not set. Please set LINODE_TOKEN as environment variable.")
 	}
 
-	linodeInstanceLabel := setImageLabel()
-	err := os.Setenv("LINODE_IMAGE_LABEL", linodeInstanceLabel)
-
+	linodeImageLabel := generateImageLabel()
+	err := os.Setenv("LINODE_IMAGE_LABEL", linodeImageLabel)
 	if err != nil {
 		fmt.Printf("Error setting LINODE_IMAGE_LABEL: %v\n", err)
 		return
@@ -40,7 +40,7 @@ func TestBuildPackerImage(t *testing.T) {
 	output, err := cmd.CombinedOutput()
 
 	defer func() {
-		if err := teardown(linodeInstanceLabel); err != nil {
+		if err := teardown(linodeImageLabel); err != nil {
 			fmt.Printf("Error during deleting image after test execution: %v\n", err)
 		}
 	}()
@@ -55,7 +55,7 @@ func TestBuildPackerImage(t *testing.T) {
 	assert.True(t, strings.Contains(string(output), expectedSubstring), "Expected successful build output to contain: %s", expectedSubstring)
 
 	// Assert other fields
-	err = assertLinodeImage(linodeInstanceLabel, t)
+	err = assertLinodeImage(linodeImageLabel, t)
 
 	if err != nil {
 		t.Fatalf("Error asserting Linode builder image: %v", err)
@@ -127,8 +127,8 @@ func getLinodegoClient() linodego.Client {
 	return linodeClient
 }
 
-func setImageLabel() string {
-	timestamp := time.Now().Format("20240102150405") // Shortened format without dashes
+func generateImageLabel() string {
+	timestamp := strconv.FormatInt(time.Now().UnixNano(), 10) // Shortened format without dashes
 	instanceLabel := fmt.Sprintf("test-image-%s", timestamp)
 
 	return instanceLabel
