@@ -19,8 +19,8 @@ import (
 )
 
 type InterfaceIPv4 struct {
-	VPC     string `mapstructure:"vpc"`
-	NAT1To1 string `mapstructure:"nat_1_1"`
+	VPC     string  `mapstructure:"vpc"`
+	NAT1To1 *string `mapstructure:"nat_1_1"`
 }
 
 type Interface struct {
