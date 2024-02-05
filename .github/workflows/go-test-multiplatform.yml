@@ -43,7 +43,7 @@ jobs:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
       - run: |
           echo "Testing with Go ${{ needs.get-go-version.outputs.go-version }}"
-          go test -race -count 1 ./builder/linode/... -timeout=3m
+          make unit-test
 
   windows-go-tests:
     needs:
@@ -57,7 +57,7 @@ jobs:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
       - run: |
           echo "Testing with Go ${{ needs.get-go-version.outputs.go-version }}"
-          go test -race -count 1 ./builder/linode/... -timeout=3m
+          make unit-test
 
   linux-go-tests:
     needs:
@@ -71,4 +71,4 @@ jobs:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
       - run: |
           echo "Testing with Go ${{ needs.get-go-version.outputs.go-version }}"
-          go test -race -count 1 ./builder/linode/... -timeout=3m
+          make unit-test
