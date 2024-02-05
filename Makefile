@@ -24,7 +24,7 @@ plugin-check: install-packer-sdc build
 	@packer-sdc plugin-check ${BINARY}
 
 unit-test: dev
-	@PACKER_ACC=1 go test -count $(COUNT) -v $(TEST) -timeout=10m
+	go test -count $(COUNT) -v $(TEST) -timeout=10m
 
 int-test: dev
 	@go test -v test/integration/e2e_test.go
