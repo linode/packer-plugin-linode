@@ -85,6 +85,7 @@ type FlatConfig struct {
 	StackScriptData           map[string]string `mapstructure:"stackscript_data" cty:"stackscript_data" hcl:"stackscript_data"`
 	StackScriptID             *int              `mapstructure:"stackscript_id" cty:"stackscript_id" hcl:"stackscript_id"`
 	ImageCreateTimeout        *string           `mapstructure:"image_create_timeout" required:"false" cty:"image_create_timeout" hcl:"image_create_timeout"`
+	CloudInit                 *bool             `mapstructure:"cloud_init" required:"false" cty:"cloud_init" hcl:"cloud_init"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -174,6 +175,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"stackscript_data":             &hcldec.AttrSpec{Name: "stackscript_data", Type: cty.Map(cty.String), Required: false},
 		"stackscript_id":               &hcldec.AttrSpec{Name: "stackscript_id", Type: cty.Number, Required: false},
 		"image_create_timeout":         &hcldec.AttrSpec{Name: "image_create_timeout", Type: cty.String, Required: false},
+		"cloud_init":                   &hcldec.AttrSpec{Name: "cloud_init", Type: cty.Bool, Required: false},
 	}
 	return s
 }
