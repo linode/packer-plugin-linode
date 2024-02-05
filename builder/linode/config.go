@@ -57,6 +57,7 @@ type Config struct {
 	StackScriptData    map[string]string `mapstructure:"stackscript_data"`
 	StackScriptID      int               `mapstructure:"stackscript_id"`
 	ImageCreateTimeout time.Duration     `mapstructure:"image_create_timeout" required:"false"`
+	CloudInit          bool              `mapstructure:"cloud_init" required:"false"`
 }
 
 func createRandomRootPassword() (string, error) {

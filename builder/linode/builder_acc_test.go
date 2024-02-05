@@ -38,8 +38,9 @@ const testBuilderAccBasic = `
 		"type": "linode",
 		"region": "us-ord",
 		"instance_type": "g6-nanode-1",
-		"image": "linode/alpine3.9",
-		"ssh_username": "root"
+		"image": "linode/debian11",
+		"ssh_username": "root",
+		"cloud_init": true
 	}]
 }
 `

@@ -33,6 +33,7 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 		DiskID:      disk.ID,
 		Label:       c.ImageLabel,
 		Description: c.Description,
+		CloudInit:   c.CloudInit,
 	})
 	if err != nil {
 		return handleError("Failed to create image", err)
