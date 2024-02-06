@@ -6,6 +6,9 @@ on:
       - 'main'
       - 'dev'
 
+env:
+  REPORT_FILENAME:
+
 jobs:
   integration-and-unit-tests:
     runs-on: ubuntu-latest
@@ -41,7 +44,7 @@ jobs:
       - name: Upload test report as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: test-report-${{ github.run_number }}
+          name: test-report-file
           path: "${{ env.REPORT_FILENAME }}"
 
       - name: Test Execution Status Handler
@@ -67,7 +70,7 @@ jobs:
       - name: Download test report
         uses: actions/download-artifact@v4
         with:
-          name: test-report-${{ needs.integration-and-unit-tests.outputs.id }}
+          name: test-report-file
 
       - name: Set up Python
         uses: actions/setup-python@v5
