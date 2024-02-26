@@ -97,6 +97,8 @@ can also be supplied to override the typical auto-generated key:
   Please note that when you create a new Linode instance with a private image, you will
   be required to setup a new root password.
 
+- `cloud_init` (bool) - Whether the newly created image supports cloud-init.
+
 #### Interface
 
 This section outlines the fields configurable for a single interface object.

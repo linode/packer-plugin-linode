@@ -36,10 +36,11 @@ const testBuilderAccBasic = `
 {
 	"builders": [{
 		"type": "linode",
-		"region": "us-ord",
+		"region": "us-mia",
 		"instance_type": "g6-nanode-1",
-		"image": "linode/alpine3.9",
-		"ssh_username": "root"
+		"image": "linode/debian12",
+		"ssh_username": "root",
+		"cloud_init": true
 	}]
 }
 `
