@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/hashicorp/hcl/v2 v2.20.0
 	github.com/hashicorp/packer-plugin-sdk v0.5.2
-	github.com/linode/linodego v1.29.0
+	github.com/linode/linodego v1.30.0
 	github.com/zclconf/go-cty v1.13.3
 	golang.org/x/crypto v0.21.0
 	golang.org/x/oauth2 v0.18.0
