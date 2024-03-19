@@ -11,6 +11,7 @@ import (
 
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/linode/packer-plugin-linode/helper"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -27,7 +28,7 @@ func (s *StepCreateSSHKey) Run(_ context.Context, state multistep.StateBag) mult
 	config := state.Get("config").(*Config)
 
 	handleError := func(prefix string, err error) multistep.StepAction {
-		return errorHelper(state, ui, prefix, err)
+		return helper.ErrorHelper(state, ui, prefix, err)
 	}
 
 	if config.Comm.SSHPrivateKeyFile != "" {

@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/linode/linodego"
+	"github.com/linode/packer-plugin-linode/helper"
 )
 
 type stepCreateLinode struct {
@@ -41,7 +42,7 @@ func (s *stepCreateLinode) Run(ctx context.Context, state multistep.StateBag) mu
 	ui := state.Get("ui").(packersdk.Ui)
 
 	handleError := func(prefix string, err error) multistep.StepAction {
-		return errorHelper(state, ui, prefix, err)
+		return helper.ErrorHelper(state, ui, prefix, err)
 	}
 
 	ui.Say("Creating Linode...")
