@@ -40,7 +40,7 @@ jobs:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
       - run: |
           echo "Testing with Go ${{ needs.get-go-version.outputs.go-version }}"
-          make unit-test
+          go test -race -count 1 ./builder/linode/... -timeout=3m -v
 
   windows-go-tests:
     needs:
