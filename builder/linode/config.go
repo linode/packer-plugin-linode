@@ -16,6 +16,7 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
+	"github.com/linode/packer-plugin-linode/helper"
 )
 
 type InterfaceIPv4 struct {
@@ -35,10 +36,9 @@ type Interface struct {
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
+	helper.LinodeCommon `mapstructure:",squash"`
 	ctx                 interpolate.Context
 	Comm                communicator.Config `mapstructure:",squash"`
-
-	PersonalAccessToken string `mapstructure:"linode_token"`
 
 	Interfaces         []Interface       `mapstructure:"interface"`
 	Region             string            `mapstructure:"region"`
