@@ -21,7 +21,7 @@ build: fmtcheck
 	@go build -o ${BINARY}
 
 .PHONY: test
-test: dev fmtcheck acctest
+test: fmtcheck unit-test int-test
 
 .PHONY: install-packer-sdc
 install-packer-sdc: ## Install packer sofware development command
@@ -72,3 +72,4 @@ deps: install-packer-sdc
 clean:
 	@rm -rf .docs
 	@rm -rf ./packer-plugin-linode
+	@rm -rf ./docs-partials
