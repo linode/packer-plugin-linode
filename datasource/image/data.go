@@ -4,7 +4,7 @@ package image
 //go:generate packer-sdc mapstructure-to-hcl2 -type DatasourceOutput,Config
 import (
 	"context"
-	"errors"
+	"fmt"
 	"os"
 	"time"
 
@@ -55,12 +55,13 @@ func (d *Datasource) Configure(raws ...interface{}) error {
 	var errs *packersdk.MultiError
 
 	if d.config.PersonalAccessToken == "" {
-		envToken := os.Getenv("LINODE_TOKEN")
+		envToken := os.Getenv(helper.TokenEnvVar)
 		if envToken == "" {
-			errs = packersdk.MultiErrorAppend(errs, errors.New(
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf(
 				"A Linode API token is required. You can specify it in an "+
-					"environment variable LINODE_TOKEN or set linode_token "+
+					"environment variable %q or set linode_token "+
 					"attribute in the datasource block.",
+				helper.TokenEnvVar,
 			))
 		}
 		d.config.PersonalAccessToken = envToken
