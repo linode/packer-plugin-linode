@@ -1,6 +1,7 @@
 name: Ensure Docs are Compiled
 on:
   push:
+  pull_request:
 jobs:
   ensure-docs-compiled:
     runs-on: ubuntu-latest
