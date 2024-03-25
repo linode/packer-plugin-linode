@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/linode/packer-plugin-linode/builder/linode"
+	"github.com/linode/packer-plugin-linode/datasource/image"
 	"github.com/linode/packer-plugin-linode/version"
 
 	"github.com/hashicorp/packer-plugin-sdk/plugin"
@@ -12,6 +13,7 @@ import (
 
 func main() {
 	pps := plugin.NewSet()
+	pps.RegisterDatasource("image", new(image.Datasource))
 	pps.RegisterBuilder(plugin.DEFAULT_NAME, new(linode.Builder))
 	pps.SetVersion(version.PluginVersion)
 	err := pps.Run()

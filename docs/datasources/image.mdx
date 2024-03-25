@@ -1,0 +1,64 @@
+---
+description: |
+  The Linode Image data source for Packer is for matching and filtering images on Linode.
+page_title: Linode Image - Data Source
+nav_title: Linode Image
+---
+
+# Linode Image Data Source
+
+Type: `linode-image`
+
+The Linode Image data source matches or filters the ID or label of both public images on
+Linode and private images in your account using regular expression (regex) or an exact
+match.
+
+You can get the latest list of available public images on Linode via the
+[Linode Image List API](https://www.linode.com/docs/api/images/#images-list).
+
+## Examples
+
+```hcl
+data "linode-image" "latest_ubuntu" {
+    id_regex = "linode/ubuntu.*"
+    latest = true
+}
+
+source "linode" "example" {
+  image             = data.linode-image.latest_ubuntu.id
+  image_description = "My Private Image"
+  image_label       = "my-packaer-private-linode-image-test"
+  instance_label    = "temporary-linode-image"
+  instance_type     = "g6-nanode-1"
+  region            = "us-mia"
+  ssh_username      = "root"
+}
+
+build {
+  sources = ["source.linode.example"]
+}
+```
+
+```hcl
+data "linode-image" "latest_ubuntu_lts" {
+    label_regex = "Ubuntu [0-9]+\\.[0-9]+ LTS"
+    latest = true
+}
+```
+
+```hcl
+data "linode-image" "ubuntu22_lts" {
+    id = "linode/ubuntu22.04"
+    latest = true
+}
+```
+
+## Configuration Reference:
+
+@include 'datasource/image/Config-not-required.mdx'
+@include 'helper/LinodeCommon-not-required.mdx'
+
+## Output:
+
+@include 'datasource/image/DatasourceOutput.mdx'
+

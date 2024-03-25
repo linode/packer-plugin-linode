@@ -9,6 +9,8 @@ import (
 	"golang.org/x/oauth2"
 )
 
+const TokenEnvVar = "LINODE_TOKEN"
+
 func NewLinodeClient(token string) linodego.Client {
 	tokenSource := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
 
