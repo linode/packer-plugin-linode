@@ -2,7 +2,6 @@ package image
 
 import (
 	"errors"
-	"log"
 	"regexp"
 	"sort"
 
@@ -59,11 +58,9 @@ func filterImageResults(images []linodego.Image, config Config) (linodego.Image,
 	if len(images) > 1 {
 
 		if config.Latest {
-			log.Default().Print(images)
 			sort.Slice(images, func(i, j int) bool {
 				return images[i].Created.After(*images[j].Created)
 			})
-			log.Default().Print(images)
 			return images[0], nil
 		}
 
