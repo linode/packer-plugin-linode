@@ -2,3 +2,4 @@ main
 dist/*
 packer-plugin-linode
 .docs
+docs-partials
