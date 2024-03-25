@@ -16,7 +16,7 @@ data "linode-image" "latest_ubuntu" {
 }
 
 source "linode" "example" {
-  image             = linode-image.latest_ubuntu.id
+  image             = data.linode-image.latest_ubuntu.id
   image_description = "My Private Image"
   image_label       = "my-packaer-private-linode-image-test"
   instance_label    = "temporary-linode-image"
@@ -62,7 +62,8 @@ data "linode-image" "ubuntu22_lts" {
 
 <!-- Code generated from the comments of the LinodeCommon struct in helper/common.go; DO NOT EDIT MANUALLY -->
 
-- `linode_token` (string) - The Linode API token. This can also be specified in LINODE_TOKEN environment variable
+- `linode_token` (string) - The Linode API token required for provision Linode resources.
+  This can also be specified in LINODE_TOKEN environment variable.
 
 <!-- End of code generated from the comments of the LinodeCommon struct in helper/common.go; -->
 
