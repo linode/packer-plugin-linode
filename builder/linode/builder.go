@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer-plugin-sdk/multistep/commonsteps"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/linode/packer-plugin-linode/helper"
 )
 
 // The unique ID for this builder.
@@ -39,7 +40,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook) (ret packersdk.Artifact, err error) {
 	ui.Say("Running builder ...")
 
-	client := newLinodeClient(b.config.PersonalAccessToken)
+	client := helper.NewLinodeClient(b.config.PersonalAccessToken)
 
 	if err != nil {
 		ui.Error(err.Error())
