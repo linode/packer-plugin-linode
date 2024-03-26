@@ -1,5 +1,6 @@
 NAME=linode
 BINARY=packer-plugin-${NAME}
+PLUGIN_FQN="$(shell grep -E '^module' <go.mod | sed -E 's/module *//')"
 COUNT?=1
 UNIT_TEST_TARGET?=$(shell go list ./builder/...)
 HASHICORP_PACKER_PLUGIN_SDK_VERSION?=$(shell go list -m github.com/hashicorp/packer-plugin-sdk | cut -d " " -f2)
@@ -11,16 +12,16 @@ PACKER_SDC_REPO ?= github.com/hashicorp/packer-plugin-sdk/cmd/packer-sdc
 install: dev
 
 .PHONY: dev
-dev: build
-	@mkdir -p ~/.packer.d/plugins/
-	@mv ${BINARY} ~/.packer.d/plugins/${BINARY}
+dev:
+	@go build -ldflags="-X '${PLUGIN_FQN}/version.VersionPrerelease=dev'" -o '${BINARY}'
+	packer plugins install --path ${BINARY} "$(shell echo "${PLUGIN_FQN}" | sed 's/packer-plugin-//')"
 
 .PHONY: build
 build: fmtcheck
 	@go build -o ${BINARY}
 
 .PHONY: test
-test: dev fmtcheck acctest
+test: fmtcheck unit-test int-test
 
 .PHONY: install-packer-sdc
 install-packer-sdc: ## Install packer sofware development command
@@ -71,3 +72,4 @@ deps: install-packer-sdc
 clean:
 	@rm -rf .docs
 	@rm -rf ./packer-plugin-linode
+	@rm -rf ./docs-partials

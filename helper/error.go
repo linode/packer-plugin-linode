@@ -1,4 +1,4 @@
-package linode
+package helper
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 
 // errorHelper is a helper function to reduce the amount of bloat and complexity
 // caused by redundant error handling logic.
-func errorHelper(state multistep.StateBag, ui packersdk.Ui, prefix string, err error) multistep.StepAction {
+func ErrorHelper(state multistep.StateBag, ui packersdk.Ui, prefix string, err error) multistep.StepAction {
 	wrappedError := fmt.Errorf("%s: %w", prefix, err)
 	state.Put("error", wrappedError)
 	ui.Error(wrappedError.Error())
