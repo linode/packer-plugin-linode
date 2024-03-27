@@ -3,7 +3,7 @@ module github.com/linode/packer-plugin-linode
 go 1.21
 
 require (
-	github.com/hashicorp/hcl/v2 v2.20.0
+	github.com/hashicorp/hcl/v2 v2.20.1
 	github.com/hashicorp/packer-plugin-sdk v0.5.2
 	github.com/linode/linodego v1.31.0
 	github.com/mitchellh/mapstructure v1.5.0
