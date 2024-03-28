@@ -1,14 +1,14 @@
 package linode
 
 import (
-	"os"
 	"testing"
 
 	"github.com/hashicorp/packer-plugin-sdk/acctest"
+	"github.com/linode/packer-plugin-linode/helper/acceptance"
 )
 
 func TestBuilderAcc_basic(t *testing.T) {
-	if skip := testAccPreCheck(t); skip == true {
+	if skip := acceptance.TestAccPreCheck(t); skip == true {
 		return
 	}
 	acctest.TestPlugin(t, &acctest.PluginTestCase{
@@ -18,29 +18,15 @@ func TestBuilderAcc_basic(t *testing.T) {
 	})
 }
 
-func testAccPreCheck(t *testing.T) bool {
-	if os.Getenv(acctest.TestEnvVar) == "" {
-		t.Skipf("Acceptance tests skipped unless env '%s' set",
-			acctest.TestEnvVar)
-		return true
-	}
-
-	if v := os.Getenv("LINODE_TOKEN"); v == "" {
-		t.Fatal("LINODE_TOKEN must be set for acceptance tests")
-		return true
-	}
-	return false
+const testBuilderAccBasic = `
+source "linode" "example" {
+	image             = "linode/ubuntu22.04"
+	instance_type     = "g6-nanode-1"
+	region            = "us-mia"
+	ssh_username      = "root"
 }
 
-const testBuilderAccBasic = `
-{
-	"builders": [{
-		"type": "linode",
-		"region": "us-mia",
-		"instance_type": "g6-nanode-1",
-		"image": "linode/debian12",
-		"ssh_username": "root",
-		"cloud_init": true
-	}]
+build {
+	sources = ["source.linode.example"]
 }
 `
