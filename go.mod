@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/hashicorp/hcl/v2 v2.20.1
 	github.com/hashicorp/packer-plugin-sdk v0.5.2
-	github.com/linode/linodego v1.31.0
+	github.com/linode/linodego v1.32.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/zclconf/go-cty v1.13.3
 	golang.org/x/crypto v0.21.0
