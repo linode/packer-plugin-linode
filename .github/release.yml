@@ -3,20 +3,30 @@ changelog:
     labels:
       - ignore-for-release
   categories:
-    - title: Breaking Changes 🛠
+    - title: ⚠️  Breaking Change
       labels:
         - breaking-change
-    - title: Exciting New Features 🎉
+    - title: 🐛 Bug Fixes
       labels:
-        - enhancement
-    - title: Bug fixes🧑‍🔧 🐞
+        - bugfix
+    - title: 🚀 New Features
       labels:
-        - bug 
-    - title: Doc improvements 📚
+        - new-feature
+    - title: 💡 Improvements
       labels:
-        - docs
+        - improvement
+    - title: 🧪 Testing Improvements
+      labels:
+        - testing
+    - title: ⚙️  Repo/CI Improvements
+      labels:
+        - repo-ci-improvement
+    - title: 📖 Documentation
+      labels:
         - documentation
+    - title: 📦 Dependency Updates
+      labels:
+        - dependencies
     - title: Other Changes
       labels:
         - "*"
-
