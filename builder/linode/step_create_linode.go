@@ -37,6 +37,16 @@ func flattenConfigInterface(i Interface) linodego.InstanceConfigInterfaceCreateO
 	}
 }
 
+func flattenMetadata(m Metadata) *linodego.InstanceMetadataOptions {
+	if m.UserData == "" {
+		return nil
+	}
+
+	return &linodego.InstanceMetadataOptions{
+		UserData: m.UserData,
+	}
+}
+
 func (s *stepCreateLinode) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	c := state.Get("config").(*Config)
 	ui := state.Get("ui").(packersdk.Ui)
@@ -65,6 +75,9 @@ func (s *stepCreateLinode) Run(ctx context.Context, state multistep.StateBag) mu
 		Label:           c.Label,
 		Image:           c.Image,
 		SwapSize:        &c.SwapSize,
+		Tags:            c.Tags,
+		FirewallID:      c.FirewallID,
+		Metadata:        flattenMetadata(c.Metadata),
 	}
 
 	if pubKey := string(c.Comm.SSHPublicKey); pubKey != "" {
