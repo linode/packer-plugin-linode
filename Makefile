@@ -2,7 +2,7 @@ NAME=linode
 BINARY=packer-plugin-${NAME}
 PLUGIN_FQN="$(shell grep -E '^module' <go.mod | sed -E 's/module *//')"
 COUNT?=1
-UNIT_TEST_TARGET?=$(shell go list ./builder/...)
+TEST?=$(shell go list ./...)
 HASHICORP_PACKER_PLUGIN_SDK_VERSION?=$(shell go list -m github.com/hashicorp/packer-plugin-sdk | cut -d " " -f2)
 PACKER_SDC_REPO ?= github.com/hashicorp/packer-plugin-sdk/cmd/packer-sdc
 .DEFAULT_GOAL = dev
@@ -21,7 +21,7 @@ build: fmtcheck
 	@go build -o ${BINARY}
 
 .PHONY: test
-test: fmtcheck unit-test int-test
+test: fmtcheck acctest
 
 .PHONY: install-packer-sdc
 install-packer-sdc: ## Install packer sofware development command
@@ -33,7 +33,7 @@ plugin-check: install-packer-sdc build
 
 .PHONY: unit-test
 unit-test: dev
-	@go test -count $(COUNT) -v $(UNIT_TEST_TARGET) -timeout=10m
+	@go test -race -count $(COUNT) -v $(TEST) -timeout=10m
 
 # int-test is an alias of acctest
 .PHONY: int-test
@@ -41,7 +41,7 @@ int-test: acctest
 
 .PHONY: acctest
 acctest: dev
-	@PACKER_ACC=1 go test -count $(COUNT) ./... -v -timeout=100m
+	@PACKER_ACC=1 go test -race -count $(COUNT) -v $(TEST) -timeout=100m
 
 .PHONY: generate
 generate: install-packer-sdc
