@@ -36,6 +36,15 @@ can also be supplied to override the typical auto-generated key:
 
 ### Required
 
+<!-- Code generated from the comments of the LinodeCommon struct in helper/common.go; DO NOT EDIT MANUALLY -->
+
+- `linode_token` (string) - The Linode API token required for provision Linode resources.
+  This can also be specified in `LINODE_TOKEN` environment variable.
+  Saving the token in the environment or centralized vaults
+  can reduce the risk of the token being leaked from the codebase.
+
+<!-- End of code generated from the comments of the LinodeCommon struct in helper/common.go; -->
+
 <!-- Code generated from the comments of the Config struct in builder/linode/config.go; DO NOT EDIT MANUALLY -->
 
 - `region` (string) - The id of the region to launch the Linode instance in. Images are available in all

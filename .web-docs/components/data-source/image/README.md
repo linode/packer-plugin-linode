@@ -64,6 +64,8 @@ data "linode-image" "ubuntu22_lts" {
 
 - `linode_token` (string) - The Linode API token required for provision Linode resources.
   This can also be specified in `LINODE_TOKEN` environment variable.
+  Saving the token in the environment or centralized vaults
+  can reduce the risk of the token being leaked from the codebase.
 
 <!-- End of code generated from the comments of the LinodeCommon struct in helper/common.go; -->
 
