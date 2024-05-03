@@ -53,28 +53,29 @@ can also be supplied to override the typical auto-generated key:
 
 This section outlines the fields configurable for a single interface object.
 
+##### Required Interface Common Attributes
+
 @include 'builder/linode/Interface-required.mdx'
 
-<!--
-  Other interface attribute docs are intentionally
-  not generated to group them by interface purpose
--->
+##### Optional Interface Common Attributes
 
-- `primary` (bool) - Whether this interface is a primary interface.
+@include 'builder/linode/Interface-not-required.mdx'
 
-VLAN-specific fields:
+##### VLAN-specific Attributes
 
-- `label` (string) - The label of the VLAN this interface relates to.
+@include 'builder/linode/VLANInterfaceAttributes-not-required.mdx'
 
-- `ipam_address` (string) - This Network Interface’s private IP address in CIDR notation.
+##### VPC-specific Attributes
 
-VPC-specific fields:
+@include 'builder/linode/VPCInterfaceAttributes-not-required.mdx'
 
 - `subnet_id` (int) - The ID of the VPC Subnet this interface references.
 
 - `ipv4` (block) - The IPv4 configuration of this VPC interface.
-  - `vpc` (string) - The IPv4 address from the VPC subnet to use for this interface.
-  - `nat_1_1` (string) - The public IPv4 address assigned to this Linode to be 1:1 NATed with the VPC IPv4 address.
+
+###### VPC Interface IPv4 configuration object
+
+@include 'builder/linode/InterfaceIPv4-not-required.mdx'
 
 #### Metadata
 

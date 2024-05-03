@@ -33,19 +33,7 @@ type Metadata struct {
 	UserData string `mapstructure:"user_data"`
 }
 
-type Interface struct {
-	// The purpose of this interface. (public, vlan, vpc)
-	Purpose string `mapstructure:"purpose" required:"true"`
-
-	// The label of the VLAN this interface relates to.
-	Label string `mapstructure:"label"`
-
-	// This Network Interface’s private IP address in CIDR notation.
-	IPAMAddress string `mapstructure:"ipam_address"`
-
-	// Whether this interface is a primary interface.
-	Primary bool `mapstructure:"primary"`
-
+type VPCInterfaceAttributes struct {
 	// The ID of the VPC Subnet this interface references.
 	SubnetID *int `mapstructure:"subnet_id"`
 
@@ -54,6 +42,25 @@ type Interface struct {
 
 	// The IPv4 ranges of this VPC interface.
 	IPRanges []string `mapstructure:"ip_ranges"`
+}
+
+type VLANInterfaceAttributes struct {
+	// The label of the VLAN this interface relates to.
+	Label string `mapstructure:"label"`
+
+	// This Network Interface’s private IP address in CIDR notation.
+	IPAMAddress string `mapstructure:"ipam_address"`
+}
+
+type Interface struct {
+	VLANInterfaceAttributes `mapstructure:",squash"`
+	VPCInterfaceAttributes  `mapstructure:",squash"`
+
+	// The purpose of this interface. (public, vlan, vpc)
+	Purpose string `mapstructure:"purpose" required:"true"`
+
+	// Whether this interface is a primary interface.
+	Primary bool `mapstructure:"primary"`
 }
 
 type Config struct {

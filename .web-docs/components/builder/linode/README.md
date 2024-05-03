@@ -125,6 +125,8 @@ can also be supplied to override the typical auto-generated key:
 
 This section outlines the fields configurable for a single interface object.
 
+##### Required Interface Common Attributes
+
 <!-- Code generated from the comments of the Interface struct in builder/linode/config.go; DO NOT EDIT MANUALLY -->
 
 - `purpose` (string) - The purpose of this interface. (public, vlan, vpc)
@@ -132,26 +134,53 @@ This section outlines the fields configurable for a single interface object.
 <!-- End of code generated from the comments of the Interface struct in builder/linode/config.go; -->
 
 
-<!--
-  Other interface attribute docs are intentionally
-  not generated to group them by interface purpose
--->
+##### Optional Interface Common Attributes
+
+<!-- Code generated from the comments of the Interface struct in builder/linode/config.go; DO NOT EDIT MANUALLY -->
 
 - `primary` (bool) - Whether this interface is a primary interface.
 
-VLAN-specific fields:
+<!-- End of code generated from the comments of the Interface struct in builder/linode/config.go; -->
+
+
+##### VLAN-specific Attributes
+
+<!-- Code generated from the comments of the VLANInterfaceAttributes struct in builder/linode/config.go; DO NOT EDIT MANUALLY -->
 
 - `label` (string) - The label of the VLAN this interface relates to.
 
 - `ipam_address` (string) - This Network Interface’s private IP address in CIDR notation.
 
-VPC-specific fields:
+<!-- End of code generated from the comments of the VLANInterfaceAttributes struct in builder/linode/config.go; -->
+
+
+##### VPC-specific Attributes
+
+<!-- Code generated from the comments of the VPCInterfaceAttributes struct in builder/linode/config.go; DO NOT EDIT MANUALLY -->
+
+- `subnet_id` (\*int) - The ID of the VPC Subnet this interface references.
+
+- `ipv4` (\*InterfaceIPv4) - The IPv4 configuration of this VPC interface.
+
+- `ip_ranges` ([]string) - The IPv4 ranges of this VPC interface.
+
+<!-- End of code generated from the comments of the VPCInterfaceAttributes struct in builder/linode/config.go; -->
+
 
 - `subnet_id` (int) - The ID of the VPC Subnet this interface references.
 
 - `ipv4` (block) - The IPv4 configuration of this VPC interface.
-  - `vpc` (string) - The IPv4 address from the VPC subnet to use for this interface.
-  - `nat_1_1` (string) - The public IPv4 address assigned to this Linode to be 1:1 NATed with the VPC IPv4 address.
+
+###### VPC Interface IPv4 configuration object
+
+<!-- Code generated from the comments of the InterfaceIPv4 struct in builder/linode/config.go; DO NOT EDIT MANUALLY -->
+
+- `vpc` (string) - The IPv4 address from the VPC subnet to use for this interface.
+
+- `nat_1_1` (\*string) - The public IPv4 address assigned to this Linode to be 1:1 NATed with the VPC IPv4 address.
+
+<!-- End of code generated from the comments of the InterfaceIPv4 struct in builder/linode/config.go; -->
+
 
 #### Metadata
 

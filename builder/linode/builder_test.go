@@ -479,18 +479,22 @@ func TestBuilderPrepare_NetworkInterfaces(t *testing.T) {
 			Primary: true,
 		},
 		{
-			Purpose:     "vlan",
-			Label:       "vlan-1",
-			IPAMAddress: "10.0.0.1/24",
+			Purpose: "vlan",
+			VLANInterfaceAttributes: VLANInterfaceAttributes{
+				Label:       "vlan-1",
+				IPAMAddress: "10.0.0.1/24",
+			},
 		},
 		{
-			Purpose:  "vpc",
-			SubnetID: &subnetID,
-			IPv4: &InterfaceIPv4{
-				VPC:     "10.0.0.2",
-				NAT1To1: &anyStr,
+			Purpose: "vpc",
+			VPCInterfaceAttributes: VPCInterfaceAttributes{
+				SubnetID: &subnetID,
+				IPRanges: []string{"10.0.0.3/32"},
+				IPv4: &InterfaceIPv4{
+					VPC:     "10.0.0.2",
+					NAT1To1: &anyStr,
+				},
 			},
-			IPRanges: []string{"10.0.0.3/32"},
 		},
 	}
 
