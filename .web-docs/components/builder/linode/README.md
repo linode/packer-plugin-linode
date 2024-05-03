@@ -167,10 +167,6 @@ This section outlines the fields configurable for a single interface object.
 <!-- End of code generated from the comments of the VPCInterfaceAttributes struct in builder/linode/config.go; -->
 
 
-- `subnet_id` (int) - The ID of the VPC Subnet this interface references.
-
-- `ipv4` (block) - The IPv4 configuration of this VPC interface.
-
 ###### VPC Interface IPv4 configuration object
 
 <!-- Code generated from the comments of the InterfaceIPv4 struct in builder/linode/config.go; DO NOT EDIT MANUALLY -->
