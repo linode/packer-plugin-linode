@@ -215,7 +215,7 @@ source "linode" "example" {
   instance_label    = "temporary-linode-${local.timestamp}"
   instance_type     = "g6-nanode-1"
   linode_token      = "YOUR API TOKEN"
-  region            = "us-east"
+  region            = "us-mia"
   ssh_username      = "root"
 }
 
@@ -234,7 +234,7 @@ build {
       "example": {
         "image": "linode/debian11",
         "linode_token": "YOUR API TOKEN",
-        "region": "us-east",
+        "region": "us-mia",
         "instance_type": "g6-nanode-1",
         "instance_label": "temporary-linode-{{timestamp}}",
         "image_label": "private-image-{{timestamp}}",
@@ -267,7 +267,7 @@ source "linode" "example" {
   instance_label    = "temporary-linode-${local.timestamp}"
   instance_type     = "g6-nanode-1"
   linode_token      = "YOUR API TOKEN"
-  region            = "us-east"
+  region            = "us-mia"
   ssh_username      = "root"
   private_ip        = true
   firewall_id       = 12345
