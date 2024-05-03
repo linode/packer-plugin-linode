@@ -63,7 +63,7 @@ data "linode-image" "ubuntu22_lts" {
 <!-- Code generated from the comments of the LinodeCommon struct in helper/common.go; DO NOT EDIT MANUALLY -->
 
 - `linode_token` (string) - The Linode API token required for provision Linode resources.
-  This can also be specified in LINODE_TOKEN environment variable.
+  This can also be specified in `LINODE_TOKEN` environment variable.
 
 <!-- End of code generated from the comments of the LinodeCommon struct in helper/common.go; -->
 

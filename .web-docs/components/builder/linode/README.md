@@ -36,79 +36,97 @@ can also be supplied to override the typical auto-generated key:
 
 ### Required
 
-- `linode_token` (string) - The client TOKEN to use to access your account.
-  Alternatively, you can set your token as an environment variable named
-  `LINODE_TOKEN`. Saving the token in the environment or centralized vaults
-  can reduce the risk of the token being leaked from the codebase.
+<!-- Code generated from the comments of the Config struct in builder/linode/config.go; DO NOT EDIT MANUALLY -->
 
-- `image` (string) - An Image ID to deploy the Disk from. Official Linode
-  Images start with `linode/`, while user Images start with `private/`. See
-  [images](https://api.linode.com/v4/images) for more information on the
-  Images available for use. Examples are `linode/debian9`, `linode/fedora28`,
-  `linode/ubuntu18.04`, `linode/arch`, and `private/12345`.
+- `region` (string) - The id of the region to launch the Linode instance in. Images are available in all
+  regions, but there will be less delay when deploying from the region where the image
+  was taken. See [regions](https://api.linode.com/v4/regions) for more information on
+  the available regions. Examples are `us-east`, `us-central`, `us-west`, `ap-south`,
+  `ca-east`, `ap-northeast`, `eu-central`, and `eu-west`.
 
-- `region` (string) - The id of the region to launch the Linode instance in.
-  Images are available in all regions, but there will be less delay when
-  deploying from the region where the image was taken. See
-  [regions](https://api.linode.com/v4/regions) for more information on the
-  available regions. Examples are `us-east`, `us-central`, `us-west`,
-  `ap-south`, `ca-east`, `ap-northeast`, `eu-central`, and `eu-west`.
+- `instance_type` (string) - The Linode type defines the pricing, CPU, disk, and RAM specs of the instance. See
+  [instance types](https://api.linode.com/v4/linode/types) for more information on the
+  available Linode instance types. Examples are `g6-nanode-1`, `g6-standard-2`,
+  `g6-highmem-16`, and `g6-dedicated-16`.
 
-- `instance_type` (string) - The Linode type defines the pricing, CPU, disk,
-  and RAM specs of the instance. See [instance types](https://api.linode.com/v4/linode/types)
-  for more information on the available Linode instance types. Examples are `g6-nanode-1`,
-  `g6-standard-2`, `g6-highmem-16`, and `g6-dedicated-16`.
+- `image` (string) - An Image ID to deploy the Disk from. Official Linode Images start with `linode/`,
+  while user Images start with `private/`. See [images](https://api.linode.com/v4/images)
+  for more information on the Images available for use. Examples are `linode/debian9`,
+  `linode/fedora28`, `linode/ubuntu18.04`, `linode/arch`, and `private/12345`.
+
+<!-- End of code generated from the comments of the Config struct in builder/linode/config.go; -->
+
 
 ### Optional
 
-- `authorized_keys` (list) - Public SSH keys need to be appended to the Linode instance.
+<!-- Code generated from the comments of the Config struct in builder/linode/config.go; DO NOT EDIT MANUALLY -->
 
-- `authorized_users` (list) - Users whose SSH keys need to be appended to the Linode instance.
+- `interface` ([]Interface) - Network Interfaces to add to this Linode’s Configuration Profile. Singular repeatable
+  block containing a `purpose`, a `label`, and an `ipam_address` field.
+
+- `authorized_keys` ([]string) - Public SSH keys need to be appended to the Linode instance.
+
+- `authorized_users` ([]string) - Users whose SSH keys need to be appended to the Linode instance.
 
 - `instance_label` (string) - The name assigned to the Linode Instance.
 
-- `instance_tags` (list) - Tags to apply to the instance when it is created.
+- `instance_tags` ([]string) - Tags to apply to the instance when it is created.
 
 - `swap_size` (int) - The disk size (MiB) allocated for swap space.
 
-- `interface` ([](Interface)[#interface]) - Network Interfaces
-  to add to this Linode’s Configuration Profile. Singular repeatable block containing a `purpose`,
-  a `label`, and an `ipam_address` field.
+- `private_ip` (bool) - If true, the created Linode will have private networking enabled and assigned
+  a private IPv4 address.
+
+- `root_pass` (string) - The root password of the Linode instance for building the image. Please note that when
+  you create a new Linode instance with a private image, you will be required to setup a
+  new root password.
 
 - `image_label` (string) - The name of the resulting image that will appear
   in your account. Defaults to `packer-{{timestamp}}` (see [configuration
   templates](/packer/docs/templates/legacy_json_templates/engine) for more info).
 
-- `image_description` (string) - The description of the resulting image that
-  will appear in your account. Defaults to "".
+- `image_description` (string) - The description of the resulting image that will appear in your account. Defaults to "".
 
-- `state_timeout` (string) - The time to wait, as a duration string, for the
-  Linode instance to enter a desired state (such as "running") before timing
-  out. The default state timeout is "5m".
+- `state_timeout` (duration string | ex: "1h5m2s") - The time to wait, as a duration string, for the Linode instance to enter a desired state
+  (such as "running") before timing out. The default state timeout is "5m".
 
-- `image_create_timeout` (string) - The time to wait, as a duration string, for the
-  disk image to be created successfully before timing out.
-  The default image creation timeout is "10m".
+- `stackscript_data` (map[string]string) - This attribute is required only if the StackScript being deployed requires input data from
+  the User for successful completion. See User Defined Fields (UDFs) for more details.
+  
+  This attribute is required to be valid JSON.
 
-- `private_ip` (bool) - If true, the created Linode will have private networking
-  enabled and assigned a private IPv4 address.
+- `stackscript_id` (int) - A StackScript ID that will cause the referenced StackScript to be run during deployment
+  of this Linode. A compatible image is required to use a StackScript. To get a list of
+  available StackScript and their permitted Images see /stackscripts. This field cannot
+  be used when deploying from a Backup or a Private Image.
 
-- `root_pass` (string) - The root password of the Linode instance for building the image.
-  Please note that when you create a new Linode instance with a private image, you will
-  be required to setup a new root password.
+- `image_create_timeout` (duration string | ex: "1h5m2s") - The time to wait, as a duration string, for the disk image to be created successfully
+  before timing out. The default image creation timeout is "10m".
 
 - `cloud_init` (bool) - Whether the newly created image supports cloud-init.
 
+- `metadata` (Metadata) - An object containing user-defined data relevant to the creation of Linodes.
+
 - `firewall_id` (int) - The ID of the Firewall to attach this Linode to upon creation.
 
-- `metadata` ((Metadata)[#metadata]) - An object containing user-defined data relevant
-  to the creation of Linodes.
+<!-- End of code generated from the comments of the Config struct in builder/linode/config.go; -->
+
 
 #### Interface
 
 This section outlines the fields configurable for a single interface object.
 
+<!-- Code generated from the comments of the Interface struct in builder/linode/config.go; DO NOT EDIT MANUALLY -->
+
 - `purpose` (string) - The purpose of this interface. (public, vlan, vpc)
+
+<!-- End of code generated from the comments of the Interface struct in builder/linode/config.go; -->
+
+
+<!--
+  Other interface attribute docs are intentionally
+  not generated to group them by interface purpose
+-->
 
 - `primary` (bool) - Whether this interface is a primary interface.
 
@@ -123,16 +141,19 @@ VPC-specific fields:
 - `subnet_id` (int) - The ID of the VPC Subnet this interface references.
 
 - `ipv4` (block) - The IPv4 configuration of this VPC interface.
-
-    - `vpc` (string) - The IPv4 address from the VPC subnet to use for this interface.
-
-    - `nat_1_1` (string) - The public IPv4 address assigned to this Linode to be 1:1 NATed with the VPC IPv4 address.
+  - `vpc` (string) - The IPv4 address from the VPC subnet to use for this interface.
+  - `nat_1_1` (string) - The public IPv4 address assigned to this Linode to be 1:1 NATed with the VPC IPv4 address.
 
 #### Metadata
 
 This section outlines the fields configurable for a single metadata object.
 
+<!-- Code generated from the comments of the Metadata struct in builder/linode/config.go; DO NOT EDIT MANUALLY -->
+
 - `user_data` (string) - Base64-encoded (cloud-config)[https://www.linode.com/docs/products/compute/compute-instances/guides/metadata-cloud-config/] data.
+
+<!-- End of code generated from the comments of the Metadata struct in builder/linode/config.go; -->
+
 
 ## Examples
 

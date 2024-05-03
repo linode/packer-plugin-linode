@@ -69,13 +69,13 @@ type FlatConfig struct {
 	WinRMInsecure             *bool             `mapstructure:"winrm_insecure" cty:"winrm_insecure" hcl:"winrm_insecure"`
 	WinRMUseNTLM              *bool             `mapstructure:"winrm_use_ntlm" cty:"winrm_use_ntlm" hcl:"winrm_use_ntlm"`
 	Interfaces                []FlatInterface   `mapstructure:"interface" required:"false" cty:"interface" hcl:"interface"`
-	Region                    *string           `mapstructure:"region" cty:"region" hcl:"region"`
+	Region                    *string           `mapstructure:"region" required:"true" cty:"region" hcl:"region"`
 	AuthorizedKeys            []string          `mapstructure:"authorized_keys" required:"false" cty:"authorized_keys" hcl:"authorized_keys"`
 	AuthorizedUsers           []string          `mapstructure:"authorized_users" required:"false" cty:"authorized_users" hcl:"authorized_users"`
-	InstanceType              *string           `mapstructure:"instance_type" cty:"instance_type" hcl:"instance_type"`
+	InstanceType              *string           `mapstructure:"instance_type" required:"true" cty:"instance_type" hcl:"instance_type"`
 	Label                     *string           `mapstructure:"instance_label" required:"false" cty:"instance_label" hcl:"instance_label"`
 	Tags                      []string          `mapstructure:"instance_tags" required:"false" cty:"instance_tags" hcl:"instance_tags"`
-	Image                     *string           `mapstructure:"image" cty:"image" hcl:"image"`
+	Image                     *string           `mapstructure:"image" required:"true" cty:"image" hcl:"image"`
 	SwapSize                  *int              `mapstructure:"swap_size" required:"false" cty:"swap_size" hcl:"swap_size"`
 	PrivateIP                 *bool             `mapstructure:"private_ip" required:"false" cty:"private_ip" hcl:"private_ip"`
 	RootPass                  *string           `mapstructure:"root_pass" required:"false" cty:"root_pass" hcl:"root_pass"`
@@ -187,7 +187,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 // FlatInterface is an auto-generated flat version of Interface.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatInterface struct {
-	Purpose     *string            `mapstructure:"purpose" cty:"purpose" hcl:"purpose"`
+	Purpose     *string            `mapstructure:"purpose" required:"true" cty:"purpose" hcl:"purpose"`
 	Label       *string            `mapstructure:"label" cty:"label" hcl:"label"`
 	IPAMAddress *string            `mapstructure:"ipam_address" cty:"ipam_address" hcl:"ipam_address"`
 	Primary     *bool              `mapstructure:"primary" cty:"primary" hcl:"primary"`
