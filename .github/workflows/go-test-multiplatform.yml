@@ -15,9 +15,6 @@ on:
 permissions:
   contents: read
 
-env:
-  REPORT_FILENAME:
-
 jobs:
   get-go-version:
     runs-on: ubuntu-latest
@@ -43,7 +40,7 @@ jobs:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
       - run: |
           echo "Testing with Go ${{ needs.get-go-version.outputs.go-version }}"
-          make unit-test
+          go test -race -count 1 ./... -timeout=3m -v
 
   windows-go-tests:
     needs:
@@ -55,9 +52,10 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
+      # Running unit tests directly with `go test` due to gofmt/gofumpt issues in Windows
       - run: |
           echo "Testing with Go ${{ needs.get-go-version.outputs.go-version }}"
-          make unit-test
+          go test -race -count 1 ./... -timeout=3m -v
 
   linux-go-tests:
     needs:

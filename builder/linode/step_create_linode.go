@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/linode/linodego"
+	"github.com/linode/packer-plugin-linode/helper"
 )
 
 type stepCreateLinode struct {
@@ -36,12 +37,22 @@ func flattenConfigInterface(i Interface) linodego.InstanceConfigInterfaceCreateO
 	}
 }
 
+func flattenMetadata(m Metadata) *linodego.InstanceMetadataOptions {
+	if m.UserData == "" {
+		return nil
+	}
+
+	return &linodego.InstanceMetadataOptions{
+		UserData: m.UserData,
+	}
+}
+
 func (s *stepCreateLinode) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	c := state.Get("config").(*Config)
 	ui := state.Get("ui").(packersdk.Ui)
 
 	handleError := func(prefix string, err error) multistep.StepAction {
-		return errorHelper(state, ui, prefix, err)
+		return helper.ErrorHelper(state, ui, prefix, err)
 	}
 
 	ui.Say("Creating Linode...")
@@ -64,6 +75,9 @@ func (s *stepCreateLinode) Run(ctx context.Context, state multistep.StateBag) mu
 		Label:           c.Label,
 		Image:           c.Image,
 		SwapSize:        &c.SwapSize,
+		Tags:            c.Tags,
+		FirewallID:      c.FirewallID,
+		Metadata:        flattenMetadata(c.Metadata),
 	}
 
 	if pubKey := string(c.Comm.SSHPublicKey); pubKey != "" {

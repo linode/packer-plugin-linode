@@ -9,8 +9,8 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
-func testConfig() map[string]interface{} {
-	return map[string]interface{}{
+func testConfig() map[string]any {
+	return map[string]any{
 		"linode_token":  "bar",
 		"region":        "us-ord",
 		"instance_type": "g6-nanode-1",
@@ -20,7 +20,7 @@ func testConfig() map[string]interface{} {
 }
 
 func TestBuilder_ImplementsBuilder(t *testing.T) {
-	var raw interface{}
+	var raw any
 	raw = &Builder{}
 	if _, ok := raw.(packersdk.Builder); !ok {
 		t.Fatalf("Builder should be a builder")
@@ -29,7 +29,7 @@ func TestBuilder_ImplementsBuilder(t *testing.T) {
 
 func TestBuilder_Prepare_BadType(t *testing.T) {
 	b := &Builder{}
-	c := map[string]interface{}{
+	c := map[string]any{
 		"linode_token": []string{},
 	}
 
@@ -545,5 +545,62 @@ func TestBuilderPrepare_CloudInit(t *testing.T) {
 
 	if b.config.CloudInit != expected {
 		t.Errorf("found %s, expected %t", b.config.Region, expected)
+	}
+}
+
+func TestBuilderPrepare_MetadataTagsFirewallID(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test optional
+	delete(config, "firewall_id")
+	delete(config, "metadata")
+	delete(config, "instance_tags")
+
+	_, warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expectedFirewallID := 123
+	config["firewall_id"] = expectedFirewallID
+
+	expectedUserData := "foo"
+	expectedMetadata := Metadata{
+		UserData: expectedUserData,
+	}
+	config["metadata"] = map[string]string{
+		"user_data": expectedUserData,
+	}
+
+	expectedTags := []string{
+		"foo",
+		"bar=baz",
+		":!@#$%^&*()_+-=[]\\{}|;'\",./<>?`~",
+	}
+	config["instance_tags"] = expectedTags
+
+	b = Builder{}
+	_, warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if !reflect.DeepEqual(b.config.FirewallID, expectedFirewallID) {
+		t.Errorf("got %v, expected %v", b.config.FirewallID, expectedFirewallID)
+	}
+
+	if !reflect.DeepEqual(b.config.Metadata, expectedMetadata) {
+		t.Errorf("got %v, expected %v", b.config.Metadata, expectedMetadata)
+	}
+
+	if !reflect.DeepEqual(b.config.Tags, expectedTags) {
+		t.Errorf("got %v, expected %v", b.config.Tags, expectedTags)
 	}
 }

@@ -1,4 +1,4 @@
-//go:generate packer-sdc mapstructure-to-hcl2 -type Config,Interface,InterfaceIPv4
+//go:generate packer-sdc mapstructure-to-hcl2 -type Config,Interface,InterfaceIPv4,Metadata
 
 package linode
 
@@ -16,11 +16,16 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
+	"github.com/linode/packer-plugin-linode/helper"
 )
 
 type InterfaceIPv4 struct {
 	VPC     string  `mapstructure:"vpc"`
 	NAT1To1 *string `mapstructure:"nat_1_1"`
+}
+
+type Metadata struct {
+	UserData string `mapstructure:"user_data"`
 }
 
 type Interface struct {
@@ -35,29 +40,30 @@ type Interface struct {
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
+	helper.LinodeCommon `mapstructure:",squash"`
 	ctx                 interpolate.Context
 	Comm                communicator.Config `mapstructure:",squash"`
 
-	PersonalAccessToken string `mapstructure:"linode_token"`
-
-	Interfaces         []Interface       `mapstructure:"interface"`
+	Interfaces         []Interface       `mapstructure:"interface" required:"false"`
 	Region             string            `mapstructure:"region"`
-	AuthorizedKeys     []string          `mapstructure:"authorized_keys"`
-	AuthorizedUsers    []string          `mapstructure:"authorized_users"`
+	AuthorizedKeys     []string          `mapstructure:"authorized_keys" required:"false"`
+	AuthorizedUsers    []string          `mapstructure:"authorized_users" required:"false"`
 	InstanceType       string            `mapstructure:"instance_type"`
-	Label              string            `mapstructure:"instance_label"`
-	Tags               []string          `mapstructure:"instance_tags"`
+	Label              string            `mapstructure:"instance_label" required:"false"`
+	Tags               []string          `mapstructure:"instance_tags" required:"false"`
 	Image              string            `mapstructure:"image"`
-	SwapSize           int               `mapstructure:"swap_size"`
-	PrivateIP          bool              `mapstructure:"private_ip"`
-	RootPass           string            `mapstructure:"root_pass"`
-	ImageLabel         string            `mapstructure:"image_label"`
-	Description        string            `mapstructure:"image_description"`
+	SwapSize           int               `mapstructure:"swap_size" required:"false"`
+	PrivateIP          bool              `mapstructure:"private_ip" required:"false"`
+	RootPass           string            `mapstructure:"root_pass" required:"false"`
+	ImageLabel         string            `mapstructure:"image_label" required:"false"`
+	Description        string            `mapstructure:"image_description" required:"false"`
 	StateTimeout       time.Duration     `mapstructure:"state_timeout" required:"false"`
-	StackScriptData    map[string]string `mapstructure:"stackscript_data"`
-	StackScriptID      int               `mapstructure:"stackscript_id"`
+	StackScriptData    map[string]string `mapstructure:"stackscript_data" required:"false"`
+	StackScriptID      int               `mapstructure:"stackscript_id" required:"false"`
 	ImageCreateTimeout time.Duration     `mapstructure:"image_create_timeout" required:"false"`
 	CloudInit          bool              `mapstructure:"cloud_init" required:"false"`
+	Metadata           Metadata          `mapstructure:"metadata" required:"false"`
+	FirewallID         int               `mapstructure:"firewall_id" required:"false"`
 }
 
 func createRandomRootPassword() (string, error) {
@@ -70,7 +76,7 @@ func createRandomRootPassword() (string, error) {
 	return rootPass, nil
 }
 
-func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
+func (c *Config) Prepare(raws ...any) ([]string, error) {
 	if err := config.Decode(c, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &c.ctx,
@@ -157,7 +163,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	if c.Tags == nil {
 		c.Tags = make([]string, 0)
 	}
-	tagRe := regexp.MustCompile("^[[:alnum:]:_-]{1,255}$")
+	tagRe := regexp.MustCompile("^[[:print:]]{3,50}$")
 
 	for _, t := range c.Tags {
 		if !tagRe.MatchString(t) {

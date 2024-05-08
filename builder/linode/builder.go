@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer-plugin-sdk/multistep/commonsteps"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/linode/packer-plugin-linode/helper"
 )
 
 // The unique ID for this builder.
@@ -28,7 +29,7 @@ type Builder struct {
 
 func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
 
-func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
+func (b *Builder) Prepare(raws ...any) ([]string, []string, error) {
 	warnings, errs := b.config.Prepare(raws...)
 	if errs != nil {
 		return nil, warnings, errs
@@ -39,12 +40,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook) (ret packersdk.Artifact, err error) {
 	ui.Say("Running builder ...")
 
-	client := newLinodeClient(b.config.PersonalAccessToken)
-
-	if err != nil {
-		ui.Error(err.Error())
-		return nil, err
-	}
+	client := helper.NewLinodeClient(b.config.PersonalAccessToken)
 
 	state := new(multistep.BasicStateBag)
 	state.Put("config", &b.config)
@@ -95,7 +91,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 		ImageLabel: image.Label,
 		ImageID:    image.ID,
 		Driver:     &client,
-		StateData: map[string]interface{}{
+		StateData: map[string]any{
 			"generated_data": state.Get("generated_data"),
 			"source_image":   b.config.Image,
 			"region":         b.config.Region,

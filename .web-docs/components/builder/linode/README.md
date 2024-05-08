@@ -99,6 +99,11 @@ can also be supplied to override the typical auto-generated key:
 
 - `cloud_init` (bool) - Whether the newly created image supports cloud-init.
 
+- `firewall_id` (int) - The ID of the Firewall to attach this Linode to upon creation.
+
+- `metadata` ((Metadata)[#metadata]) - An object containing user-defined data relevant
+  to the creation of Linodes.
+
 #### Interface
 
 This section outlines the fields configurable for a single interface object.
@@ -122,6 +127,12 @@ VPC-specific fields:
     - `vpc` (string) - The IPv4 address from the VPC subnet to use for this interface.
 
     - `nat_1_1` (string) - The public IPv4 address assigned to this Linode to be 1:1 NATed with the VPC IPv4 address.
+
+#### Metadata
+
+This section outlines the fields configurable for a single metadata object.
+
+- `user_data` (string) - Base64-encoded (cloud-config)[https://www.linode.com/docs/products/compute/compute-instances/guides/metadata-cloud-config/] data.
 
 ## Examples
 
@@ -200,7 +211,9 @@ source "linode" "example" {
   region            = "us-east"
   ssh_username      = "root"
   private_ip        = true
+  firewall_id       = 12345
 
+  instance_tags     = ["abc", "foo=bar"]
   authorized_users  = ["your_authorized_username"]
   authorized_keys   = ["ssh-rsa AAAA_valid_public_ssh_key_123456785== user@their-computer"]
   stackscript_id    = 1177256
@@ -219,6 +232,20 @@ source "linode" "example" {
         vpc = "10.0.0.2"
         nat_1_1 = "any"
     }
+  }
+
+  metadata {
+    user_data = base64encode(<<EOF
+#cloud-config
+
+write_files:
+  - path: /root/helloworld.txt
+    content: |
+      Hello, world!
+    owner: 'root:root'
+    permissions: '0644'
+EOF
+)
   }
 }
 

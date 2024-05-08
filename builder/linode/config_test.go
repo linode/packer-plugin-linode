@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
+	"github.com/linode/packer-plugin-linode/helper"
 )
 
 func TestPrepare(t *testing.T) {
@@ -15,12 +16,15 @@ func TestPrepare(t *testing.T) {
 	}
 
 	config := &Config{
-		ctx:                 interpolate.Context{},
-		Comm:                communicator.Config{SSH: data},
-		PersonalAccessToken: "test-linode-access-token",
-		Region:              "us-ord",
-		InstanceType:        "g6-standard-1",
-		Image:               "linode/debian10",
+		LinodeCommon: helper.LinodeCommon{
+			PersonalAccessToken: "test-linode-access-token",
+		},
+		ctx:  interpolate.Context{},
+		Comm: communicator.Config{SSH: data},
+
+		Region:       "us-ord",
+		InstanceType: "g6-standard-1",
+		Image:        "linode/debian10",
 	}
 
 	warnings, err := config.Prepare()

@@ -1,4 +1,4 @@
-package linode
+package helper
 
 import (
 	"fmt"
@@ -9,8 +9,10 @@ import (
 	"golang.org/x/oauth2"
 )
 
-func newLinodeClient(pat string) linodego.Client {
-	tokenSource := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: pat})
+const TokenEnvVar = "LINODE_TOKEN"
+
+func NewLinodeClient(token string) linodego.Client {
+	tokenSource := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
 
 	oauthTransport := &oauth2.Transport{
 		Source: tokenSource,
