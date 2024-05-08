@@ -66,6 +66,8 @@ data "linode-image" "ubuntu22_lts" {
   This can also be specified in `LINODE_TOKEN` environment variable.
   Saving the token in the environment or centralized vaults
   can reduce the risk of the token being leaked from the codebase.
+  `images:read_write`, `linodes:read_write`, and `events:read_only`
+  scopes are required for the API token.
 
 <!-- End of code generated from the comments of the LinodeCommon struct in helper/common.go; -->
 
