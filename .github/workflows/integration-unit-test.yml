@@ -34,7 +34,7 @@ jobs:
       - name: Run integration and unit tests
         run: |
           echo "Testing with Go ${{ needs.get-go-version.outputs.go-version }}"
-          make test | go-junit-report -set-exit-code -iocopy -out > "$REPORT_FILENAME"
+          make test | go-junit-report -set-exit-code -iocopy -out "$REPORT_FILENAME"
         env:
           LINODE_TOKEN: ${{ secrets.LINODE_TOKEN }}
 
