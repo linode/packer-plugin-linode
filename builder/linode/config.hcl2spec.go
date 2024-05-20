@@ -69,13 +69,13 @@ type FlatConfig struct {
 	WinRMInsecure             *bool             `mapstructure:"winrm_insecure" cty:"winrm_insecure" hcl:"winrm_insecure"`
 	WinRMUseNTLM              *bool             `mapstructure:"winrm_use_ntlm" cty:"winrm_use_ntlm" hcl:"winrm_use_ntlm"`
 	Interfaces                []FlatInterface   `mapstructure:"interface" required:"false" cty:"interface" hcl:"interface"`
-	Region                    *string           `mapstructure:"region" cty:"region" hcl:"region"`
+	Region                    *string           `mapstructure:"region" required:"true" cty:"region" hcl:"region"`
 	AuthorizedKeys            []string          `mapstructure:"authorized_keys" required:"false" cty:"authorized_keys" hcl:"authorized_keys"`
 	AuthorizedUsers           []string          `mapstructure:"authorized_users" required:"false" cty:"authorized_users" hcl:"authorized_users"`
-	InstanceType              *string           `mapstructure:"instance_type" cty:"instance_type" hcl:"instance_type"`
+	InstanceType              *string           `mapstructure:"instance_type" required:"true" cty:"instance_type" hcl:"instance_type"`
 	Label                     *string           `mapstructure:"instance_label" required:"false" cty:"instance_label" hcl:"instance_label"`
 	Tags                      []string          `mapstructure:"instance_tags" required:"false" cty:"instance_tags" hcl:"instance_tags"`
-	Image                     *string           `mapstructure:"image" cty:"image" hcl:"image"`
+	Image                     *string           `mapstructure:"image" required:"true" cty:"image" hcl:"image"`
 	SwapSize                  *int              `mapstructure:"swap_size" required:"false" cty:"swap_size" hcl:"swap_size"`
 	PrivateIP                 *bool             `mapstructure:"private_ip" required:"false" cty:"private_ip" hcl:"private_ip"`
 	RootPass                  *string           `mapstructure:"root_pass" required:"false" cty:"root_pass" hcl:"root_pass"`
@@ -187,13 +187,13 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 // FlatInterface is an auto-generated flat version of Interface.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatInterface struct {
-	Purpose     *string            `mapstructure:"purpose" cty:"purpose" hcl:"purpose"`
 	Label       *string            `mapstructure:"label" cty:"label" hcl:"label"`
 	IPAMAddress *string            `mapstructure:"ipam_address" cty:"ipam_address" hcl:"ipam_address"`
-	Primary     *bool              `mapstructure:"primary" cty:"primary" hcl:"primary"`
 	SubnetID    *int               `mapstructure:"subnet_id" cty:"subnet_id" hcl:"subnet_id"`
 	IPv4        *FlatInterfaceIPv4 `mapstructure:"ipv4" cty:"ipv4" hcl:"ipv4"`
 	IPRanges    []string           `mapstructure:"ip_ranges" cty:"ip_ranges" hcl:"ip_ranges"`
+	Purpose     *string            `mapstructure:"purpose" required:"true" cty:"purpose" hcl:"purpose"`
+	Primary     *bool              `mapstructure:"primary" cty:"primary" hcl:"primary"`
 }
 
 // FlatMapstructure returns a new FlatInterface.
@@ -208,13 +208,13 @@ func (*Interface) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spe
 // The decoded values from this spec will then be applied to a FlatInterface.
 func (*FlatInterface) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
-		"purpose":      &hcldec.AttrSpec{Name: "purpose", Type: cty.String, Required: false},
 		"label":        &hcldec.AttrSpec{Name: "label", Type: cty.String, Required: false},
 		"ipam_address": &hcldec.AttrSpec{Name: "ipam_address", Type: cty.String, Required: false},
-		"primary":      &hcldec.AttrSpec{Name: "primary", Type: cty.Bool, Required: false},
 		"subnet_id":    &hcldec.AttrSpec{Name: "subnet_id", Type: cty.Number, Required: false},
 		"ipv4":         &hcldec.BlockSpec{TypeName: "ipv4", Nested: hcldec.ObjectSpec((*FlatInterfaceIPv4)(nil).HCL2Spec())},
 		"ip_ranges":    &hcldec.AttrSpec{Name: "ip_ranges", Type: cty.List(cty.String), Required: false},
+		"purpose":      &hcldec.AttrSpec{Name: "purpose", Type: cty.String, Required: false},
+		"primary":      &hcldec.AttrSpec{Name: "primary", Type: cty.Bool, Required: false},
 	}
 	return s
 }

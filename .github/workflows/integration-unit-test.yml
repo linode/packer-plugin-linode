@@ -34,27 +34,17 @@ jobs:
       - name: Run integration and unit tests
         run: |
           echo "Testing with Go ${{ needs.get-go-version.outputs.go-version }}"
-          if ! make test | go-junit-report -set-exit-code > "$REPORT_FILENAME"; then
-            echo "EXIT_STATUS=1" >> $GITHUB_ENV
-          fi
-          cat "$REPORT_FILENAME"
+          make test | go-junit-report -set-exit-code -iocopy -out "$REPORT_FILENAME"
         env:
           LINODE_TOKEN: ${{ secrets.LINODE_TOKEN }}
 
       - name: Upload test report as artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-report-file
           path: "${{ env.REPORT_FILENAME }}"
 
-      - name: Test Execution Status Handler
-        run: |
-          if [[ "$EXIT_STATUS" != 0 ]]; then
-            echo "Test execution contains failure(s), check Run Integration tests step above"
-            exit $EXIT_STATUS 
-          else
-            echo "Tests passed!"
-          fi
 
   process-upload-report:
     runs-on: ubuntu-latest
