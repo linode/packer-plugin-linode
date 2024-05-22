@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/hashicorp/hcl/v2 v2.20.1
 	github.com/hashicorp/packer-plugin-sdk v0.5.3
-	github.com/linode/linodego v1.33.1
+	github.com/linode/linodego v1.34.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/zclconf/go-cty v1.13.3
 	golang.org/x/crypto v0.23.0
@@ -29,7 +29,7 @@ require (
 	github.com/dylanmei/iso8601 v0.1.0 // indirect
 	github.com/fatih/color v1.14.1 // indirect
 	github.com/go-jose/go-jose/v3 v3.0.3 // indirect
-	github.com/go-resty/resty/v2 v2.12.0 // indirect
+	github.com/go-resty/resty/v2 v2.13.1 // indirect
 	github.com/gofrs/flock v0.8.1 // indirect
 	github.com/gofrs/uuid v4.0.0+incompatible // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
@@ -83,7 +83,7 @@ require (
 	go.opencensus.io v0.24.0 // indirect
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29 // indirect
 	golang.org/x/mod v0.13.0 // indirect
-	golang.org/x/net v0.24.0 // indirect
+	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
 	golang.org/x/term v0.20.0 // indirect
 	golang.org/x/text v0.15.0 // indirect
