@@ -1,13 +1,12 @@
 module github.com/linode/packer-plugin-linode
 
 go 1.21.0
-
-toolchain go1.22.4
+toolchain go1.22.5
 
 require (
 	github.com/hashicorp/hcl/v2 v2.21.0
 	github.com/hashicorp/packer-plugin-sdk v0.5.4
-	github.com/linode/linodego v1.39.0
+	github.com/linode/linodego v1.40.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/zclconf/go-cty v1.13.3
 	golang.org/x/crypto v0.26.0
