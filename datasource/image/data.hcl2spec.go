@@ -19,6 +19,7 @@ type FlatConfig struct {
 	PackerUserVars      map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
 	PackerSensitiveVars []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
 	PersonalAccessToken *string           `mapstructure:"linode_token" cty:"linode_token" hcl:"linode_token"`
+	APICAPath           *string           `mapstructure:"api_ca_path" cty:"api_ca_path" hcl:"api_ca_path"`
 	Label               *string           `mapstructure:"label" cty:"label" hcl:"label"`
 	LabelRegex          *string           `mapstructure:"label_regex" cty:"label_regex" hcl:"label_regex"`
 	ID                  *string           `mapstructure:"id" cty:"id" hcl:"id"`
@@ -47,6 +48,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_user_variables":      &hcldec.AttrSpec{Name: "packer_user_variables", Type: cty.Map(cty.String), Required: false},
 		"packer_sensitive_variables": &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
 		"linode_token":               &hcldec.AttrSpec{Name: "linode_token", Type: cty.String, Required: false},
+		"api_ca_path":                &hcldec.AttrSpec{Name: "api_ca_path", Type: cty.String, Required: false},
 		"label":                      &hcldec.AttrSpec{Name: "label", Type: cty.String, Required: false},
 		"label_regex":                &hcldec.AttrSpec{Name: "label_regex", Type: cty.String, Required: false},
 		"id":                         &hcldec.AttrSpec{Name: "id", Type: cty.String, Required: false},

@@ -39,8 +39,13 @@ func (b *Builder) Prepare(raws ...any) ([]string, []string, error) {
 
 func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook) (ret packersdk.Artifact, err error) {
 	ui.Say("Running builder ...")
+	var client linodego.Client
 
-	client := helper.NewLinodeClient(b.config.PersonalAccessToken)
+	if b.config.APICAPath != "" {
+		client = helper.NewLinodeClientWithCA(b.config.PersonalAccessToken, b.config.APICAPath)
+	} else {
+		client = helper.NewLinodeClient(b.config.PersonalAccessToken)
+	}
 
 	state := new(multistep.BasicStateBag)
 	state.Put("config", &b.config)

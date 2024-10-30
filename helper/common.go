@@ -10,4 +10,8 @@ type LinodeCommon struct {
 	// `images:read_write`, `linodes:read_write`, and `events:read_only`
 	// scopes are required for the API token.
 	PersonalAccessToken string `mapstructure:"linode_token"`
+
+	// The path to a CA file to trust when making API requests.
+	// It can also be specified using the `LINODE_CA` environment variable.
+	APICAPath string `mapstructure:"api_ca_path"`
 }
