@@ -11,7 +11,7 @@ import (
 )
 
 type stepCreateLinode struct {
-	client linodego.Client
+	client *linodego.Client
 }
 
 func flattenConfigInterfaceIPv4(i *InterfaceIPv4) *linodego.VPCIPv4 {

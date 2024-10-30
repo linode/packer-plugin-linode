@@ -129,10 +129,14 @@ func (d *Datasource) OutputSpec() hcldec.ObjectSpec {
 }
 
 func (d *Datasource) Execute() (cty.Value, error) {
-	var client linodego.Client
+	var client *linodego.Client
+	var err error
 
 	if d.config.APICAPath != "" {
-		client = helper.NewLinodeClientWithCA(d.config.PersonalAccessToken, d.config.APICAPath)
+		client, err = helper.NewLinodeClientWithCA(d.config.PersonalAccessToken, d.config.APICAPath)
+		if err != nil {
+			return cty.NullVal(cty.EmptyObject), err
+		}
 	} else {
 		client = helper.NewLinodeClient(d.config.PersonalAccessToken)
 	}

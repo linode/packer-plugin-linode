@@ -10,7 +10,7 @@ import (
 )
 
 type stepCreateImage struct {
-	client linodego.Client
+	client *linodego.Client
 }
 
 func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {

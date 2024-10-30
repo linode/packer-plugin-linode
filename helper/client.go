@@ -37,7 +37,7 @@ func AddRootCAToTransport(CAPath string, transport *http.Transport) error {
 	return nil
 }
 
-func linodeClientFromTransport(transport http.RoundTripper) linodego.Client {
+func linodeClientFromTransport(transport http.RoundTripper) *linodego.Client {
 	oauth2Client := &http.Client{
 		Transport: transport,
 	}
@@ -49,14 +49,12 @@ func linodeClientFromTransport(transport http.RoundTripper) linodego.Client {
 		version.PluginVersion.FormattedVersion(), projectURL, linodego.Version)
 
 	client.SetUserAgent(userAgent)
-	return client
+	return &client
 }
 
-func getDefaultTransportWithCA(CAPath string) *http.Transport {
+func getDefaultTransportWithCA(CAPath string) (*http.Transport, error) {
 	httpTransport := http.DefaultTransport.(*http.Transport).Clone()
-	AddRootCAToTransport(CAPath, httpTransport)
-
-	return httpTransport
+	return httpTransport, AddRootCAToTransport(CAPath, httpTransport)
 }
 
 func getOauth2TransportWithToken(token string, baseTransport http.RoundTripper) *oauth2.Transport {
@@ -68,12 +66,16 @@ func getOauth2TransportWithToken(token string, baseTransport http.RoundTripper) 
 	return oauthTransport
 }
 
-func NewLinodeClient(token string) linodego.Client {
+func NewLinodeClient(token string) *linodego.Client {
 	oauthTransport := getOauth2TransportWithToken(token, nil)
 	return linodeClientFromTransport(oauthTransport)
 }
 
-func NewLinodeClientWithCA(token, CAPath string) linodego.Client {
-	oauthTransport := getOauth2TransportWithToken(token, getDefaultTransportWithCA(CAPath))
-	return linodeClientFromTransport(oauthTransport)
+func NewLinodeClientWithCA(token, CAPath string) (*linodego.Client, error) {
+	transport, err := getDefaultTransportWithCA(CAPath)
+	if err != nil {
+		return nil, err
+	}
+	oauthTransport := getOauth2TransportWithToken(token, transport)
+	return linodeClientFromTransport(oauthTransport), nil
 }
