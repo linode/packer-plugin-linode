@@ -10,7 +10,7 @@ import (
 )
 
 type stepShutdownLinode struct {
-	client linodego.Client
+	client *linodego.Client
 }
 
 func (s *stepShutdownLinode) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
