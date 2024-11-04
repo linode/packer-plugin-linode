@@ -39,8 +39,16 @@ func (b *Builder) Prepare(raws ...any) ([]string, []string, error) {
 
 func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook) (ret packersdk.Artifact, err error) {
 	ui.Say("Running builder ...")
+	var client *linodego.Client
 
-	client := helper.NewLinodeClient(b.config.PersonalAccessToken)
+	if b.config.APICAPath != "" {
+		client, err = helper.NewLinodeClientWithCA(b.config.PersonalAccessToken, b.config.APICAPath)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		client = helper.NewLinodeClient(b.config.PersonalAccessToken)
+	}
 
 	state := new(multistep.BasicStateBag)
 	state.Put("config", &b.config)
@@ -90,7 +98,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 	artifact := Artifact{
 		ImageLabel: image.Label,
 		ImageID:    image.ID,
-		Driver:     &client,
+		Driver:     client,
 		StateData: map[string]any{
 			"generated_data": state.Get("generated_data"),
 			"source_image":   b.config.Image,

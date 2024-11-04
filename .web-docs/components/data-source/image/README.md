@@ -69,6 +69,9 @@ data "linode-image" "ubuntu22_lts" {
   `images:read_write`, `linodes:read_write`, and `events:read_only`
   scopes are required for the API token.
 
+- `api_ca_path` (string) - The path to a CA file to trust when making API requests.
+  It can also be specified using the `LINODE_CA` environment variable.
+
 <!-- End of code generated from the comments of the LinodeCommon struct in helper/common.go; -->
 
 

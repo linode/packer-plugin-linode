@@ -186,6 +186,10 @@ func (c *Config) Prepare(raws ...any) ([]string, error) {
 		c.PersonalAccessToken = os.Getenv("LINODE_TOKEN")
 	}
 
+	if c.APICAPath == "" {
+		c.APICAPath = os.Getenv("LINODE_CA")
+	}
+
 	if c.ImageLabel == "" {
 		if def, err := interpolate.Render("packer-{{timestamp}}", nil); err == nil {
 			c.ImageLabel = def
