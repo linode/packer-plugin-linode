@@ -47,3 +47,22 @@ jobs:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           API_VERSION: ${{ steps.plugin_describe.outputs.api_version }}
+  
+  notify:
+    needs: goreleaser
+    if: github.repository == 'linode/packer-plugin-linode'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Slack - Main Message
+        id: main_message
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            channel: ${{ secrets.DEV_DX_SLACK_CHANNEL_ID }}
+            blocks:
+              - type: section
+                text:
+                  type: mrkdwn
+                  text: "*New Release Published: _packer-plugin-linode_ <${{ github.event.release.html_url }}|${{ github.event.release.tag_name }}> is now live!* :tada:"
