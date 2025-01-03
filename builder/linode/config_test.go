@@ -25,7 +25,7 @@ func TestPrepare(t *testing.T) {
 		Region:       "us-ord",
 		InstanceType: "g6-standard-1",
 		Image:        "linode/debian12",
-		ImageRegions: []string{"us-mia", "us-lax"},
+		ImageRegions: []string{"us-ord", "us-mia", "us-lax"},
 	}
 
 	warnings, err := config.Prepare()
