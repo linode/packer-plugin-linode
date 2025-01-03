@@ -45,6 +45,22 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 		return handleError("Failed to wait for image creation", err)
 	}
 
+	if len(c.ImageRegions) > 0 {
+		image, err = s.client.ReplicateImage(ctx, image.ID, linodego.ImageReplicateOptions{
+			Regions: c.ImageRegions,
+		})
+		if err != nil {
+			return handleError("Failed to replicate the image", err)
+		}
+
+		for _, r := range c.ImageRegions {
+			_, err = s.client.WaitForImageRegionStatus(ctx, image.ID, r, linodego.ImageRegionStatusAvailable)
+			if err != nil {
+				return handleError("Failed to wait for the image replication", err)
+			}
+		}
+	}
+
 	image, err = s.client.GetImage(ctx, image.ID)
 	if err != nil {
 		return handleError("Failed to get image", err)

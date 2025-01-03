@@ -89,6 +89,7 @@ type FlatConfig struct {
 	CloudInit                 *bool             `mapstructure:"cloud_init" required:"false" cty:"cloud_init" hcl:"cloud_init"`
 	Metadata                  *FlatMetadata     `mapstructure:"metadata" required:"false" cty:"metadata" hcl:"metadata"`
 	FirewallID                *int              `mapstructure:"firewall_id" required:"false" cty:"firewall_id" hcl:"firewall_id"`
+	ImageRegions              []string          `mapstructure:"image_regions" required:"false" cty:"image_regions" hcl:"image_regions"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -182,6 +183,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"cloud_init":                   &hcldec.AttrSpec{Name: "cloud_init", Type: cty.Bool, Required: false},
 		"metadata":                     &hcldec.BlockSpec{TypeName: "metadata", Nested: hcldec.ObjectSpec((*FlatMetadata)(nil).HCL2Spec())},
 		"firewall_id":                  &hcldec.AttrSpec{Name: "firewall_id", Type: cty.Number, Required: false},
+		"image_regions":                &hcldec.AttrSpec{Name: "image_regions", Type: cty.List(cty.String), Required: false},
 	}
 	return s
 }
