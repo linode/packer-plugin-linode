@@ -152,6 +152,9 @@ type Config struct {
 
 	// The ID of the Firewall to attach this Linode to upon creation.
 	FirewallID int `mapstructure:"firewall_id" required:"false"`
+
+	// The regions where the outcome image will be replicated to.
+	ImageRegions []string `mapstructure:"image_regions" required:"false"`
 }
 
 func createRandomRootPassword() (string, error) {
