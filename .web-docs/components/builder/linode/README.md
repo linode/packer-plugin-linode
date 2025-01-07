@@ -123,6 +123,8 @@ can also be supplied to override the typical auto-generated key:
 
 - `firewall_id` (int) - The ID of the Firewall to attach this Linode to upon creation.
 
+- `image_regions` ([]string) - The regions where the outcome image will be replicated to.
+
 <!-- End of code generated from the comments of the Config struct in builder/linode/config.go; -->
 
 
