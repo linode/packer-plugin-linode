@@ -68,7 +68,7 @@ jobs:
           python-version: '3.x'
 
       - name: Install Python dependencies
-        run: pip3 install requests wheel boto3
+        run: pip3 install requests wheel boto3==1.35.99
 
       - name: Set release version env
         run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
