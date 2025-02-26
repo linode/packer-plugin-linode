@@ -30,7 +30,7 @@ require (
 	github.com/cenkalti/backoff/v3 v3.2.2 // indirect
 	github.com/dylanmei/iso8601 v0.1.0 // indirect
 	github.com/fatih/color v1.16.0 // indirect
-	github.com/go-jose/go-jose/v4 v4.0.1 // indirect
+	github.com/go-jose/go-jose/v4 v4.0.5 // indirect
 	github.com/go-resty/resty/v2 v2.16.3 // indirect
 	github.com/gofrs/flock v0.8.1 // indirect
 	github.com/gofrs/uuid v4.0.0+incompatible // indirect
