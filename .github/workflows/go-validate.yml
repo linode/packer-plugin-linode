@@ -50,6 +50,7 @@ jobs:
       - uses: golangci/golangci-lint-action@v7
         with:
           only-new-issues: true
+          version: v2.0
   check-fmt:
     needs:
       - get-go-version
