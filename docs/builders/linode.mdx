@@ -341,3 +341,77 @@ build {
 }
 ```
 
+## Linode Interface Example
+
+**HCL2**
+
+```hcl
+locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }
+
+source "linode" "example" {
+  image             = "linode/ubuntu24.04"
+  image_description = "My Private Image"
+  image_label       = "private-image-${local.timestamp}"
+  instance_label    = "temporary-linode-${local.timestamp}"
+  instance_type     = "g6-standard-1"
+  region            = "us-mia"
+  ssh_username      = "root"
+  interface_generation = "linode"
+
+  linode_interface {
+    firewall_id = 2930969
+    public {
+      ipv4 {
+        address {
+          address = "auto"
+          primary = true
+        }
+      }
+    }
+  }
+}
+
+build {
+  sources = ["source.linode.example"]
+}
+```
+
+**JSON**
+
+```json
+{
+  "source": {
+    "linode": {
+      "example": {
+        "image": "linode/ubuntu24.04",
+        "linode_token": "YOUR API TOKEN",
+        "region": "us-mia",
+        "instance_type": "g6-nanode-1",
+        "instance_label": "temporary-linode-{{timestamp}}",
+        "image_label": "private-image-{{timestamp}}",
+        "image_description": "My Private Image",
+        "ssh_username": "root",
+        "interface_generation": "linode",
+        "linode_interface": {
+          "firewall_id": 2930969,
+          "public": {
+            "ipv4": {
+              "addresses": [
+                {
+                  "address": "auto",
+                  "primary": true
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "build": {
+    "sources": [
+      "source.linode.example"
+    ]
+  }
+}
+```
