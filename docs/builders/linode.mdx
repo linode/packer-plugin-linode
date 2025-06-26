@@ -49,15 +49,103 @@ can also be supplied to override the typical auto-generated key:
 
 @include 'builder/linode/Config-not-required.mdx'
 
-#### Interface
+#### Linode Interface
 
-This section outlines the fields configurable for a single interface object.
+This section outlines the fields configurable for a newer Linode interface object.
 
-##### Required Interface Common Attributes
+@include 'builder/linode/LinodeInterface-not-required.mdx'
+
+##### Linode Interface Default Route configuration object (InterfaceDefaultRoute)
+
+###### Optional
+
+@include 'builder/linode/InterfaceDefaultRoute-not-required.mdx'
+
+##### Public Linode Interface configuration object (PublicInterface)
+
+###### Optional
+
+@include 'builder/linode/PublicInterface-not-required.mdx'
+
+##### Public Linode Interface IPv4 configuration object (PublicInterfaceIPv4)
+
+###### Optional
+
+@include 'builder/linode/PublicInterfaceIPv4-not-required.mdx'
+
+##### Public Linode Interface IPv4 Address configuration object (PublicInterfaceIPv4Address)
+
+###### Required
+
+@include 'builder/linode/PublicInterfaceIPv4Address-required.mdx'
+
+###### Optional
+
+@include 'builder/linode/PublicInterfaceIPv4Address-not-required.mdx'
+
+##### Public Linode Interface IPv6 configuration object (PublicInterfaceIPv6)
+
+###### Optional
+
+@include 'builder/linode/PublicInterfaceIPv6-not-required.mdx'
+
+##### Public Linode Interface IPv6 Range configuration object (PublicInterfaceIPv6Range)
+
+###### Required
+
+@include 'builder/linode/PublicInterfaceIPv6Range-required.mdx'
+
+##### VPC Linode Interface configuration object (VPCInterface)
+
+###### Required
+
+@include 'builder/linode/VPCInterface-required.mdx'
+
+###### Optional
+
+@include 'builder/linode/VPCInterface-not-required.mdx'
+
+##### VPC Linode Interface IPv4 configuration object (VPCInterfaceIPv4)
+
+###### Optional
+
+@include 'builder/linode/VPCInterfaceIPv4-not-required.mdx'
+
+##### VPC Linode Interface IPv4 Address configuration object (VPCInterfaceIPv4Address)
+
+###### Required
+
+@include 'builder/linode/VPCInterfaceIPv4Address-required.mdx'
+
+###### Optional
+
+@include 'builder/linode/VPCInterfaceIPv4Address-not-required.mdx'
+
+##### VPC Linode Interface IPv4 Range configuration object (VPCInterfaceIPv4Range)
+
+###### Required
+
+@include 'builder/linode/VPCInterfaceIPv4Range-required.mdx'
+
+##### VLAN Linode Interface configuration object (VLANInterface)
+
+###### Required
+
+@include 'builder/linode/VLANInterface-required.mdx'
+
+###### Optional
+
+@include 'builder/linode/VLANInterface-not-required.mdx'
+
+#### Legacy Config Interface
+
+This section outlines the fields configurable for a single legacy config interface object.
+
+##### Required Config Interface Common Attributes
 
 @include 'builder/linode/Interface-required.mdx'
 
-##### Optional Interface Common Attributes
+##### Optional Config Interface Common Attributes
 
 @include 'builder/linode/Interface-not-required.mdx'
 
@@ -69,7 +157,7 @@ This section outlines the fields configurable for a single interface object.
 
 @include 'builder/linode/VPCInterfaceAttributes-not-required.mdx'
 
-###### VPC Interface IPv4 configuration object
+###### VPC Config Interface IPv4 configuration object (InterfaceIPv4)
 
 @include 'builder/linode/InterfaceIPv4-not-required.mdx'
 
