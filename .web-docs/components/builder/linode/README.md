@@ -188,7 +188,7 @@ This section outlines the fields configurable for a newer Linode interface objec
 
 <!-- Code generated from the comments of the PublicInterfaceIPv4 struct in builder/linode/linode_interfaces.go; DO NOT EDIT MANUALLY -->
 
-- `addresses` ([]PublicInterfaceIPv4Address) - List of IPv4 addresses to assign to this interface. Setting any to auto
+- `address` ([]PublicInterfaceIPv4Address) - Blocks of IPv4 addresses to assign to this interface. Setting any to auto
   allocates a public IPv4 address.
 
 <!-- End of code generated from the comments of the PublicInterfaceIPv4 struct in builder/linode/linode_interfaces.go; -->
@@ -599,7 +599,7 @@ source "linode" "example" {
   interface_generation = "linode"
 
   linode_interface {
-    firewall_id = 2930969
+    firewall_id = 12345
     public {
       ipv4 {
         address {

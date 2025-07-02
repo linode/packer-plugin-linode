@@ -39,9 +39,9 @@ type PublicInterface struct {
 }
 
 type PublicInterfaceIPv4 struct {
-	// List of IPv4 addresses to assign to this interface. Setting any to auto
+	// Blocks of IPv4 addresses to assign to this interface. Setting any to auto
 	// allocates a public IPv4 address.
-	Addresses []PublicInterfaceIPv4Address `mapstructure:"addresses" required:"false"`
+	Addresses []PublicInterfaceIPv4Address `mapstructure:"address" required:"false"`
 }
 
 type PublicInterfaceIPv4Address struct {

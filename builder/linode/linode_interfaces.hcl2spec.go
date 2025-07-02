@@ -91,7 +91,7 @@ func (*FlatPublicInterface) HCL2Spec() map[string]hcldec.Spec {
 // FlatPublicInterfaceIPv4 is an auto-generated flat version of PublicInterfaceIPv4.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatPublicInterfaceIPv4 struct {
-	Addresses []FlatPublicInterfaceIPv4Address `mapstructure:"addresses" required:"false" cty:"addresses" hcl:"addresses"`
+	Addresses []FlatPublicInterfaceIPv4Address `mapstructure:"address" required:"false" cty:"address" hcl:"address"`
 }
 
 // FlatMapstructure returns a new FlatPublicInterfaceIPv4.
@@ -106,7 +106,7 @@ func (*PublicInterfaceIPv4) FlatMapstructure() interface{ HCL2Spec() map[string]
 // The decoded values from this spec will then be applied to a FlatPublicInterfaceIPv4.
 func (*FlatPublicInterfaceIPv4) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
-		"addresses": &hcldec.BlockListSpec{TypeName: "addresses", Nested: hcldec.ObjectSpec((*FlatPublicInterfaceIPv4Address)(nil).HCL2Spec())},
+		"address": &hcldec.BlockListSpec{TypeName: "address", Nested: hcldec.ObjectSpec((*FlatPublicInterfaceIPv4Address)(nil).HCL2Spec())},
 	}
 	return s
 }
