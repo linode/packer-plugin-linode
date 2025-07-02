@@ -7,6 +7,7 @@ import (
 	"time"
 
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/linode/linodego"
 )
 
 func testConfig() map[string]any {
@@ -453,7 +454,7 @@ func TestBuilderPrepare_StackScripts(t *testing.T) {
 	}
 }
 
-func TestBuilderPrepare_NetworkInterfaces(t *testing.T) {
+func TestBuilderPrepare_ConfigNetworkInterfaces(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
@@ -511,6 +512,93 @@ func TestBuilderPrepare_NetworkInterfaces(t *testing.T) {
 
 	if !reflect.DeepEqual(b.config.Interfaces, expectedInterfaces) {
 		t.Errorf("got %v, expected %v", b.config.Interfaces, expectedInterfaces)
+	}
+}
+
+func TestBuilderPrepare_LinodeNetworkInterfaces(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test optional
+	delete(config, "linode_interface")
+
+	_, warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	expectedLinodeInterfaces := []LinodeInterface{
+		{
+			FirewallID: linodego.Pointer(123),
+			DefaultRoute: &InterfaceDefaultRoute{
+				IPv4: linodego.Pointer(true),
+				IPv6: linodego.Pointer(true),
+			},
+			Public: &PublicInterface{
+				IPv4: &PublicInterfaceIPv4{
+					Addresses: []PublicInterfaceIPv4Address{
+						{
+							Address: "auto",
+							Primary: linodego.Pointer(true),
+						},
+					},
+				},
+				IPv6: &PublicInterfaceIPv6{
+					Ranges: []PublicInterfaceIPv6Range{
+						{
+							Range: "/64",
+						},
+					},
+				},
+			},
+		},
+		{
+			FirewallID: linodego.Pointer(123),
+			DefaultRoute: &InterfaceDefaultRoute{
+				IPv4: linodego.Pointer(false),
+				IPv6: linodego.Pointer(false),
+			},
+			VPC: &VPCInterface{
+				SubnetID: 12345,
+				IPv4: &VPCInterfaceIPv4{
+					Addresses: []VPCInterfaceIPv4Address{
+						{
+							Address:        "auto",
+							Primary:        linodego.Pointer(false),
+							NAT1To1Address: linodego.Pointer("auto"),
+						},
+					},
+				},
+			},
+		},
+		{
+			DefaultRoute: &InterfaceDefaultRoute{
+				IPv4: linodego.Pointer(false),
+				IPv6: linodego.Pointer(false),
+			},
+			VLAN: &VLANInterface{
+				VLANLabel:   "vlan-1",
+				IPAMAddress: linodego.Pointer("10.0.0.1/24"),
+			},
+		},
+	}
+
+	// Test set
+	config["linode_interface"] = expectedLinodeInterfaces
+	b = Builder{}
+	_, warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if !reflect.DeepEqual(b.config.LinodeInterfaces, expectedLinodeInterfaces) {
+		t.Errorf("got %v, expected %v", b.config.LinodeInterfaces, expectedLinodeInterfaces)
 	}
 }
 
