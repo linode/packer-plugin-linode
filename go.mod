@@ -105,4 +105,6 @@ require (
 	gopkg.in/ini.v1 v1.66.6 // indirect
 )
 
+replace github.com/linode/linodego => github.com/linode/linodego v1.52.2-0.20250624192138-d3eda897a7e5
+
 replace github.com/zclconf/go-cty => github.com/nywilken/go-cty v1.13.3 // added by packer-sdc fix as noted in github.com/hashicorp/packer-plugin-sdk/issues/187
