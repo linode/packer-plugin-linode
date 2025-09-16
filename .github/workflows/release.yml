@@ -20,15 +20,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-      - name: Get Go version
-        id: go-version
-        run: echo "go-version=$(cat .go-version)" >> $GITHUB_OUTPUT
       - name: Unshallow
         run: git fetch --prune --unshallow
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ steps.go-version.outputs.go-version }}
+          go-version: stable
       - name: Describe plugin
         id: plugin_describe
         run: echo "api_version=$(go run . describe | jq -r '.api_version')" >> "$GITHUB_OUTPUT"
