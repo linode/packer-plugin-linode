@@ -21,7 +21,7 @@ jobs:
         with:
           ref: ${{ github.event.inputs.branch }}
       # Ensure that Docs are Compiled
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
       - shell: bash
         run: make generate
       - shell: bash
