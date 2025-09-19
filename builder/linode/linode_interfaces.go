@@ -48,7 +48,7 @@ type PublicInterfaceIPv4Address struct {
 	// The interface's public IPv4 address. You can specify which public IPv4
 	// address to configure for the interface. Setting this to auto automatically
 	// allocates a public address.
-	Address string `mapstructure:"address" required:"true"`
+	Address *string `mapstructure:"address" required:"true"`
 
 	// The IPv4 primary address configures the source address for routes within
 	// the Linode on the corresponding network interface.
@@ -94,7 +94,7 @@ type VPCInterfaceIPv4Address struct {
 	// an IPv4 address taken from another Linode or interface, or the first two or
 	// last two addresses in the VPC subnet. When address is set to `auto`, an IP
 	// address from the subnet is automatically assigned.
-	Address string `mapstructure:"address" required:"true"`
+	Address *string `mapstructure:"address" required:"true"`
 
 	// The IPv4 primary address is used to configure the source address for routes
 	// within the Linode on the corresponding network interface.

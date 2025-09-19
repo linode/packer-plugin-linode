@@ -97,7 +97,7 @@ func flattenVLANInterface(vlan *VLANInterface) *linodego.VLANInterface {
 		return nil
 	}
 	result := &linodego.VLANInterface{
-		Label: vlan.VLANLabel,
+		VLANLabel: vlan.VLANLabel,
 	}
 	if vlan.IPAMAddress != nil {
 		result.IPAMAddress = vlan.IPAMAddress
@@ -106,7 +106,7 @@ func flattenVLANInterface(vlan *VLANInterface) *linodego.VLANInterface {
 }
 
 func flattenLinodeInterface(li LinodeInterface) (opts linodego.LinodeInterfaceCreateOptions) {
-	opts.FirewallID = li.FirewallID
+	opts.FirewallID = linodego.Pointer(li.FirewallID)
 
 	if li.DefaultRoute != nil {
 		opts.DefaultRoute = &linodego.InterfaceDefaultRoute{
