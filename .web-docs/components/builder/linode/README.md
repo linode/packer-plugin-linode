@@ -200,7 +200,7 @@ This section outlines the fields configurable for a newer Linode interface objec
 
 <!-- Code generated from the comments of the PublicInterfaceIPv4Address struct in builder/linode/linode_interfaces.go; DO NOT EDIT MANUALLY -->
 
-- `address` (string) - The interface's public IPv4 address. You can specify which public IPv4
+- `address` (\*string) - The interface's public IPv4 address. You can specify which public IPv4
   address to configure for the interface. Setting this to auto automatically
   allocates a public address.
 
@@ -286,7 +286,7 @@ This section outlines the fields configurable for a newer Linode interface objec
 
 <!-- Code generated from the comments of the VPCInterfaceIPv4Address struct in builder/linode/linode_interfaces.go; DO NOT EDIT MANUALLY -->
 
-- `address` (string) - Specifies which IPv4 address to use in the VPC subnet. You can specify which
+- `address` (\*string) - Specifies which IPv4 address to use in the VPC subnet. You can specify which
   VPC Ipv4 address in the subnet to configure for the interface. You can't use
   an IPv4 address taken from another Linode or interface, or the first two or
   last two addresses in the VPC subnet. When address is set to `auto`, an IP
