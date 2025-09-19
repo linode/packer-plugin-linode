@@ -15,62 +15,43 @@ permissions:
   contents: read
 
 jobs:
-  get-go-version:
-    runs-on: ubuntu-latest
-    outputs:
-      go-version: ${{ steps.get-go-version.outputs.go-version }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: 'Determine Go version'
-        id: get-go-version
-        run: |
-          echo "Found Go $(cat .go-version)"
-          echo "go-version=$(cat .go-version)" >> $GITHUB_OUTPUT
   check-mod-tidy:
-    needs:
-      - get-go-version
     runs-on: ubuntu-latest
     name: Go Mod Tidy
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
         with:
-          go-version: ${{ needs.get-go-version.outputs.go-version }}
+          go-version: stable
       - run: go mod tidy
   check-lint:
-    needs:
-      - get-go-version
     runs-on: ubuntu-latest
     name: Lint check
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
         with:
-          go-version: ${{ needs.get-go-version.outputs.go-version }}
+          go-version: stable
       - uses: golangci/golangci-lint-action@v8
         with:
           only-new-issues: true
   check-fmt:
-    needs:
-      - get-go-version
     runs-on: ubuntu-latest
     name: Gofmt check
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
         with:
-          go-version: ${{ needs.get-go-version.outputs.go-version }}
+          go-version: stable
       - run: make fmtcheck
   check-generate:
-    needs:
-      - get-go-version
     runs-on: ubuntu-latest
     name: Generate check
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
         with:
-          go-version: ${{ needs.get-go-version.outputs.go-version }}
+          go-version: stable
       - run: |
           export PATH=$PATH:$(go env GOPATH)/bin
           make generate

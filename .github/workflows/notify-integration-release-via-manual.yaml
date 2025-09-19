@@ -17,11 +17,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout this repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event.inputs.branch }}
       # Ensure that Docs are Compiled
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
       - shell: bash
         run: make generate
       - shell: bash
@@ -35,7 +35,7 @@ jobs:
           fi
       # Perform the Release
       - name: Checkout integration-release-action
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: hashicorp/integration-release-action
           path: ./integration-release-action
