@@ -16,57 +16,36 @@ permissions:
   contents: read
 
 jobs:
-  get-go-version:
-    runs-on: ubuntu-latest
-    outputs:
-      go-version: ${{ steps.get-go-version.outputs.go-version }}
-    steps:
-      - uses: actions/checkout@v5
-      - name: 'Determine Go version'
-        id: get-go-version
-        run: |
-          echo "Found Go $(cat .go-version)"
-          echo "go-version=$(cat .go-version)" >> $GITHUB_OUTPUT
-
   darwin-go-tests:
-    needs:
-      - get-go-version
     runs-on: macos-latest
     name: Darwin Go tests
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
-          go-version: ${{ needs.get-go-version.outputs.go-version }}
+          go-version: stable
       - run: |
-          echo "Testing with Go ${{ needs.get-go-version.outputs.go-version }}"
           go test -race -count 1 ./... -timeout=3m -v
 
   windows-go-tests:
-    needs:
-      - get-go-version
     runs-on: windows-latest
     name: Windows Go tests
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
-          go-version: ${{ needs.get-go-version.outputs.go-version }}
+          go-version: stable
       # Running unit tests directly with `go test` due to gofmt/gofumpt issues in Windows
       - run: |
-          echo "Testing with Go ${{ needs.get-go-version.outputs.go-version }}"
           go test -race -count 1 ./... -timeout=3m -v
 
   linux-go-tests:
-    needs:
-      - get-go-version
     runs-on: ubuntu-latest
     name: Linux Go tests
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
-          go-version: ${{ needs.get-go-version.outputs.go-version }}
+          go-version: stable
       - run: |
-          echo "Testing with Go ${{ needs.get-go-version.outputs.go-version }}"
           make unit-test
