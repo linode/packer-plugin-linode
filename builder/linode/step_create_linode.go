@@ -43,24 +43,26 @@ func flattenPublicInterface(public *PublicInterface) *linodego.PublicInterfaceCr
 	}
 	result := &linodego.PublicInterfaceCreateOptions{}
 	if public.IPv4 != nil {
-		result.IPv4 = &linodego.PublicInterfaceIPv4CreateOptions{
-			Addresses: make([]linodego.PublicInterfaceIPv4AddressCreateOptions, len(public.IPv4.Addresses)),
-		}
+		addresses := make([]linodego.PublicInterfaceIPv4AddressCreateOptions, len(public.IPv4.Addresses))
 		for i, addr := range public.IPv4.Addresses {
-			result.IPv4.Addresses[i] = linodego.PublicInterfaceIPv4AddressCreateOptions{
+			addresses[i] = linodego.PublicInterfaceIPv4AddressCreateOptions{
 				Address: addr.Address,
 				Primary: addr.Primary,
 			}
 		}
+		result.IPv4 = &linodego.PublicInterfaceIPv4CreateOptions{
+			Addresses: linodego.Pointer(addresses),
+		}
 	}
 	if public.IPv6 != nil {
-		result.IPv6 = &linodego.PublicInterfaceIPv6CreateOptions{
-			Ranges: make([]linodego.PublicInterfaceIPv6RangeCreateOptions, len(public.IPv6.Ranges)),
-		}
+		ranges := make([]linodego.PublicInterfaceIPv6RangeCreateOptions, len(public.IPv6.Ranges))
 		for i, r := range public.IPv6.Ranges {
-			result.IPv6.Ranges[i] = linodego.PublicInterfaceIPv6RangeCreateOptions{
+			ranges[i] = linodego.PublicInterfaceIPv6RangeCreateOptions{
 				Range: r.Range,
 			}
+		}
+		result.IPv6 = &linodego.PublicInterfaceIPv6CreateOptions{
+			Ranges: linodego.Pointer(ranges),
 		}
 	}
 	return result
@@ -74,19 +76,21 @@ func flattenVPCInterface(vpc *VPCInterface) *linodego.VPCInterfaceCreateOptions 
 		SubnetID: vpc.SubnetID,
 	}
 	if vpc.IPv4 != nil {
-		result.IPv4 = &linodego.VPCInterfaceIPv4CreateOptions{
-			Addresses: make([]linodego.VPCInterfaceIPv4AddressCreateOptions, len(vpc.IPv4.Addresses)),
-			Ranges:    make([]linodego.VPCInterfaceIPv4RangeCreateOptions, len(vpc.IPv4.Ranges)),
-		}
+		addresses := make([]linodego.VPCInterfaceIPv4AddressCreateOptions, len(vpc.IPv4.Addresses))
+		ranges := make([]linodego.VPCInterfaceIPv4RangeCreateOptions, len(vpc.IPv4.Ranges))
 		for i, addr := range vpc.IPv4.Addresses {
-			result.IPv4.Addresses[i] = linodego.VPCInterfaceIPv4AddressCreateOptions{
+			addresses[i] = linodego.VPCInterfaceIPv4AddressCreateOptions{
 				Address: addr.Address,
 			}
 		}
 		for i, r := range vpc.IPv4.Ranges {
-			result.IPv4.Ranges[i] = linodego.VPCInterfaceIPv4RangeCreateOptions{
+			ranges[i] = linodego.VPCInterfaceIPv4RangeCreateOptions{
 				Range: r.Range,
 			}
+		}
+		result.IPv4 = &linodego.VPCInterfaceIPv4CreateOptions{
+			Addresses: linodego.Pointer(addresses),
+			Ranges:    linodego.Pointer(ranges),
 		}
 	}
 	return result
