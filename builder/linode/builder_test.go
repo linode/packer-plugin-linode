@@ -541,7 +541,7 @@ func TestBuilderPrepare_LinodeNetworkInterfaces(t *testing.T) {
 				IPv4: &PublicInterfaceIPv4{
 					Addresses: []PublicInterfaceIPv4Address{
 						{
-							Address: "auto",
+							Address: linodego.Pointer("auto"),
 							Primary: linodego.Pointer(true),
 						},
 					},
@@ -566,7 +566,7 @@ func TestBuilderPrepare_LinodeNetworkInterfaces(t *testing.T) {
 				IPv4: &VPCInterfaceIPv4{
 					Addresses: []VPCInterfaceIPv4Address{
 						{
-							Address:        "auto",
+							Address:        linodego.Pointer("auto"),
 							Primary:        linodego.Pointer(false),
 							NAT1To1Address: linodego.Pointer("auto"),
 						},
