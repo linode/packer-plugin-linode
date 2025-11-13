@@ -37,6 +37,95 @@ func flattenConfigInterface(i Interface) linodego.InstanceConfigInterfaceCreateO
 	}
 }
 
+func flattenPublicInterface(public *PublicInterface) *linodego.PublicInterfaceCreateOptions {
+	if public == nil {
+		return nil
+	}
+	result := &linodego.PublicInterfaceCreateOptions{}
+	if public.IPv4 != nil {
+		addresses := make([]linodego.PublicInterfaceIPv4AddressCreateOptions, len(public.IPv4.Addresses))
+		for i, addr := range public.IPv4.Addresses {
+			addresses[i] = linodego.PublicInterfaceIPv4AddressCreateOptions{
+				Address: addr.Address,
+				Primary: addr.Primary,
+			}
+		}
+		result.IPv4 = &linodego.PublicInterfaceIPv4CreateOptions{
+			Addresses: linodego.Pointer(addresses),
+		}
+	}
+	if public.IPv6 != nil {
+		ranges := make([]linodego.PublicInterfaceIPv6RangeCreateOptions, len(public.IPv6.Ranges))
+		for i, r := range public.IPv6.Ranges {
+			ranges[i] = linodego.PublicInterfaceIPv6RangeCreateOptions{
+				Range: r.Range,
+			}
+		}
+		result.IPv6 = &linodego.PublicInterfaceIPv6CreateOptions{
+			Ranges: linodego.Pointer(ranges),
+		}
+	}
+	return result
+}
+
+func flattenVPCInterface(vpc *VPCInterface) *linodego.VPCInterfaceCreateOptions {
+	if vpc == nil {
+		return nil
+	}
+	result := &linodego.VPCInterfaceCreateOptions{
+		SubnetID: vpc.SubnetID,
+	}
+	if vpc.IPv4 != nil {
+		addresses := make([]linodego.VPCInterfaceIPv4AddressCreateOptions, len(vpc.IPv4.Addresses))
+		ranges := make([]linodego.VPCInterfaceIPv4RangeCreateOptions, len(vpc.IPv4.Ranges))
+		for i, addr := range vpc.IPv4.Addresses {
+			addresses[i] = linodego.VPCInterfaceIPv4AddressCreateOptions{
+				Address: addr.Address,
+			}
+		}
+		for i, r := range vpc.IPv4.Ranges {
+			ranges[i] = linodego.VPCInterfaceIPv4RangeCreateOptions{
+				Range: r.Range,
+			}
+		}
+		result.IPv4 = &linodego.VPCInterfaceIPv4CreateOptions{
+			Addresses: linodego.Pointer(addresses),
+			Ranges:    linodego.Pointer(ranges),
+		}
+	}
+	return result
+}
+
+func flattenVLANInterface(vlan *VLANInterface) *linodego.VLANInterface {
+	if vlan == nil {
+		return nil
+	}
+	result := &linodego.VLANInterface{
+		VLANLabel: vlan.VLANLabel,
+	}
+	if vlan.IPAMAddress != nil {
+		result.IPAMAddress = vlan.IPAMAddress
+	}
+	return result
+}
+
+func flattenLinodeInterface(li LinodeInterface) (opts linodego.LinodeInterfaceCreateOptions) {
+	opts.FirewallID = linodego.Pointer(li.FirewallID)
+
+	if li.DefaultRoute != nil {
+		opts.DefaultRoute = &linodego.InterfaceDefaultRoute{
+			IPv4: li.DefaultRoute.IPv4,
+			IPv6: li.DefaultRoute.IPv6,
+		}
+	}
+
+	opts.Public = flattenPublicInterface(li.Public)
+	opts.VPC = flattenVPCInterface(li.VPC)
+	opts.VLAN = flattenVLANInterface(li.VLAN)
+
+	return
+}
+
 func flattenMetadata(m Metadata) *linodego.InstanceMetadataOptions {
 	if m.UserData == "" {
 		return nil
@@ -57,27 +146,40 @@ func (s *stepCreateLinode) Run(ctx context.Context, state multistep.StateBag) mu
 
 	ui.Say("Creating Linode...")
 
+	createOpts := linodego.InstanceCreateOptions{
+		RootPass:            c.Comm.Password(),
+		AuthorizedKeys:      []string{},
+		AuthorizedUsers:     []string{},
+		PrivateIP:           c.PrivateIP,
+		Region:              c.Region,
+		StackScriptID:       c.StackScriptID,
+		StackScriptData:     c.StackScriptData,
+		Type:                c.InstanceType,
+		Label:               c.Label,
+		Image:               c.Image,
+		SwapSize:            &c.SwapSize,
+		Tags:                c.Tags,
+		FirewallID:          c.FirewallID,
+		Metadata:            flattenMetadata(c.Metadata),
+		InterfaceGeneration: linodego.InterfaceGeneration(c.InterfaceGeneration),
+	}
+
 	interfaces := make([]linodego.InstanceConfigInterfaceCreateOptions, len(c.Interfaces))
 	for i, v := range c.Interfaces {
 		interfaces[i] = flattenConfigInterface(v)
 	}
 
-	createOpts := linodego.InstanceCreateOptions{
-		RootPass:        c.Comm.Password(),
-		AuthorizedKeys:  []string{},
-		AuthorizedUsers: []string{},
-		Interfaces:      interfaces,
-		PrivateIP:       c.PrivateIP,
-		Region:          c.Region,
-		StackScriptID:   c.StackScriptID,
-		StackScriptData: c.StackScriptData,
-		Type:            c.InstanceType,
-		Label:           c.Label,
-		Image:           c.Image,
-		SwapSize:        &c.SwapSize,
-		Tags:            c.Tags,
-		FirewallID:      c.FirewallID,
-		Metadata:        flattenMetadata(c.Metadata),
+	linodeInterfaces := make([]linodego.LinodeInterfaceCreateOptions, len(c.LinodeInterfaces))
+	for i, v := range c.LinodeInterfaces {
+		linodeInterfaces[i] = flattenLinodeInterface(v)
+	}
+
+	if len(interfaces) > 0 {
+		createOpts.Interfaces = interfaces
+	}
+
+	if len(linodeInterfaces) > 0 {
+		createOpts.LinodeInterfaces = linodeInterfaces
 	}
 
 	if pubKey := string(c.Comm.SSHPublicKey); pubKey != "" {
