@@ -119,7 +119,7 @@ require (
 // Temporary replacement for issue causing releases to fail (see: #379)
 // This issue was resolved in the indirect upstream dependency but has not
 // been included in a hashicorp/packer-plugin-sdk release quite yet.
-// The patch in xz was manually verified by @lgarber and should not have any unintended consequences.
+// The patch in xz was manually verified by @lgarber-akamai and should not have any unintended consequences.
 replace github.com/ulikunitz/xz v0.5.14 => github.com/ulikunitz/xz v0.5.15
 
 replace github.com/zclconf/go-cty => github.com/nywilken/go-cty v1.13.3 // added by packer-sdc fix as noted in github.com/hashicorp/packer-plugin-sdk/issues/187
