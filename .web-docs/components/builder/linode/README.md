@@ -75,8 +75,10 @@ can also be supplied to override the typical auto-generated key:
 
 <!-- Code generated from the comments of the Config struct in builder/linode/config.go; DO NOT EDIT MANUALLY -->
 
-- `interface` ([]Interface) - Network Interfaces to add to this Linode’s Configuration Profile. Singular repeatable
+- `interface` ([]Interface) - Legacy Config Network Interfaces to add to this Linode’s Configuration Profile. Singular repeatable
   block containing a `purpose`, a `label`, and an `ipam_address` field.
+
+- `linode_interface` ([]LinodeInterface) - Newer Linode Network Interfaces to add to this Linode.
 
 - `authorized_keys` ([]string) - Public SSH keys need to be appended to the Linode instance.
 
@@ -125,14 +127,223 @@ can also be supplied to override the typical auto-generated key:
 
 - `image_regions` ([]string) - The regions where the outcome image will be replicated to.
 
+- `interface_generation` (string) - Specifies the interface type for the Linode. The value can be either
+  `legacy_config` or `linode`. The default value is determined by the
+  `interfaces_for_new_linodes` setting in the account settings.
+
 <!-- End of code generated from the comments of the Config struct in builder/linode/config.go; -->
 
 
-#### Interface
+#### Linode Interface
 
-This section outlines the fields configurable for a single interface object.
+This section outlines the fields configurable for a newer Linode interface object.
 
-##### Required Interface Common Attributes
+<!-- Code generated from the comments of the LinodeInterface struct in builder/linode/linode_interfaces.go; DO NOT EDIT MANUALLY -->
+
+- `firewall_id` (\*int) - The enabled firewall to secure a VPC or public interface. Not allowed for VLAN interfaces.
+
+- `default_route` (\*InterfaceDefaultRoute) - Indicates if the interface serves as the default route when multiple interfaces are
+  eligible for this role.
+
+- `public` (\*PublicInterface) - Public interface settings. A Linode can have only one public interface.
+  A public interface can have both IPv4 and IPv6 configurations.
+
+- `vpc` (\*VPCInterface) - VPC interface settings.
+
+- `vlan` (\*VLANInterface) - VLAN interface settings.
+
+<!-- End of code generated from the comments of the LinodeInterface struct in builder/linode/linode_interfaces.go; -->
+
+
+##### Linode Interface Default Route configuration object (InterfaceDefaultRoute)
+
+###### Optional
+
+<!-- Code generated from the comments of the InterfaceDefaultRoute struct in builder/linode/linode_interfaces.go; DO NOT EDIT MANUALLY -->
+
+- `ipv4` (\*bool) - Whether this interface is used for the IPv4 default route.
+
+- `ipv6` (\*bool) - Whether this interface is used for the IPv6 default route.
+
+<!-- End of code generated from the comments of the InterfaceDefaultRoute struct in builder/linode/linode_interfaces.go; -->
+
+
+##### Public Linode Interface configuration object (PublicInterface)
+
+###### Optional
+
+<!-- Code generated from the comments of the PublicInterface struct in builder/linode/linode_interfaces.go; DO NOT EDIT MANUALLY -->
+
+- `ipv4` (\*PublicInterfaceIPv4) - IPv4 address settings for this public interface. If omitted,
+  a public IPv4 address is automatically allocated.
+
+- `ipv6` (\*PublicInterfaceIPv6) - IPv6 address settings for the public interface.
+
+<!-- End of code generated from the comments of the PublicInterface struct in builder/linode/linode_interfaces.go; -->
+
+
+##### Public Linode Interface IPv4 configuration object (PublicInterfaceIPv4)
+
+###### Optional
+
+<!-- Code generated from the comments of the PublicInterfaceIPv4 struct in builder/linode/linode_interfaces.go; DO NOT EDIT MANUALLY -->
+
+- `address` ([]PublicInterfaceIPv4Address) - Blocks of IPv4 addresses to assign to this interface. Setting any to auto
+  allocates a public IPv4 address.
+
+<!-- End of code generated from the comments of the PublicInterfaceIPv4 struct in builder/linode/linode_interfaces.go; -->
+
+
+##### Public Linode Interface IPv4 Address configuration object (PublicInterfaceIPv4Address)
+
+###### Required
+
+<!-- Code generated from the comments of the PublicInterfaceIPv4Address struct in builder/linode/linode_interfaces.go; DO NOT EDIT MANUALLY -->
+
+- `address` (\*string) - The interface's public IPv4 address. You can specify which public IPv4
+  address to configure for the interface. Setting this to auto automatically
+  allocates a public address.
+
+<!-- End of code generated from the comments of the PublicInterfaceIPv4Address struct in builder/linode/linode_interfaces.go; -->
+
+
+###### Optional
+
+<!-- Code generated from the comments of the PublicInterfaceIPv4Address struct in builder/linode/linode_interfaces.go; DO NOT EDIT MANUALLY -->
+
+- `primary` (\*bool) - The IPv4 primary address configures the source address for routes within
+  the Linode on the corresponding network interface.
+  
+  - Don't set this to false if there's only one address in the addresses array.
+  - If more than one address is provided, primary can be set to true for one address.
+  - If only one address is present in the addresses array, this address is automatically set as the primary address.
+
+<!-- End of code generated from the comments of the PublicInterfaceIPv4Address struct in builder/linode/linode_interfaces.go; -->
+
+
+##### Public Linode Interface IPv6 configuration object (PublicInterfaceIPv6)
+
+###### Optional
+
+<!-- Code generated from the comments of the PublicInterfaceIPv6 struct in builder/linode/linode_interfaces.go; DO NOT EDIT MANUALLY -->
+
+- `ranges` ([]PublicInterfaceIPv6Range) - IPv6 address ranges to assign to this interface. If omitted, no ranges are assigned.
+
+<!-- End of code generated from the comments of the PublicInterfaceIPv6 struct in builder/linode/linode_interfaces.go; -->
+
+
+##### Public Linode Interface IPv6 Range configuration object (PublicInterfaceIPv6Range)
+
+###### Required
+
+<!-- Code generated from the comments of the PublicInterfaceIPv6Range struct in builder/linode/linode_interfaces.go; DO NOT EDIT MANUALLY -->
+
+- `range` (string) - Your assigned IPv6 range in CIDR notation (2001:0db8::1/64) or prefix (/64).
+  
+  - The prefix of /64 or /56 block of IPv6 addresses.
+  - If provided in CIDR notation, the prefix must be within the assigned ranges for the Linode.
+
+<!-- End of code generated from the comments of the PublicInterfaceIPv6Range struct in builder/linode/linode_interfaces.go; -->
+
+
+##### VPC Linode Interface configuration object (VPCInterface)
+
+###### Required
+
+<!-- Code generated from the comments of the VPCInterface struct in builder/linode/linode_interfaces.go; DO NOT EDIT MANUALLY -->
+
+- `subnet_id` (int) - The VPC subnet identifier for this interface. Your subnet’s VPC must be in
+  the same data center (region) as the Linode.
+
+<!-- End of code generated from the comments of the VPCInterface struct in builder/linode/linode_interfaces.go; -->
+
+
+###### Optional
+
+<!-- Code generated from the comments of the VPCInterface struct in builder/linode/linode_interfaces.go; DO NOT EDIT MANUALLY -->
+
+- `ipv4` (\*VPCInterfaceIPv4) - Interfaces can be configured with IPv4 addresses or ranges.
+
+<!-- End of code generated from the comments of the VPCInterface struct in builder/linode/linode_interfaces.go; -->
+
+
+##### VPC Linode Interface IPv4 configuration object (VPCInterfaceIPv4)
+
+###### Optional
+
+<!-- Code generated from the comments of the VPCInterfaceIPv4 struct in builder/linode/linode_interfaces.go; DO NOT EDIT MANUALLY -->
+
+- `addresses` ([]VPCInterfaceIPv4Address) - IPv4 address settings for this VPC interface.
+
+- `ranges` ([]VPCInterfaceIPv4Range) - VPC IPv4 ranges.
+
+<!-- End of code generated from the comments of the VPCInterfaceIPv4 struct in builder/linode/linode_interfaces.go; -->
+
+
+##### VPC Linode Interface IPv4 Address configuration object (VPCInterfaceIPv4Address)
+
+###### Required
+
+<!-- Code generated from the comments of the VPCInterfaceIPv4Address struct in builder/linode/linode_interfaces.go; DO NOT EDIT MANUALLY -->
+
+- `address` (\*string) - Specifies which IPv4 address to use in the VPC subnet. You can specify which
+  VPC Ipv4 address in the subnet to configure for the interface. You can't use
+  an IPv4 address taken from another Linode or interface, or the first two or
+  last two addresses in the VPC subnet. When address is set to `auto`, an IP
+  address from the subnet is automatically assigned.
+
+<!-- End of code generated from the comments of the VPCInterfaceIPv4Address struct in builder/linode/linode_interfaces.go; -->
+
+
+###### Optional
+
+<!-- Code generated from the comments of the VPCInterfaceIPv4Address struct in builder/linode/linode_interfaces.go; DO NOT EDIT MANUALLY -->
+
+- `primary` (\*bool) - The IPv4 primary address is used to configure the source address for routes
+  within the Linode on the corresponding network interface.
+
+- `nat_1_1_address` (\*string) - The 1:1 NAT IPv4 address used to associate a public IPv4 address with the
+  interface's VPC subnet IPv4 address.
+
+<!-- End of code generated from the comments of the VPCInterfaceIPv4Address struct in builder/linode/linode_interfaces.go; -->
+
+
+##### VPC Linode Interface IPv4 Range configuration object (VPCInterfaceIPv4Range)
+
+###### Required
+
+<!-- Code generated from the comments of the VPCInterfaceIPv4Range struct in builder/linode/linode_interfaces.go; DO NOT EDIT MANUALLY -->
+
+- `range` (string) - VPC IPv4 ranges.
+
+<!-- End of code generated from the comments of the VPCInterfaceIPv4Range struct in builder/linode/linode_interfaces.go; -->
+
+
+##### VLAN Linode Interface configuration object (VLANInterface)
+
+###### Required
+
+<!-- Code generated from the comments of the VLANInterface struct in builder/linode/linode_interfaces.go; DO NOT EDIT MANUALLY -->
+
+- `vlan_label` (string) - The VLAN's unique label. VLAN interfaces on the same Linode must have a unique `vlan_label`.
+
+<!-- End of code generated from the comments of the VLANInterface struct in builder/linode/linode_interfaces.go; -->
+
+
+###### Optional
+
+<!-- Code generated from the comments of the VLANInterface struct in builder/linode/linode_interfaces.go; DO NOT EDIT MANUALLY -->
+
+- `ipam_address` (\*string) - This VLAN interface's private IPv4 address in classless inter-domain routing (CIDR) notation.
+
+<!-- End of code generated from the comments of the VLANInterface struct in builder/linode/linode_interfaces.go; -->
+
+
+#### Legacy Config Interface
+
+This section outlines the fields configurable for a single legacy config interface object.
+
+##### Required Config Interface Common Attributes
 
 <!-- Code generated from the comments of the Interface struct in builder/linode/config.go; DO NOT EDIT MANUALLY -->
 
@@ -141,7 +352,7 @@ This section outlines the fields configurable for a single interface object.
 <!-- End of code generated from the comments of the Interface struct in builder/linode/config.go; -->
 
 
-##### Optional Interface Common Attributes
+##### Optional Config Interface Common Attributes
 
 <!-- Code generated from the comments of the Interface struct in builder/linode/config.go; DO NOT EDIT MANUALLY -->
 
@@ -174,7 +385,7 @@ This section outlines the fields configurable for a single interface object.
 <!-- End of code generated from the comments of the VPCInterfaceAttributes struct in builder/linode/config.go; -->
 
 
-###### VPC Interface IPv4 configuration object
+###### VPC Config Interface IPv4 configuration object (InterfaceIPv4)
 
 <!-- Code generated from the comments of the InterfaceIPv4 struct in builder/linode/config.go; DO NOT EDIT MANUALLY -->
 
@@ -359,6 +570,81 @@ build {
             "ipam_address": "10.0.0.2/24"
           }
         ]
+      }
+    }
+  },
+  "build": {
+    "sources": [
+      "source.linode.example"
+    ]
+  }
+}
+```
+
+## Linode Interface Example
+
+**HCL2**
+
+```hcl
+locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }
+
+source "linode" "example" {
+  image             = "linode/ubuntu24.04"
+  image_description = "My Private Image"
+  image_label       = "private-image-${local.timestamp}"
+  instance_label    = "temporary-linode-${local.timestamp}"
+  instance_type     = "g6-standard-1"
+  region            = "us-mia"
+  ssh_username      = "root"
+  interface_generation = "linode"
+
+  linode_interface {
+    firewall_id = 12345
+    public {
+      ipv4 {
+        address {
+          address = "auto"
+          primary = true
+        }
+      }
+    }
+  }
+}
+
+build {
+  sources = ["source.linode.example"]
+}
+```
+
+**JSON**
+
+```json
+{
+  "source": {
+    "linode": {
+      "example": {
+        "image": "linode/ubuntu24.04",
+        "linode_token": "YOUR API TOKEN",
+        "region": "us-mia",
+        "instance_type": "g6-nanode-1",
+        "instance_label": "temporary-linode-{{timestamp}}",
+        "image_label": "private-image-{{timestamp}}",
+        "image_description": "My Private Image",
+        "ssh_username": "root",
+        "interface_generation": "linode",
+        "linode_interface": {
+          "firewall_id": 2930969,
+          "public": {
+            "ipv4": {
+              "addresses": [
+                {
+                  "address": "auto",
+                  "primary": true
+                }
+              ]
+            }
+          }
+        }
       }
     }
   },
