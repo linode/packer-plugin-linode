@@ -69,9 +69,12 @@ type Config struct {
 	ctx                 interpolate.Context
 	Comm                communicator.Config `mapstructure:",squash"`
 
-	// Network Interfaces to add to this Linode’s Configuration Profile. Singular repeatable
+	// Legacy Config Network Interfaces to add to this Linode’s Configuration Profile. Singular repeatable
 	// block containing a `purpose`, a `label`, and an `ipam_address` field.
 	Interfaces []Interface `mapstructure:"interface" required:"false"`
+
+	// Newer Linode Network Interfaces to add to this Linode.
+	LinodeInterfaces []LinodeInterface `mapstructure:"linode_interface" required:"false"`
 
 	// The id of the region to launch the Linode instance in. Images are available in all
 	// regions, but there will be less delay when deploying from the region where the image
@@ -155,6 +158,11 @@ type Config struct {
 
 	// The regions where the outcome image will be replicated to.
 	ImageRegions []string `mapstructure:"image_regions" required:"false"`
+
+	// Specifies the interface type for the Linode. The value can be either
+	// `legacy_config` or `linode`. The default value is determined by the
+	// `interfaces_for_new_linodes` setting in the account settings.
+	InterfaceGeneration string `mapstructure:"interface_generation" required:"false"`
 }
 
 func createRandomRootPassword() (string, error) {
