@@ -159,6 +159,10 @@ type Config struct {
 	// The regions where the outcome image will be replicated to.
 	ImageRegions []string `mapstructure:"image_regions" required:"false"`
 
+	// Image Share Group IDs to add the newly created private image to
+	// immediately after image creation.
+	ImageShareGroupIDs []int `mapstructure:"image_share_group_ids" required:"false"`
+
 	// Specifies the interface type for the Linode. The value can be either
 	// `legacy_config` or `linode`. The default value is determined by the
 	// `interfaces_for_new_linodes` setting in the account settings.

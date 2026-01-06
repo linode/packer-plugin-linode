@@ -127,6 +127,9 @@ can also be supplied to override the typical auto-generated key:
 
 - `image_regions` ([]string) - The regions where the outcome image will be replicated to.
 
+- `image_share_group_ids` ([]int) - Image Share Group IDs to add the newly created private image to
+  immediately after image creation.
+
 - `interface_generation` (string) - Specifies the interface type for the Linode. The value can be either
   `legacy_config` or `linode`. The default value is determined by the
   `interfaces_for_new_linodes` setting in the account settings.
@@ -426,6 +429,7 @@ source "linode" "example" {
   image             = "linode/debian11"
   image_description = "My Private Image"
   image_label       = "private-image-${local.timestamp}"
+  image_share_group_ids = [12345]
   instance_label    = "temporary-linode-${local.timestamp}"
   instance_type     = "g6-nanode-1"
   linode_token      = "YOUR API TOKEN"
@@ -453,6 +457,7 @@ build {
         "instance_label": "temporary-linode-{{timestamp}}",
         "image_label": "private-image-{{timestamp}}",
         "image_description": "My Private Image",
+        "image_share_group_ids": [12345],
         "ssh_username": "root"
       }
     }

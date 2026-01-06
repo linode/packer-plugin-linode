@@ -186,6 +186,7 @@ source "linode" "example" {
   image             = "linode/debian11"
   image_description = "My Private Image"
   image_label       = "private-image-${local.timestamp}"
+  image_share_group_ids = [12345]
   instance_label    = "temporary-linode-${local.timestamp}"
   instance_type     = "g6-nanode-1"
   linode_token      = "YOUR API TOKEN"
@@ -213,6 +214,7 @@ build {
         "instance_label": "temporary-linode-{{timestamp}}",
         "image_label": "private-image-{{timestamp}}",
         "image_description": "My Private Image",
+        "image_share_group_ids": [12345],
         "ssh_username": "root"
       }
     }

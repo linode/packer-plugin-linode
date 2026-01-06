@@ -2,6 +2,7 @@ package linode
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
@@ -43,6 +44,39 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 	_, err = creationPoller.WaitForFinished(ctx, int(c.ImageCreateTimeout.Seconds()))
 	if err != nil {
 		return handleError("Failed to wait for image creation", err)
+	}
+
+	// Add the image to Image Share Groups, if configured
+	if len(c.ImageShareGroupIDs) > 0 {
+		for _, shareGroupID := range c.ImageShareGroupIDs {
+			ui.Say(fmt.Sprintf(
+				"Adding image %s to image share group %d...",
+				image.ID,
+				shareGroupID,
+			))
+
+			_, err := s.client.ImageShareGroupAddImages(
+				ctx,
+				shareGroupID,
+				linodego.ImageShareGroupAddImagesOptions{
+					Images: []linodego.ImageShareGroupImage{
+						{
+							ID: image.ID,
+						},
+					},
+				},
+			)
+			if err != nil {
+				return handleError(
+					fmt.Sprintf(
+						"Failed to add image %s to image share group %d",
+						image.ID,
+						shareGroupID,
+					),
+					err,
+				)
+			}
+		}
 	}
 
 	if len(c.ImageRegions) > 0 {
