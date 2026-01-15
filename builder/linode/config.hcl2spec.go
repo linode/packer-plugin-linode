@@ -91,6 +91,7 @@ type FlatConfig struct {
 	Metadata                  *FlatMetadata         `mapstructure:"metadata" required:"false" cty:"metadata" hcl:"metadata"`
 	FirewallID                *int                  `mapstructure:"firewall_id" required:"false" cty:"firewall_id" hcl:"firewall_id"`
 	ImageRegions              []string              `mapstructure:"image_regions" required:"false" cty:"image_regions" hcl:"image_regions"`
+	ImageShareGroupIDs        []int                 `mapstructure:"image_share_group_ids" required:"false" cty:"image_share_group_ids" hcl:"image_share_group_ids"`
 	InterfaceGeneration       *string               `mapstructure:"interface_generation" required:"false" cty:"interface_generation" hcl:"interface_generation"`
 }
 
@@ -187,6 +188,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"metadata":                     &hcldec.BlockSpec{TypeName: "metadata", Nested: hcldec.ObjectSpec((*FlatMetadata)(nil).HCL2Spec())},
 		"firewall_id":                  &hcldec.AttrSpec{Name: "firewall_id", Type: cty.Number, Required: false},
 		"image_regions":                &hcldec.AttrSpec{Name: "image_regions", Type: cty.List(cty.String), Required: false},
+		"image_share_group_ids":        &hcldec.AttrSpec{Name: "image_share_group_ids", Type: cty.List(cty.Number), Required: false},
 		"interface_generation":         &hcldec.AttrSpec{Name: "interface_generation", Type: cty.String, Required: false},
 	}
 	return s
