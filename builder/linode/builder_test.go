@@ -696,3 +696,34 @@ func TestBuilderPrepare_MetadataTagsFirewallID(t *testing.T) {
 		t.Errorf("got %v, expected %v", b.config.Tags, expectedTags)
 	}
 }
+
+func TestBuilderPrepare_ImageShareGroupIDs(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	delete(config, "image_share_group_ids")
+	_, warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(b.config.ImageShareGroupIDs) != 0 {
+		t.Errorf("expected nil or empty, got %v", b.config.ImageShareGroupIDs)
+	}
+
+	expected := []int{101, 202, 303}
+	config["image_share_group_ids"] = expected
+	b = Builder{}
+	_, warnings, err = b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+	if !reflect.DeepEqual(b.config.ImageShareGroupIDs, expected) {
+		t.Errorf("got %v, expected %v", b.config.ImageShareGroupIDs, expected)
+	}
+}
