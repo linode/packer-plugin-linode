@@ -142,6 +142,10 @@ can also be supplied to override the typical auto-generated key:
   you are responsible for creating all configuration profiles.
   See the `config` block documentation for available options.
 
+- `image_disk_label` (string) - The label of the disk to use for creating the final image. Required when
+  using custom disk and config blocks. Must match one of the disk labels
+  defined in the disk blocks.
+
 <!-- End of code generated from the comments of the Config struct in builder/linode/config.go; -->
 
 

@@ -355,6 +355,11 @@ type Config struct {
 	// you are responsible for creating all configuration profiles.
 	// See the `config` block documentation for available options.
 	InstanceConfigs []InstanceConfig `mapstructure:"config" required:"false"`
+
+	// The label of the disk to use for creating the final image. Required when
+	// using custom disk and config blocks. Must match one of the disk labels
+	// defined in the disk blocks.
+	ImageDiskLabel string `mapstructure:"image_disk_label" required:"false"`
 }
 
 func createRandomRootPassword() (string, error) {
@@ -467,6 +472,38 @@ func (c *Config) Prepare(raws ...any) ([]string, error) {
 	}
 
 	if len(c.Disks) > 0 {
+		// Validate disk labels are unique
+		diskLabels := make(map[string]bool)
+		for _, disk := range c.Disks {
+			if disk.Label == "" {
+				errs = packersdk.MultiErrorAppend(
+					errs, errors.New("disk label cannot be empty"))
+			} else if diskLabels[disk.Label] {
+				errs = packersdk.MultiErrorAppend(
+					errs, fmt.Errorf("duplicate disk label %q found", disk.Label))
+			} else {
+				diskLabels[disk.Label] = true
+			}
+		}
+
+		if c.ImageDiskLabel == "" {
+			errs = packersdk.MultiErrorAppend(
+				errs, errors.New("image_disk_label is required when using custom disks"))
+		} else {
+			// Validate that the specified disk label exists in the disk blocks
+			found := false
+			for _, disk := range c.Disks {
+				if disk.Label == c.ImageDiskLabel {
+					found = true
+					break
+				}
+			}
+			if !found {
+				errs = packersdk.MultiErrorAppend(
+					errs, fmt.Errorf("image_disk_label %q does not match any disk label", c.ImageDiskLabel))
+			}
+		}
+
 		if len(c.AuthorizedKeys) > 0 {
 			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("authorized_keys cannot be specified when using custom disks (specify in disk blocks instead)"))

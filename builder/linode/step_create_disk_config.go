@@ -445,25 +445,30 @@ func (s *stepCreateDiskConfig) Run(ctx context.Context, state multistep.StateBag
 		}
 	}
 
-	// Find the boot disk (first non-swap disk) and store it for image creation
-	var bootDisk *linodego.InstanceDisk
+	// Find the disk for imaging based on the user-specified label
+	var imageDisk *linodego.InstanceDisk
+	imageDiskID, ok := diskLabelToID[c.ImageDiskLabel]
+	if !ok {
+		return handleError("Failed to find image disk", fmt.Errorf("disk with label %q not found", c.ImageDiskLabel))
+	}
+
 	disks, err := s.client.ListInstanceDisks(ctx, instance.ID, nil)
 	if err != nil {
 		return handleError("Failed to list instance disks", err)
 	}
 
 	for _, disk := range disks {
-		if disk.Filesystem != linodego.FilesystemSwap {
-			bootDisk = &disk
+		if disk.ID == imageDiskID {
+			imageDisk = &disk
 			break
 		}
 	}
 
-	if bootDisk == nil {
-		return handleError("Failed to find boot disk", errors.New("no suitable disk was found"))
+	if imageDisk == nil {
+		return handleError("Failed to find image disk", fmt.Errorf("disk with ID %d not found", imageDiskID))
 	}
 
-	state.Put("disk", bootDisk)
+	state.Put("disk", imageDisk)
 
 	// Boot the instance with the first configuration profile
 	if bootConfigID != 0 {

@@ -48,6 +48,7 @@ source "linode" "custom" {
 	region            = "us-mia"
 	ssh_username      = "root"
 	interface_generation = "legacy_config"
+	image_disk_label  = "boot"
 	
 	disk {
 		label      = "boot"
@@ -110,6 +111,7 @@ source "linode" "custom_linode_interface" {
 	region            = "us-mia"
 	ssh_username      = "root"
 	interface_generation = "linode"
+	image_disk_label  = "boot"
 	
 	# Newer linode_interface blocks work with custom disks
 	linode_interface {

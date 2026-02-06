@@ -757,6 +757,9 @@ func TestBuilderPrepare_CustomDisks(t *testing.T) {
 		},
 	}
 
+	// Specify which disk to use for the final image
+	config["image_disk_label"] = "boot"
+
 	// When using custom disks, image should not be required at top level
 	delete(config, "image")
 
@@ -818,6 +821,9 @@ func TestBuilderPrepare_CustomConfig(t *testing.T) {
 			"image": "linode/arch",
 		},
 	}
+
+	// Specify which disk to use for the final image
+	config["image_disk_label"] = "boot"
 
 	// When using custom disks, image should not be required at top level
 	delete(config, "image")
@@ -1060,10 +1066,53 @@ func TestBuilderPrepare_CustomDisksValidation(t *testing.T) {
 		config["config"] = []map[string]any{
 			{"label": "my-config"},
 		}
+		config["image_disk_label"] = "boot"
 
 		_, _, err := b.Prepare(config)
 		if err != nil {
 			t.Fatalf("linode_interface should be allowed with custom disks, got error: %s", err)
+		}
+	})
+
+	t.Run("MissingImageDiskLabel", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "image")
+		config["disk"] = []map[string]any{
+			{"label": "boot", "size": 25000, "image": "linode/arch"},
+		}
+		config["config"] = []map[string]any{
+			{"label": "my-config"},
+		}
+		// Missing image_disk_label
+
+		_, _, err := b.Prepare(config)
+		if err == nil {
+			t.Fatal("expected error when image_disk_label is missing")
+		}
+		if !strings.Contains(err.Error(), "image_disk_label is required when using custom disks") {
+			t.Fatalf("expected specific error message, got: %s", err)
+		}
+	})
+
+	t.Run("InvalidImageDiskLabel", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "image")
+		config["disk"] = []map[string]any{
+			{"label": "boot", "size": 25000, "image": "linode/arch"},
+		}
+		config["config"] = []map[string]any{
+			{"label": "my-config"},
+		}
+		config["image_disk_label"] = "nonexistent"
+
+		_, _, err := b.Prepare(config)
+		if err == nil {
+			t.Fatal("expected error when image_disk_label does not match any disk")
+		}
+		if !strings.Contains(err.Error(), "image_disk_label \"nonexistent\" does not match any disk label") {
+			t.Fatalf("expected specific error message, got: %s", err)
 		}
 	})
 
@@ -1080,6 +1129,49 @@ func TestBuilderPrepare_CustomDisksValidation(t *testing.T) {
 			t.Fatal("expected error when using config blocks without disk blocks")
 		}
 		if !strings.Contains(err.Error(), "disk and config blocks must be specified together") {
+			t.Fatalf("expected specific error message, got: %s", err)
+		}
+	})
+
+	t.Run("DuplicateDiskLabels", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "image")
+		config["disk"] = []map[string]any{
+			{"label": "boot", "size": 25000, "image": "linode/arch"},
+			{"label": "boot", "size": 512, "filesystem": "swap"},
+		}
+		config["config"] = []map[string]any{
+			{"label": "my-config"},
+		}
+		config["image_disk_label"] = "boot"
+
+		_, _, err := b.Prepare(config)
+		if err == nil {
+			t.Fatal("expected error when disk labels are duplicated")
+		}
+		if !strings.Contains(err.Error(), "duplicate disk label \"boot\" found") {
+			t.Fatalf("expected specific error message, got: %s", err)
+		}
+	})
+
+	t.Run("EmptyDiskLabel", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "image")
+		config["disk"] = []map[string]any{
+			{"label": "", "size": 25000, "image": "linode/arch"},
+		}
+		config["config"] = []map[string]any{
+			{"label": "my-config"},
+		}
+		config["image_disk_label"] = ""
+
+		_, _, err := b.Prepare(config)
+		if err == nil {
+			t.Fatal("expected error when disk label is empty")
+		}
+		if !strings.Contains(err.Error(), "disk label cannot be empty") {
 			t.Fatalf("expected specific error message, got: %s", err)
 		}
 	})
