@@ -44,7 +44,7 @@ type Disk struct {
 	Size int `mapstructure:"size" required:"true"`
 
 	// An Image ID to deploy the Linode Disk from. If provided, root_pass is required.
-	Image string `mapstructure:"image" required:"false"`
+	Image string `mapstructure:"image" required:"true"`
 
 	// The filesystem for the disk. Valid values are raw, swap, ext3, ext4, initrd.
 	// Defaults to ext4.

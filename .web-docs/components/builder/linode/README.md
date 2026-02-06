@@ -448,11 +448,11 @@ The SSH public key from the communicator configuration will still be automatical
 - `size` (int) - The size of the disk in MB. NOTE: Resizing a disk can only be done
   when the Linode is offline and may take some time.
 
+- `image` (string) - An Image ID to deploy the Linode Disk from. If provided, root_pass is required.
+
 <!-- End of code generated from the comments of the Disk struct in builder/linode/config.go; -->
 
 <!-- Code generated from the comments of the Disk struct in builder/linode/config.go; DO NOT EDIT MANUALLY -->
-
-- `image` (string) - An Image ID to deploy the Linode Disk from. If provided, root_pass is required.
 
 - `filesystem` (string) - The filesystem for the disk. Valid values are raw, swap, ext3, ext4, initrd.
   Defaults to ext4.
