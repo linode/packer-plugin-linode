@@ -84,15 +84,15 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 
 	// If we were interrupted or cancelled, then just exit.
 	if _, ok := state.GetOk(multistep.StateCancelled); ok {
-		return nil, errors.New("Build was cancelled.")
+		return nil, errors.New("build was cancelled")
 	}
 
 	if _, ok := state.GetOk(multistep.StateHalted); ok {
-		return nil, errors.New("Build was halted.")
+		return nil, errors.New("build was halted")
 	}
 
 	if _, ok := state.GetOk("image"); !ok {
-		return nil, errors.New("Cannot find image in state.")
+		return nil, errors.New("cannot find image in state")
 	}
 
 	image := state.Get("image").(*linodego.Image)
@@ -120,7 +120,7 @@ func commHost(host string) func(multistep.StateBag) (string, error) {
 
 		instance := state.Get("instance").(*linodego.Instance)
 		if len(instance.IPv4) == 0 {
-			return "", fmt.Errorf("Linode instance %d has no IPv4 addresses!", instance.ID)
+			return "", fmt.Errorf("linode instance %d has no IPv4 addresses", instance.ID)
 		}
 		return instance.IPv4[0].String(), nil
 	}

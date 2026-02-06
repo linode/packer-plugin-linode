@@ -65,12 +65,12 @@ func filterImageResults(images []linodego.Image, config Config) (linodego.Image,
 		}
 
 		return linodego.Image{}, errors.New(
-			"Multiple images found. Please try a more specific search, " +
-				"or set latest to true in the data source config block.",
+			"multiple images found; please try a more specific search, " +
+				"or set latest to true in the data source config block",
 		)
 	}
 	if len(images) == 0 {
-		return linodego.Image{}, errors.New("No image found.")
+		return linodego.Image{}, errors.New("no image found")
 	}
 
 	return images[0], nil

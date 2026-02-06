@@ -397,7 +397,7 @@ func (c *Config) Prepare(raws ...any) ([]string, error) {
 		if def, err := interpolate.Render("packer-{{timestamp}}", nil); err == nil {
 			c.ImageLabel = def
 		} else {
-			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Unable to render image name: %s", err))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("unable to render image name: %s", err))
 		}
 	}
 
@@ -406,7 +406,7 @@ func (c *Config) Prepare(raws ...any) ([]string, error) {
 		if def, err := interpolate.Render("packer-{{timestamp}}", nil); err == nil {
 			c.Label = def
 		} else {
-			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Unable to render Linode label: %s", err))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("unable to render Linode label: %s", err))
 		}
 	}
 
@@ -414,7 +414,7 @@ func (c *Config) Prepare(raws ...any) ([]string, error) {
 		var err error
 		c.RootPass, err = createRandomRootPassword()
 		if err != nil {
-			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Unable to generate root_pass: %s", err))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("unable to generate root_pass: %s", err))
 		}
 	}
 
@@ -495,6 +495,11 @@ func (c *Config) Prepare(raws ...any) ([]string, error) {
 			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("interface blocks cannot be specified when using custom disks (specify in config blocks instead)"))
 		}
+	}
+
+	if len(c.InstanceConfigs) > 0 && len(c.Disks) == 0 {
+		errs = packersdk.MultiErrorAppend(
+			errs, errors.New("config blocks require custom disk blocks (disk labels must be defined before they can be referenced in device mappings)"))
 	}
 
 	if c.Tags == nil {

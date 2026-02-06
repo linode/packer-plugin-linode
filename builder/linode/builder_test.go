@@ -1066,4 +1066,21 @@ func TestBuilderPrepare_CustomDisksValidation(t *testing.T) {
 			t.Fatalf("linode_interface should be allowed with custom disks, got error: %s", err)
 		}
 	})
+
+	t.Run("ConfigWithoutDisks", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		// Specify config blocks without disk blocks
+		config["config"] = []map[string]any{
+			{"label": "my-config"},
+		}
+
+		_, _, err := b.Prepare(config)
+		if err == nil {
+			t.Fatal("expected error when using config blocks without disk blocks")
+		}
+		if !strings.Contains(err.Error(), "config blocks require custom disk blocks") {
+			t.Fatalf("expected specific error message, got: %s", err)
+		}
+	})
 }
