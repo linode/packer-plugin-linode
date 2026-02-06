@@ -182,7 +182,7 @@ type InstanceConfig struct {
 	Comments string `mapstructure:"comments" required:"false"`
 
 	// Device assignments for this configuration profile.
-	Devices *InstanceConfigDevices `mapstructure:"devices" required:"false"`
+	Devices *InstanceConfigDevices `mapstructure:"devices" required:"true"`
 
 	// Helper options for this configuration profile.
 	Helpers *InstanceConfigHelpers `mapstructure:"helpers" required:"false"`
@@ -283,7 +283,7 @@ type Config struct {
 	// while user Images start with `private/`. See [images](https://api.linode.com/v4/images)
 	// for more information on the Images available for use. Examples are `linode/debian12`,
 	// `linode/debian13`, `linode/ubuntu24.04`, `linode/arch`, and `private/12345`.
-	Image string `mapstructure:"image" required:"true"`
+	Image string `mapstructure:"image" required:"false"`
 
 	// The disk size (MiB) allocated for swap space.
 	SwapSize int `mapstructure:"swap_size" required:"false"`

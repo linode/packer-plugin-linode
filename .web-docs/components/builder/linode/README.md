@@ -63,11 +63,6 @@ can also be supplied to override the typical auto-generated key:
   available Linode instance types. Examples are `g6-nanode-1`, `g6-standard-2`,
   `g6-highmem-16`, and `g6-dedicated-16`.
 
-- `image` (string) - An Image ID to deploy the Disk from. Official Linode Images start with `linode/`,
-  while user Images start with `private/`. See [images](https://api.linode.com/v4/images)
-  for more information on the Images available for use. Examples are `linode/debian12`,
-  `linode/debian13`, `linode/ubuntu24.04`, `linode/arch`, and `private/12345`.
-
 <!-- End of code generated from the comments of the Config struct in builder/linode/config.go; -->
 
 
@@ -87,6 +82,11 @@ can also be supplied to override the typical auto-generated key:
 - `instance_label` (string) - The name assigned to the Linode Instance.
 
 - `instance_tags` ([]string) - Tags to apply to the instance when it is created.
+
+- `image` (string) - An Image ID to deploy the Disk from. Official Linode Images start with `linode/`,
+  while user Images start with `private/`. See [images](https://api.linode.com/v4/images)
+  for more information on the Images available for use. Examples are `linode/debian12`,
+  `linode/debian13`, `linode/ubuntu24.04`, `linode/arch`, and `private/12345`.
 
 - `swap_size` (int) - The disk size (MiB) allocated for swap space.
 
@@ -476,6 +476,8 @@ The SSH public key from the communicator configuration will still be automatical
 
 - `label` (string) - The label for this configuration profile.
 
+- `devices` (\*InstanceConfigDevices) - Device assignments for this configuration profile.
+
 <!-- End of code generated from the comments of the InstanceConfig struct in builder/linode/config.go; -->
 
 <!-- Code generated from the comments of the InstanceConfig struct in builder/linode/config.go; DO NOT EDIT MANUALLY -->
@@ -485,8 +487,6 @@ The SSH public key from the communicator configuration will still be automatical
   If not specified, the first configuration profile will be used for booting.
 
 - `comments` (string) - Optional comments about this configuration profile.
-
-- `devices` (\*InstanceConfigDevices) - Device assignments for this configuration profile.
 
 - `helpers` (\*InstanceConfigHelpers) - Helper options for this configuration profile.
 

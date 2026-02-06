@@ -77,7 +77,7 @@ type FlatConfig struct {
 	InstanceType              *string               `mapstructure:"instance_type" required:"true" cty:"instance_type" hcl:"instance_type"`
 	Label                     *string               `mapstructure:"instance_label" required:"false" cty:"instance_label" hcl:"instance_label"`
 	Tags                      []string              `mapstructure:"instance_tags" required:"false" cty:"instance_tags" hcl:"instance_tags"`
-	Image                     *string               `mapstructure:"image" required:"true" cty:"image" hcl:"image"`
+	Image                     *string               `mapstructure:"image" required:"false" cty:"image" hcl:"image"`
 	SwapSize                  *int                  `mapstructure:"swap_size" required:"false" cty:"swap_size" hcl:"swap_size"`
 	PrivateIP                 *bool                 `mapstructure:"private_ip" required:"false" cty:"private_ip" hcl:"private_ip"`
 	RootPass                  *string               `mapstructure:"root_pass" required:"false" cty:"root_pass" hcl:"root_pass"`
@@ -241,7 +241,7 @@ type FlatInstanceConfig struct {
 	Label       *string                    `mapstructure:"label" required:"true" cty:"label" hcl:"label"`
 	Booted      *bool                      `mapstructure:"booted" required:"false" cty:"booted" hcl:"booted"`
 	Comments    *string                    `mapstructure:"comments" required:"false" cty:"comments" hcl:"comments"`
-	Devices     *FlatInstanceConfigDevices `mapstructure:"devices" required:"false" cty:"devices" hcl:"devices"`
+	Devices     *FlatInstanceConfigDevices `mapstructure:"devices" required:"true" cty:"devices" hcl:"devices"`
 	Helpers     *FlatInstanceConfigHelpers `mapstructure:"helpers" required:"false" cty:"helpers" hcl:"helpers"`
 	Interfaces  []FlatInterface            `mapstructure:"interface" required:"false" cty:"interface" hcl:"interface"`
 	MemoryLimit *int                       `mapstructure:"memory_limit" required:"false" cty:"memory_limit" hcl:"memory_limit"`
