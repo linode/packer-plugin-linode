@@ -897,7 +897,7 @@ func TestBuilderPrepare_CustomDisksValidation(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error when using custom disks without config")
 		}
-		if !strings.Contains(err.Error(), "at least one config block is required") {
+		if !strings.Contains(err.Error(), "disk and config blocks must be specified together") {
 			t.Fatalf("expected specific error message, got: %s", err)
 		}
 	})
@@ -1079,7 +1079,7 @@ func TestBuilderPrepare_CustomDisksValidation(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error when using config blocks without disk blocks")
 		}
-		if !strings.Contains(err.Error(), "config blocks require custom disk blocks") {
+		if !strings.Contains(err.Error(), "disk and config blocks must be specified together") {
 			t.Fatalf("expected specific error message, got: %s", err)
 		}
 	})

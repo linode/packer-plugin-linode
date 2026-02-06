@@ -460,12 +460,13 @@ func (c *Config) Prepare(raws ...any) ([]string, error) {
 			errs, errors.New("cannot specify both image and custom disks"))
 	}
 
-	if len(c.Disks) > 0 {
-		if len(c.InstanceConfigs) == 0 {
-			errs = packersdk.MultiErrorAppend(
-				errs, errors.New("at least one config block is required when using custom disks"))
-		}
+	// Disks and configs must be specified together - both or neither
+	if (len(c.InstanceConfigs) == 0) != (len(c.Disks) == 0) {
+		errs = packersdk.MultiErrorAppend(
+			errs, errors.New("disk and config blocks must be specified together"))
+	}
 
+	if len(c.Disks) > 0 {
 		if len(c.AuthorizedKeys) > 0 {
 			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("authorized_keys cannot be specified when using custom disks (specify in disk blocks instead)"))
@@ -495,11 +496,6 @@ func (c *Config) Prepare(raws ...any) ([]string, error) {
 			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("interface blocks cannot be specified when using custom disks (specify in config blocks instead)"))
 		}
-	}
-
-	if len(c.InstanceConfigs) > 0 && len(c.Disks) == 0 {
-		errs = packersdk.MultiErrorAppend(
-			errs, errors.New("config blocks require custom disk blocks (disk labels must be defined before they can be referenced in device mappings)"))
 	}
 
 	if c.Tags == nil {
