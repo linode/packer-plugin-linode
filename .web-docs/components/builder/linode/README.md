@@ -65,8 +65,8 @@ can also be supplied to override the typical auto-generated key:
 
 - `image` (string) - An Image ID to deploy the Disk from. Official Linode Images start with `linode/`,
   while user Images start with `private/`. See [images](https://api.linode.com/v4/images)
-  for more information on the Images available for use. Examples are `linode/debian9`,
-  `linode/fedora28`, `linode/ubuntu18.04`, `linode/arch`, and `private/12345`.
+  for more information on the Images available for use. Examples are `linode/debian12`,
+  `linode/debian13`, `linode/ubuntu24.04`, `linode/arch`, and `private/12345`.
 
 <!-- End of code generated from the comments of the Config struct in builder/linode/config.go; -->
 
@@ -133,6 +133,14 @@ can also be supplied to override the typical auto-generated key:
 - `interface_generation` (string) - Specifies the interface type for the Linode. The value can be either
   `legacy_config` or `linode`. The default value is determined by the
   `interfaces_for_new_linodes` setting in the account settings.
+
+- `disk` ([]Disk) - Custom disks to create for this Linode. When specified, you are responsible
+  for creating all disks including the boot disk. See the `disk` block
+  documentation for available options.
+
+- `config` ([]InstanceConfig) - Custom configuration profiles to create for this Linode. When specified,
+  you are responsible for creating all configuration profiles.
+  See the `config` block documentation for available options.
 
 <!-- End of code generated from the comments of the Config struct in builder/linode/config.go; -->
 
@@ -410,6 +418,261 @@ This section outlines the fields configurable for a single metadata object.
 <!-- End of code generated from the comments of the Metadata struct in builder/linode/config.go; -->
 
 
+#### Custom Disks and Configuration Profiles
+
+When you specify custom `disk` and `config` blocks, you take full control over the Linode's disk layout and boot configuration. This is useful for advanced scenarios like:
+- Creating multiple disks (boot, data, swap)
+- Configuring specific filesystems
+- Setting up custom device mappings
+- Deploying from custom or multiple images
+
+**Important:** When using custom disks, the following top-level attributes are **not compatible** and must not be specified:
+- `image` - Specify images at the disk level instead
+- `authorized_keys` - Specify in disk blocks instead
+- `authorized_users` - Specify in disk blocks instead
+- `swap_size` - Create a swap disk instead
+- `stackscript_id` - Specify in disk blocks instead
+- `stackscript_data` - Specify in disk blocks instead
+- `interface` - Specify in config blocks instead
+
+**Note:** The newer `linode_interface` blocks CAN be used with custom disks as they are specified at the instance level and work independently of the disk/config provisioning.
+
+The SSH public key from the communicator configuration will still be automatically added to boot disks.
+
+##### Disk Block
+
+<!-- Code generated from the comments of the Disk struct in builder/linode/config.go; DO NOT EDIT MANUALLY -->
+
+- `label` (string) - The label for this disk.
+
+- `size` (int) - The size of the disk in MB. NOTE: Resizing a disk can only be done
+  when the Linode is offline and may take some time.
+
+<!-- End of code generated from the comments of the Disk struct in builder/linode/config.go; -->
+
+<!-- Code generated from the comments of the Disk struct in builder/linode/config.go; DO NOT EDIT MANUALLY -->
+
+- `image` (string) - An Image ID to deploy the Linode Disk from. If provided, root_pass is required.
+
+- `filesystem` (string) - The filesystem for the disk. Valid values are raw, swap, ext3, ext4, initrd.
+  Defaults to ext4.
+
+- `authorized_keys` ([]string) - A list of public SSH keys to be installed on the disk as the root user's
+  ~/.ssh/authorized_keys file.
+
+- `authorized_users` ([]string) - A list of usernames that will have their SSH keys installed as the root
+  user's ~/.ssh/authorized_keys file.
+
+- `stackscript_id` (int) - A StackScript ID to deploy to this disk. Only applies to Image-based disks.
+
+- `stackscript_data` (map[string]string) - UDF data to pass to the StackScript.
+
+<!-- End of code generated from the comments of the Disk struct in builder/linode/config.go; -->
+
+
+##### Configuration Profile Block (config)
+
+<!-- Code generated from the comments of the InstanceConfig struct in builder/linode/config.go; DO NOT EDIT MANUALLY -->
+
+- `label` (string) - The label for this configuration profile.
+
+<!-- End of code generated from the comments of the InstanceConfig struct in builder/linode/config.go; -->
+
+<!-- Code generated from the comments of the InstanceConfig struct in builder/linode/config.go; DO NOT EDIT MANUALLY -->
+
+- `booted` (bool) - Whether to boot the Linode with this configuration profile.
+  Only one configuration profile can have this set to true.
+  If not specified, the first configuration profile will be used for booting.
+
+- `comments` (string) - Optional comments about this configuration profile.
+
+- `devices` (\*InstanceConfigDevices) - Device assignments for this configuration profile.
+
+- `helpers` (\*InstanceConfigHelpers) - Helper options for this configuration profile.
+
+- `interface` ([]Interface) - Legacy config interfaces for this configuration profile.
+  Conflicts with the top-level interface and linode_interface blocks.
+
+- `memory_limit` (int) - Limits the amount of RAM the Linode can use. 0 (default) means no limit.
+
+- `kernel` (string) - The kernel to boot with. Use "linode/latest-64bit" or "linode/grub2".
+  See https://api.linode.com/v4/linode/kernels for available kernels.
+
+- `init_rd` (int) - The init RAM disk to use. This is optional and typically not needed.
+
+- `root_device` (string) - The root device to boot from, e.g., "/dev/sda".
+
+- `run_level` (string) - The run level to boot into. Valid values are "default", "single", "binbash".
+
+- `virt_mode` (string) - The virtualization mode. Valid values are "paravirt" or "fullvirt".
+
+<!-- End of code generated from the comments of the InstanceConfig struct in builder/linode/config.go; -->
+
+
+###### Configuration Helpers (helpers)
+
+<!-- Code generated from the comments of the InstanceConfigHelpers struct in builder/linode/config.go; DO NOT EDIT MANUALLY -->
+
+- `updatedb_disabled` (\*bool) - Disables updatedb cron job to avoid disk thrashing.
+
+- `distro` (\*bool) - Enables the Distro filesystem helper.
+
+- `modules_dep` (\*bool) - Creates a modules dependency file for the Kernel.
+
+- `network` (\*bool) - Configures network services.
+
+- `devtmpfs_automount` (\*bool) - Automatically mounts devtmpfs.
+
+<!-- End of code generated from the comments of the InstanceConfigHelpers struct in builder/linode/config.go; -->
+
+
+###### Device Mappings (devices)
+
+<!-- Code generated from the comments of the InstanceConfigDevices struct in builder/linode/config.go; DO NOT EDIT MANUALLY -->
+
+- `sda` (\*InstanceConfigDevice) - Device assignments for slots sda through sdz.
+
+- `sdb` (\*InstanceConfigDevice) - SDB
+
+- `sdc` (\*InstanceConfigDevice) - SDC
+
+- `sdd` (\*InstanceConfigDevice) - SDD
+
+- `sde` (\*InstanceConfigDevice) - SDE
+
+- `sdf` (\*InstanceConfigDevice) - SDF
+
+- `sdg` (\*InstanceConfigDevice) - SDG
+
+- `sdh` (\*InstanceConfigDevice) - SDH
+
+- `sdi` (\*InstanceConfigDevice) - SDI
+
+- `sdj` (\*InstanceConfigDevice) - SDJ
+
+- `sdk` (\*InstanceConfigDevice) - SDK
+
+- `sdl` (\*InstanceConfigDevice) - SDL
+
+- `sdm` (\*InstanceConfigDevice) - SDM
+
+- `sdn` (\*InstanceConfigDevice) - SDN
+
+- `sdo` (\*InstanceConfigDevice) - SDO
+
+- `sdp` (\*InstanceConfigDevice) - SDP
+
+- `sdq` (\*InstanceConfigDevice) - SDQ
+
+- `sdr` (\*InstanceConfigDevice) - SDR
+
+- `sds` (\*InstanceConfigDevice) - SDS
+
+- `sdt` (\*InstanceConfigDevice) - SDT
+
+- `sdu` (\*InstanceConfigDevice) - SDU
+
+- `sdv` (\*InstanceConfigDevice) - SDV
+
+- `sdw` (\*InstanceConfigDevice) - SDW
+
+- `sdx` (\*InstanceConfigDevice) - SDX
+
+- `sdy` (\*InstanceConfigDevice) - SDY
+
+- `sdz` (\*InstanceConfigDevice) - SDZ
+
+- `sdaa` (\*InstanceConfigDevice) - Device assignments for slots sdaa through sdaz.
+
+- `sdab` (\*InstanceConfigDevice) - SDAB
+
+- `sdac` (\*InstanceConfigDevice) - SDAC
+
+- `sdad` (\*InstanceConfigDevice) - SDAD
+
+- `sdae` (\*InstanceConfigDevice) - SDAE
+
+- `sdaf` (\*InstanceConfigDevice) - SDAF
+
+- `sdag` (\*InstanceConfigDevice) - SDAG
+
+- `sdah` (\*InstanceConfigDevice) - SDAH
+
+- `sdai` (\*InstanceConfigDevice) - SDAI
+
+- `sdaj` (\*InstanceConfigDevice) - SDAJ
+
+- `sdak` (\*InstanceConfigDevice) - SDAK
+
+- `sdal` (\*InstanceConfigDevice) - SDAL
+
+- `sdam` (\*InstanceConfigDevice) - SDAM
+
+- `sdan` (\*InstanceConfigDevice) - SDAN
+
+- `sdao` (\*InstanceConfigDevice) - SDAO
+
+- `sdap` (\*InstanceConfigDevice) - SDAP
+
+- `sdaq` (\*InstanceConfigDevice) - SDAQ
+
+- `sdar` (\*InstanceConfigDevice) - SDAR
+
+- `sdas` (\*InstanceConfigDevice) - SDAS
+
+- `sdat` (\*InstanceConfigDevice) - SDAT
+
+- `sdau` (\*InstanceConfigDevice) - SDAU
+
+- `sdav` (\*InstanceConfigDevice) - SDAV
+
+- `sdaw` (\*InstanceConfigDevice) - SDAW
+
+- `sdax` (\*InstanceConfigDevice) - SDAX
+
+- `sday` (\*InstanceConfigDevice) - SDAY
+
+- `sdaz` (\*InstanceConfigDevice) - SDAZ
+
+- `sdba` (\*InstanceConfigDevice) - Device assignments for slots sdba through sdbl.
+
+- `sdbb` (\*InstanceConfigDevice) - SDBB
+
+- `sdbc` (\*InstanceConfigDevice) - SDBC
+
+- `sdbd` (\*InstanceConfigDevice) - SDBD
+
+- `sdbe` (\*InstanceConfigDevice) - SDBE
+
+- `sdbf` (\*InstanceConfigDevice) - SDBF
+
+- `sdbg` (\*InstanceConfigDevice) - SDBG
+
+- `sdbh` (\*InstanceConfigDevice) - SDBH
+
+- `sdbi` (\*InstanceConfigDevice) - SDBI
+
+- `sdbj` (\*InstanceConfigDevice) - SDBJ
+
+- `sdbk` (\*InstanceConfigDevice) - SDBK
+
+- `sdbl` (\*InstanceConfigDevice) - SDBL
+
+<!-- End of code generated from the comments of the InstanceConfigDevices struct in builder/linode/config.go; -->
+
+
+###### Device Configuration (InstanceConfigDevice)
+
+<!-- Code generated from the comments of the InstanceConfigDevice struct in builder/linode/config.go; DO NOT EDIT MANUALLY -->
+
+- `disk_label` (string) - The label of the disk to assign to this device slot.
+  This will be resolved to the disk ID after disks are created.
+
+- `volume_id` (int) - The ID of the volume to assign to this device slot.
+
+<!-- End of code generated from the comments of the InstanceConfigDevice struct in builder/linode/config.go; -->
+
+
 ## Examples
 
 ### Basic Example
@@ -426,7 +689,7 @@ or in the config file or the environmental variable, `LINODE_TOKEN`.
 locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }
 
 source "linode" "example" {
-  image             = "linode/debian11"
+  image             = "linode/debian13"
   image_description = "My Private Image"
   image_label       = "private-image-${local.timestamp}"
   image_share_group_ids = [12345]
@@ -450,7 +713,7 @@ build {
   "source": {
     "linode": {
       "example": {
-        "image": "linode/debian11",
+        "image": "linode/debian13",
         "linode_token": "YOUR API TOKEN",
         "region": "us-mia",
         "instance_type": "g6-nanode-1",
@@ -480,7 +743,7 @@ build {
 locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }
 
 source "linode" "example" {
-  image             = "linode/debian11"
+  image             = "linode/debian13"
   image_description = "My Private Image"
   image_label       = "private-image-${local.timestamp}"
   instance_label    = "temporary-linode-${local.timestamp}"
@@ -540,7 +803,7 @@ build {
   "source": {
     "linode": {
       "example": {
-        "image": "linode/debian11",
+        "image": "linode/debian13",
         "region": "us-southeast",
         "instance_type": "g6-nanode-1",
         "instance_label": "temporary-linode-{{timestamp}}",
@@ -594,7 +857,7 @@ build {
 locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }
 
 source "linode" "example" {
-  image             = "linode/ubuntu24.04"
+  image             = "linode/debian13"
   image_description = "My Private Image"
   image_label       = "private-image-${local.timestamp}"
   instance_label    = "temporary-linode-${local.timestamp}"
@@ -621,6 +884,134 @@ build {
 }
 ```
 
+## Custom Disk and Configuration Example
+
+This example demonstrates creating a Linode with custom disks and a configuration profile. This provides full control over disk layout and boot configuration.
+
+**HCL2**
+
+```hcl
+locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }
+
+source "linode" "custom" {
+  image_description = "Custom Disk Image"
+  image_label       = "custom-disk-${local.timestamp}"
+  instance_label    = "temporary-linode-${local.timestamp}"
+  instance_type     = "g6-nanode-1"
+  region            = "us-mia"
+  ssh_username      = "root"
+  interface_generation = "legacy_config"
+
+  # Define custom disks
+  disk {
+    label      = "boot"
+    size       = 25000
+    image      = "linode/debian13"
+    filesystem = "ext4"
+  }
+
+  disk {
+    label      = "swap"
+    size       = 512
+    filesystem = "swap"
+  }
+
+  # Define configuration profile
+  config {
+    label       = "my-config"
+    comments    = "Boot configuration"
+    kernel      = "linode/latest-64bit"
+    root_device = "/dev/sda"
+    run_level   = "default"
+    
+    # Map disks to device slots
+    devices {
+      sda { disk_label = "boot" }
+      sdb { disk_label = "swap" }
+    }
+    
+    # Configure helpers
+    helpers {
+      updatedb_disabled   = true
+      distro              = true
+      modules_dep         = true
+      network             = true
+      devtmpfs_automount  = true
+    }
+    
+    # Define network interfaces
+    interface {
+      purpose = "public"
+    }
+  }
+}
+
+build {
+  sources = ["source.linode.custom"]
+}
+```
+
+**JSON**
+
+```json
+{
+  "source": {
+    "linode": {
+      "custom": {
+        "image_description": "Custom Disk Image",
+        "image_label": "custom-disk-{{timestamp}}",
+        "instance_label": "temporary-linode-{{timestamp}}",
+        "instance_type": "g6-nanode-1",
+        "region": "us-mia",
+        "ssh_username": "root",
+        "interface_generation": "legacy_config",
+        "disk": [
+          {
+            "label": "boot",
+            "size": 25000,
+            "image": "linode/debian13",
+            "filesystem": "ext4"
+          },
+          {
+            "label": "swap",
+            "size": 512,
+            "filesystem": "swap"
+          }
+        ],
+        "config": [
+          {
+            "label": "my-config",
+            "comments": "Boot configuration",
+            "kernel": "linode/latest-64bit",
+            "root_device": "/dev/sda",
+            "run_level": "default",
+            "devices": {
+              "sda": { "disk_label": "boot" },
+              "sdb": { "disk_label": "swap" }
+            },
+            "helpers": {
+              "updatedb_disabled": true,
+              "distro": true,
+              "modules_dep": true,
+              "network": true,
+              "devtmpfs_automount": true
+            },
+            "interface": [
+              {
+                "purpose": "public"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "build": {
+    "sources": ["source.linode.custom"]
+  }
+}
+```
+
 **JSON**
 
 ```json
@@ -628,7 +1019,7 @@ build {
   "source": {
     "linode": {
       "example": {
-        "image": "linode/ubuntu24.04",
+        "image": "linode/debian13",
         "linode_token": "YOUR API TOKEN",
         "region": "us-mia",
         "instance_type": "g6-nanode-1",

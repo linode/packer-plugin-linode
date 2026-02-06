@@ -146,22 +146,36 @@ func (s *stepCreateLinode) Run(ctx context.Context, state multistep.StateBag) mu
 
 	ui.Say("Creating Linode...")
 
+	// Determine if we're using custom disks/configs (explicit provisioning)
+	// When custom disks are specified, we don't set the Image on instance creation
+	// because we'll create disks and configs manually in a separate step.
+	useCustomDisks := len(c.Disks) > 0
+
 	createOpts := linodego.InstanceCreateOptions{
 		RootPass:            c.Comm.Password(),
 		AuthorizedKeys:      []string{},
 		AuthorizedUsers:     []string{},
 		PrivateIP:           c.PrivateIP,
 		Region:              c.Region,
-		StackScriptID:       c.StackScriptID,
-		StackScriptData:     c.StackScriptData,
 		Type:                c.InstanceType,
 		Label:               c.Label,
-		Image:               c.Image,
-		SwapSize:            &c.SwapSize,
 		Tags:                c.Tags,
 		FirewallID:          c.FirewallID,
 		Metadata:            flattenMetadata(c.Metadata),
 		InterfaceGeneration: linodego.InterfaceGeneration(c.InterfaceGeneration),
+	}
+
+	// Only set image-related options when NOT using custom disks
+	if !useCustomDisks {
+		createOpts.Image = c.Image
+		createOpts.SwapSize = &c.SwapSize
+		createOpts.StackScriptID = c.StackScriptID
+		createOpts.StackScriptData = c.StackScriptData
+	} else {
+		ui.Say("Using custom disk configuration - instance will be created without an image")
+
+		// When using custom disks, we need to boot the instance ourselves after config is created
+		createOpts.Booted = linodego.Pointer(false)
 	}
 
 	interfaces := make([]linodego.InstanceConfigInterfaceCreateOptions, len(c.Interfaces))
@@ -174,7 +188,10 @@ func (s *stepCreateLinode) Run(ctx context.Context, state multistep.StateBag) mu
 		linodeInterfaces[i] = flattenLinodeInterface(v)
 	}
 
-	if len(interfaces) > 0 {
+	// Only add legacy interfaces to instance creation when NOT using custom disks
+	// (when using custom disks, legacy interfaces should be specified in the config block)
+	// linode_interface (newer system) can be specified at instance level regardless of disk mode
+	if !useCustomDisks && len(interfaces) > 0 {
 		createOpts.Interfaces = interfaces
 	}
 
@@ -195,6 +212,19 @@ func (s *stepCreateLinode) Run(ctx context.Context, state multistep.StateBag) mu
 	}
 	state.Put("instance", instance)
 	state.Put("instance_id", instance.ID)
+
+	// When using custom disks, we skip waiting for running state here
+	// because the instance won't boot until we create disks and configs
+	if useCustomDisks {
+		// Wait for instance to be in offline state (resources allocated)
+		instance, err = s.client.WaitForInstanceStatus(ctx, instance.ID, linodego.InstanceOffline, int(c.StateTimeout.Seconds()))
+		if err != nil {
+			return handleError("Failed to wait for Linode to be offline", err)
+		}
+		state.Put("instance", instance)
+		// Disk will be set by stepCreateDiskConfig
+		return multistep.ActionContinue
+	}
 
 	// wait until instance is running
 	instance, err = s.client.WaitForInstanceStatus(ctx, instance.ID, linodego.InstanceRunning, int(c.StateTimeout.Seconds()))

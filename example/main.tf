@@ -32,13 +32,13 @@ data "hcp_packer_image" "production_linode_image" {
   bucket_name    = "linode-hcp-test"
   cloud_provider = "linode"
   iteration_id   = data.hcp_packer_iteration.production_linode.ulid
-  region         = "us-east"
+  region         = "us-mia"
 }
 
 resource "linode_instance" "production_linode_instance" {
   label           = "test-hcp-linode-instance"
   image           = data.hcp_packer_image.production_linode_image.cloud_image_id
-  region          = "us-east"
+  region          = "us-mia"
   type            = "g6-nanode-1"
   root_pass       = "terr4form_test"
 }

@@ -69,7 +69,7 @@ func TestArtifactState_hcpPackerRegistryMetadata(t *testing.T) {
 		ImageID:    "test-image",
 		ImageLabel: "test-image-label",
 		StateData: map[string]interface{}{
-			"source_image": "linode/debian9",
+			"source_image": "linode/arch",
 			"region":       region,
 			"linode_type":  "g6-nanode-1",
 		},
@@ -92,9 +92,9 @@ func TestArtifactState_hcpPackerRegistryMetadata(t *testing.T) {
 		ImageID:        "test-image",
 		ProviderName:   "linode",
 		ProviderRegion: "us-ord",
-		SourceImageID:  "linode/debian9",
+		SourceImageID:  "linode/arch",
 		Labels: map[string]string{
-			"source_image": "linode/debian9",
+			"source_image": "linode/arch",
 			"region":       region,
 			"linode_type":  "g6-nanode-1",
 		},

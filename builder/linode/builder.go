@@ -61,6 +61,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			DebugKeyPath: fmt.Sprintf("linode_%s.pem", b.config.PackerBuildName),
 		},
 		&stepCreateLinode{client},
+		&stepCreateDiskConfig{client},
 		&communicator.StepConnect{
 			Config:    &b.config.Comm,
 			Host:      commHost(b.config.Comm.Host()),

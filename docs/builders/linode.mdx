@@ -167,6 +167,49 @@ This section outlines the fields configurable for a single metadata object.
 
 @include 'builder/linode/Metadata-not-required.mdx'
 
+#### Custom Disks and Configuration Profiles
+
+When you specify custom `disk` and `config` blocks, you take full control over the Linode's disk layout and boot configuration. This is useful for advanced scenarios like:
+- Creating multiple disks (boot, data, swap)
+- Configuring specific filesystems
+- Setting up custom device mappings
+- Deploying from custom or multiple images
+
+**Important:** When using custom disks, the following top-level attributes are **not compatible** and must not be specified:
+- `image` - Specify images at the disk level instead
+- `authorized_keys` - Specify in disk blocks instead
+- `authorized_users` - Specify in disk blocks instead
+- `swap_size` - Create a swap disk instead
+- `stackscript_id` - Specify in disk blocks instead
+- `stackscript_data` - Specify in disk blocks instead
+- `interface` - Specify in config blocks instead
+
+**Note:** The newer `linode_interface` blocks CAN be used with custom disks as they are specified at the instance level and work independently of the disk/config provisioning.
+
+The SSH public key from the communicator configuration will still be automatically added to boot disks.
+
+##### Disk Block
+
+@include 'builder/linode/Disk-required.mdx'
+@include 'builder/linode/Disk-not-required.mdx'
+
+##### Configuration Profile Block (config)
+
+@include 'builder/linode/InstanceConfig-required.mdx'
+@include 'builder/linode/InstanceConfig-not-required.mdx'
+
+###### Configuration Helpers (helpers)
+
+@include 'builder/linode/InstanceConfigHelpers-not-required.mdx'
+
+###### Device Mappings (devices)
+
+@include 'builder/linode/InstanceConfigDevices-not-required.mdx'
+
+###### Device Configuration (InstanceConfigDevice)
+
+@include 'builder/linode/InstanceConfigDevice-not-required.mdx'
+
 ## Examples
 
 ### Basic Example
@@ -183,7 +226,7 @@ or in the config file or the environmental variable, `LINODE_TOKEN`.
 locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }
 
 source "linode" "example" {
-  image             = "linode/debian11"
+  image             = "linode/debian13"
   image_description = "My Private Image"
   image_label       = "private-image-${local.timestamp}"
   image_share_group_ids = [12345]
@@ -207,7 +250,7 @@ build {
   "source": {
     "linode": {
       "example": {
-        "image": "linode/debian11",
+        "image": "linode/debian13",
         "linode_token": "YOUR API TOKEN",
         "region": "us-mia",
         "instance_type": "g6-nanode-1",
@@ -237,7 +280,7 @@ build {
 locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }
 
 source "linode" "example" {
-  image             = "linode/debian11"
+  image             = "linode/debian13"
   image_description = "My Private Image"
   image_label       = "private-image-${local.timestamp}"
   instance_label    = "temporary-linode-${local.timestamp}"
@@ -297,7 +340,7 @@ build {
   "source": {
     "linode": {
       "example": {
-        "image": "linode/debian11",
+        "image": "linode/debian13",
         "region": "us-southeast",
         "instance_type": "g6-nanode-1",
         "instance_label": "temporary-linode-{{timestamp}}",
@@ -351,7 +394,7 @@ build {
 locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }
 
 source "linode" "example" {
-  image             = "linode/ubuntu24.04"
+  image             = "linode/debian13"
   image_description = "My Private Image"
   image_label       = "private-image-${local.timestamp}"
   instance_label    = "temporary-linode-${local.timestamp}"
@@ -378,6 +421,134 @@ build {
 }
 ```
 
+## Custom Disk and Configuration Example
+
+This example demonstrates creating a Linode with custom disks and a configuration profile. This provides full control over disk layout and boot configuration.
+
+**HCL2**
+
+```hcl
+locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }
+
+source "linode" "custom" {
+  image_description = "Custom Disk Image"
+  image_label       = "custom-disk-${local.timestamp}"
+  instance_label    = "temporary-linode-${local.timestamp}"
+  instance_type     = "g6-nanode-1"
+  region            = "us-mia"
+  ssh_username      = "root"
+  interface_generation = "legacy_config"
+
+  # Define custom disks
+  disk {
+    label      = "boot"
+    size       = 25000
+    image      = "linode/debian13"
+    filesystem = "ext4"
+  }
+
+  disk {
+    label      = "swap"
+    size       = 512
+    filesystem = "swap"
+  }
+
+  # Define configuration profile
+  config {
+    label       = "my-config"
+    comments    = "Boot configuration"
+    kernel      = "linode/latest-64bit"
+    root_device = "/dev/sda"
+    run_level   = "default"
+    
+    # Map disks to device slots
+    devices {
+      sda { disk_label = "boot" }
+      sdb { disk_label = "swap" }
+    }
+    
+    # Configure helpers
+    helpers {
+      updatedb_disabled   = true
+      distro              = true
+      modules_dep         = true
+      network             = true
+      devtmpfs_automount  = true
+    }
+    
+    # Define network interfaces
+    interface {
+      purpose = "public"
+    }
+  }
+}
+
+build {
+  sources = ["source.linode.custom"]
+}
+```
+
+**JSON**
+
+```json
+{
+  "source": {
+    "linode": {
+      "custom": {
+        "image_description": "Custom Disk Image",
+        "image_label": "custom-disk-{{timestamp}}",
+        "instance_label": "temporary-linode-{{timestamp}}",
+        "instance_type": "g6-nanode-1",
+        "region": "us-mia",
+        "ssh_username": "root",
+        "interface_generation": "legacy_config",
+        "disk": [
+          {
+            "label": "boot",
+            "size": 25000,
+            "image": "linode/debian13",
+            "filesystem": "ext4"
+          },
+          {
+            "label": "swap",
+            "size": 512,
+            "filesystem": "swap"
+          }
+        ],
+        "config": [
+          {
+            "label": "my-config",
+            "comments": "Boot configuration",
+            "kernel": "linode/latest-64bit",
+            "root_device": "/dev/sda",
+            "run_level": "default",
+            "devices": {
+              "sda": { "disk_label": "boot" },
+              "sdb": { "disk_label": "swap" }
+            },
+            "helpers": {
+              "updatedb_disabled": true,
+              "distro": true,
+              "modules_dep": true,
+              "network": true,
+              "devtmpfs_automount": true
+            },
+            "interface": [
+              {
+                "purpose": "public"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "build": {
+    "sources": ["source.linode.custom"]
+  }
+}
+```
+
 **JSON**
 
 ```json
@@ -385,7 +556,7 @@ build {
   "source": {
     "linode": {
       "example": {
-        "image": "linode/ubuntu24.04",
+        "image": "linode/debian13",
         "linode_token": "YOUR API TOKEN",
         "region": "us-mia",
         "instance_type": "g6-nanode-1",
