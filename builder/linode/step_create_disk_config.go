@@ -18,12 +18,11 @@ type stepCreateDiskConfig struct {
 	client *linodego.Client
 }
 
-func flattenDisk(d Disk, rootPass string) linodego.InstanceDiskCreateOptions {
+func flattenDisk(d Disk) linodego.InstanceDiskCreateOptions {
 	return linodego.InstanceDiskCreateOptions{
 		Label:           d.Label,
 		Size:            d.Size,
 		Image:           d.Image,
-		RootPass:        rootPass,
 		Filesystem:      d.Filesystem,
 		AuthorizedKeys:  d.AuthorizedKeys,
 		AuthorizedUsers: d.AuthorizedUsers,
@@ -247,7 +246,7 @@ func (s *stepCreateDiskConfig) Run(ctx context.Context, state multistep.StateBag
 	for _, diskCfg := range c.Disks {
 		ui.Say(fmt.Sprintf("Creating disk: %s...", diskCfg.Label))
 
-		diskOpts := flattenDisk(diskCfg, c.Comm.Password())
+		diskOpts := flattenDisk(diskCfg)
 
 		// Always append SSH key from communicator config
 		// Note: Top-level authorized_keys/authorized_users are validated to be empty when using custom disks

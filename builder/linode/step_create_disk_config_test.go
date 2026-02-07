@@ -213,8 +213,6 @@ func TestFlattenInstanceConfigDevices(t *testing.T) {
 }
 
 func TestFlattenDisk(t *testing.T) {
-	rootPass := "testpassword123"
-
 	tests := []struct {
 		name string
 		disk Disk
@@ -232,7 +230,6 @@ func TestFlattenDisk(t *testing.T) {
 				Label:      "boot",
 				Size:       25000,
 				Image:      "linode/ubuntu24.04",
-				RootPass:   rootPass,
 				Filesystem: "ext4",
 			},
 		},
@@ -248,7 +245,6 @@ func TestFlattenDisk(t *testing.T) {
 				Label:          "boot",
 				Size:           25000,
 				Image:          "linode/arch",
-				RootPass:       rootPass,
 				AuthorizedKeys: []string{"ssh-rsa AAAA..."},
 			},
 		},
@@ -265,7 +261,6 @@ func TestFlattenDisk(t *testing.T) {
 				Label:           "boot",
 				Size:            25000,
 				Image:           "linode/debian12",
-				RootPass:        rootPass,
 				StackscriptID:   12345,
 				StackscriptData: map[string]string{"key": "value"},
 			},
@@ -274,7 +269,7 @@ func TestFlattenDisk(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := flattenDisk(tt.disk, rootPass)
+			got := flattenDisk(tt.disk)
 
 			if got.Label != tt.want.Label {
 				t.Errorf("flattenDisk() Label = %v, want %v", got.Label, tt.want.Label)
@@ -284,9 +279,6 @@ func TestFlattenDisk(t *testing.T) {
 			}
 			if got.Image != tt.want.Image {
 				t.Errorf("flattenDisk() Image = %v, want %v", got.Image, tt.want.Image)
-			}
-			if got.RootPass != tt.want.RootPass {
-				t.Errorf("flattenDisk() RootPass = %v, want %v", got.RootPass, tt.want.RootPass)
 			}
 			if got.Filesystem != tt.want.Filesystem {
 				t.Errorf("flattenDisk() Filesystem = %v, want %v", got.Filesystem, tt.want.Filesystem)
