@@ -61,7 +61,7 @@ func flattenInstanceConfigHelpers(h *InstanceConfigHelpers) *linodego.InstanceCo
 // resolveDiskLabel resolves a disk label to a disk ID using the provided map.
 func resolveDiskLabel(label string, diskLabelToID map[string]int) (int, error) {
 	if label == "" {
-		return 0, nil
+		return 0, fmt.Errorf("disk label cannot be empty")
 	}
 
 	diskID, ok := diskLabelToID[label]
@@ -91,9 +91,9 @@ func flattenInstanceConfigDevice(d *InstanceConfigDevice, diskLabelToID map[stri
 		result.VolumeID = d.VolumeID
 	}
 
-	// Return nil if neither disk nor volume is set
-	if result.DiskID == 0 && result.VolumeID == 0 {
-		return nil, nil
+	// A device must have exactly one of disk or volume (not both, not neither)
+	if (result.DiskID == 0) == (result.VolumeID == 0) {
+		return nil, fmt.Errorf("device must specify exactly one of disk_label or volume_id")
 	}
 
 	return result, nil
