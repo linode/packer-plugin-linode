@@ -109,202 +109,85 @@ func flattenInstanceConfigDevices(d *InstanceConfigDevices, diskLabelToID map[st
 
 	var err error
 
-	// sda through sdz
-	if result.SDA, err = flattenInstanceConfigDevice(d.SDA, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sda: %w", err)
-	}
-	if result.SDB, err = flattenInstanceConfigDevice(d.SDB, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdb: %w", err)
-	}
-	if result.SDC, err = flattenInstanceConfigDevice(d.SDC, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdc: %w", err)
-	}
-	if result.SDD, err = flattenInstanceConfigDevice(d.SDD, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdd: %w", err)
-	}
-	if result.SDE, err = flattenInstanceConfigDevice(d.SDE, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sde: %w", err)
-	}
-	if result.SDF, err = flattenInstanceConfigDevice(d.SDF, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdf: %w", err)
-	}
-	if result.SDG, err = flattenInstanceConfigDevice(d.SDG, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdg: %w", err)
-	}
-	if result.SDH, err = flattenInstanceConfigDevice(d.SDH, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdh: %w", err)
-	}
-	if result.SDI, err = flattenInstanceConfigDevice(d.SDI, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdi: %w", err)
-	}
-	if result.SDJ, err = flattenInstanceConfigDevice(d.SDJ, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdj: %w", err)
-	}
-	if result.SDK, err = flattenInstanceConfigDevice(d.SDK, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdk: %w", err)
-	}
-	if result.SDL, err = flattenInstanceConfigDevice(d.SDL, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdl: %w", err)
-	}
-	if result.SDM, err = flattenInstanceConfigDevice(d.SDM, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdm: %w", err)
-	}
-	if result.SDN, err = flattenInstanceConfigDevice(d.SDN, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdn: %w", err)
-	}
-	if result.SDO, err = flattenInstanceConfigDevice(d.SDO, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdo: %w", err)
-	}
-	if result.SDP, err = flattenInstanceConfigDevice(d.SDP, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdp: %w", err)
-	}
-	if result.SDQ, err = flattenInstanceConfigDevice(d.SDQ, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdq: %w", err)
-	}
-	if result.SDR, err = flattenInstanceConfigDevice(d.SDR, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdr: %w", err)
-	}
-	if result.SDS, err = flattenInstanceConfigDevice(d.SDS, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sds: %w", err)
-	}
-	if result.SDT, err = flattenInstanceConfigDevice(d.SDT, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdt: %w", err)
-	}
-	if result.SDU, err = flattenInstanceConfigDevice(d.SDU, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdu: %w", err)
-	}
-	if result.SDV, err = flattenInstanceConfigDevice(d.SDV, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdv: %w", err)
-	}
-	if result.SDW, err = flattenInstanceConfigDevice(d.SDW, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdw: %w", err)
-	}
-	if result.SDX, err = flattenInstanceConfigDevice(d.SDX, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdx: %w", err)
-	}
-	if result.SDY, err = flattenInstanceConfigDevice(d.SDY, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdy: %w", err)
-	}
-	if result.SDZ, err = flattenInstanceConfigDevice(d.SDZ, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdz: %w", err)
+	// Define explicit mappings for all device slots (sda through sdbl)
+	deviceMappings := []struct {
+		name string
+		src  *InstanceConfigDevice
+		dst  **linodego.InstanceConfigDevice
+	}{
+		// sda through sdz
+		{name: "sda", src: d.SDA, dst: &result.SDA},
+		{name: "sdb", src: d.SDB, dst: &result.SDB},
+		{name: "sdc", src: d.SDC, dst: &result.SDC},
+		{name: "sdd", src: d.SDD, dst: &result.SDD},
+		{name: "sde", src: d.SDE, dst: &result.SDE},
+		{name: "sdf", src: d.SDF, dst: &result.SDF},
+		{name: "sdg", src: d.SDG, dst: &result.SDG},
+		{name: "sdh", src: d.SDH, dst: &result.SDH},
+		{name: "sdi", src: d.SDI, dst: &result.SDI},
+		{name: "sdj", src: d.SDJ, dst: &result.SDJ},
+		{name: "sdk", src: d.SDK, dst: &result.SDK},
+		{name: "sdl", src: d.SDL, dst: &result.SDL},
+		{name: "sdm", src: d.SDM, dst: &result.SDM},
+		{name: "sdn", src: d.SDN, dst: &result.SDN},
+		{name: "sdo", src: d.SDO, dst: &result.SDO},
+		{name: "sdp", src: d.SDP, dst: &result.SDP},
+		{name: "sdq", src: d.SDQ, dst: &result.SDQ},
+		{name: "sdr", src: d.SDR, dst: &result.SDR},
+		{name: "sds", src: d.SDS, dst: &result.SDS},
+		{name: "sdt", src: d.SDT, dst: &result.SDT},
+		{name: "sdu", src: d.SDU, dst: &result.SDU},
+		{name: "sdv", src: d.SDV, dst: &result.SDV},
+		{name: "sdw", src: d.SDW, dst: &result.SDW},
+		{name: "sdx", src: d.SDX, dst: &result.SDX},
+		{name: "sdy", src: d.SDY, dst: &result.SDY},
+		{name: "sdz", src: d.SDZ, dst: &result.SDZ},
+		// sdaa through sdaz
+		{name: "sdaa", src: d.SDAA, dst: &result.SDAA},
+		{name: "sdab", src: d.SDAB, dst: &result.SDAB},
+		{name: "sdac", src: d.SDAC, dst: &result.SDAC},
+		{name: "sdad", src: d.SDAD, dst: &result.SDAD},
+		{name: "sdae", src: d.SDAE, dst: &result.SDAE},
+		{name: "sdaf", src: d.SDAF, dst: &result.SDAF},
+		{name: "sdag", src: d.SDAG, dst: &result.SDAG},
+		{name: "sdah", src: d.SDAH, dst: &result.SDAH},
+		{name: "sdai", src: d.SDAI, dst: &result.SDAI},
+		{name: "sdaj", src: d.SDAJ, dst: &result.SDAJ},
+		{name: "sdak", src: d.SDAK, dst: &result.SDAK},
+		{name: "sdal", src: d.SDAL, dst: &result.SDAL},
+		{name: "sdam", src: d.SDAM, dst: &result.SDAM},
+		{name: "sdan", src: d.SDAN, dst: &result.SDAN},
+		{name: "sdao", src: d.SDAO, dst: &result.SDAO},
+		{name: "sdap", src: d.SDAP, dst: &result.SDAP},
+		{name: "sdaq", src: d.SDAQ, dst: &result.SDAQ},
+		{name: "sdar", src: d.SDAR, dst: &result.SDAR},
+		{name: "sdas", src: d.SDAS, dst: &result.SDAS},
+		{name: "sdat", src: d.SDAT, dst: &result.SDAT},
+		{name: "sdau", src: d.SDAU, dst: &result.SDAU},
+		{name: "sdav", src: d.SDAV, dst: &result.SDAV},
+		{name: "sdaw", src: d.SDAW, dst: &result.SDAW},
+		{name: "sdax", src: d.SDAX, dst: &result.SDAX},
+		{name: "sday", src: d.SDAY, dst: &result.SDAY},
+		{name: "sdaz", src: d.SDAZ, dst: &result.SDAZ},
+		// sdba through sdbl
+		{name: "sdba", src: d.SDBA, dst: &result.SDBA},
+		{name: "sdbb", src: d.SDBB, dst: &result.SDBB},
+		{name: "sdbc", src: d.SDBC, dst: &result.SDBC},
+		{name: "sdbd", src: d.SDBD, dst: &result.SDBD},
+		{name: "sdbe", src: d.SDBE, dst: &result.SDBE},
+		{name: "sdbf", src: d.SDBF, dst: &result.SDBF},
+		{name: "sdbg", src: d.SDBG, dst: &result.SDBG},
+		{name: "sdbh", src: d.SDBH, dst: &result.SDBH},
+		{name: "sdbi", src: d.SDBI, dst: &result.SDBI},
+		{name: "sdbj", src: d.SDBJ, dst: &result.SDBJ},
+		{name: "sdbk", src: d.SDBK, dst: &result.SDBK},
+		{name: "sdbl", src: d.SDBL, dst: &result.SDBL},
 	}
 
-	// sdaa through sdaz
-	if result.SDAA, err = flattenInstanceConfigDevice(d.SDAA, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdaa: %w", err)
-	}
-	if result.SDAB, err = flattenInstanceConfigDevice(d.SDAB, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdab: %w", err)
-	}
-	if result.SDAC, err = flattenInstanceConfigDevice(d.SDAC, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdac: %w", err)
-	}
-	if result.SDAD, err = flattenInstanceConfigDevice(d.SDAD, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdad: %w", err)
-	}
-	if result.SDAE, err = flattenInstanceConfigDevice(d.SDAE, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdae: %w", err)
-	}
-	if result.SDAF, err = flattenInstanceConfigDevice(d.SDAF, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdaf: %w", err)
-	}
-	if result.SDAG, err = flattenInstanceConfigDevice(d.SDAG, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdag: %w", err)
-	}
-	if result.SDAH, err = flattenInstanceConfigDevice(d.SDAH, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdah: %w", err)
-	}
-	if result.SDAI, err = flattenInstanceConfigDevice(d.SDAI, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdai: %w", err)
-	}
-	if result.SDAJ, err = flattenInstanceConfigDevice(d.SDAJ, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdaj: %w", err)
-	}
-	if result.SDAK, err = flattenInstanceConfigDevice(d.SDAK, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdak: %w", err)
-	}
-	if result.SDAL, err = flattenInstanceConfigDevice(d.SDAL, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdal: %w", err)
-	}
-	if result.SDAM, err = flattenInstanceConfigDevice(d.SDAM, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdam: %w", err)
-	}
-	if result.SDAN, err = flattenInstanceConfigDevice(d.SDAN, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdan: %w", err)
-	}
-	if result.SDAO, err = flattenInstanceConfigDevice(d.SDAO, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdao: %w", err)
-	}
-	if result.SDAP, err = flattenInstanceConfigDevice(d.SDAP, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdap: %w", err)
-	}
-	if result.SDAQ, err = flattenInstanceConfigDevice(d.SDAQ, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdaq: %w", err)
-	}
-	if result.SDAR, err = flattenInstanceConfigDevice(d.SDAR, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdar: %w", err)
-	}
-	if result.SDAS, err = flattenInstanceConfigDevice(d.SDAS, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdas: %w", err)
-	}
-	if result.SDAT, err = flattenInstanceConfigDevice(d.SDAT, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdat: %w", err)
-	}
-	if result.SDAU, err = flattenInstanceConfigDevice(d.SDAU, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdau: %w", err)
-	}
-	if result.SDAV, err = flattenInstanceConfigDevice(d.SDAV, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdav: %w", err)
-	}
-	if result.SDAW, err = flattenInstanceConfigDevice(d.SDAW, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdaw: %w", err)
-	}
-	if result.SDAX, err = flattenInstanceConfigDevice(d.SDAX, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdax: %w", err)
-	}
-	if result.SDAY, err = flattenInstanceConfigDevice(d.SDAY, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sday: %w", err)
-	}
-	if result.SDAZ, err = flattenInstanceConfigDevice(d.SDAZ, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdaz: %w", err)
-	}
-
-	// sdba through sdbl
-	if result.SDBA, err = flattenInstanceConfigDevice(d.SDBA, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdba: %w", err)
-	}
-	if result.SDBB, err = flattenInstanceConfigDevice(d.SDBB, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdbb: %w", err)
-	}
-	if result.SDBC, err = flattenInstanceConfigDevice(d.SDBC, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdbc: %w", err)
-	}
-	if result.SDBD, err = flattenInstanceConfigDevice(d.SDBD, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdbd: %w", err)
-	}
-	if result.SDBE, err = flattenInstanceConfigDevice(d.SDBE, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdbe: %w", err)
-	}
-	if result.SDBF, err = flattenInstanceConfigDevice(d.SDBF, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdbf: %w", err)
-	}
-	if result.SDBG, err = flattenInstanceConfigDevice(d.SDBG, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdbg: %w", err)
-	}
-	if result.SDBH, err = flattenInstanceConfigDevice(d.SDBH, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdbh: %w", err)
-	}
-	if result.SDBI, err = flattenInstanceConfigDevice(d.SDBI, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdbi: %w", err)
-	}
-	if result.SDBJ, err = flattenInstanceConfigDevice(d.SDBJ, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdbj: %w", err)
-	}
-	if result.SDBK, err = flattenInstanceConfigDevice(d.SDBK, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdbk: %w", err)
-	}
-	if result.SDBL, err = flattenInstanceConfigDevice(d.SDBL, diskLabelToID); err != nil {
-		return result, fmt.Errorf("sdbl: %w", err)
+	for _, mapping := range deviceMappings {
+		if *mapping.dst, err = flattenInstanceConfigDevice(mapping.src, diskLabelToID); err != nil {
+			return result, fmt.Errorf("%s: %w", mapping.name, err)
+		}
 	}
 
 	return result, nil
