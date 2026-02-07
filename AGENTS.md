@@ -28,7 +28,7 @@ The builder supports two modes:
 - `stepCreateLinode` creates unbooted instance without image
 - `stepCreateDiskConfig` creates custom disks and configuration profiles
 - Disk label → ID resolution: configs reference disks by label, which are resolved after disk creation
-- One config must have `booted = true` to select boot configuration
+- At most one config may have `booted = true`; if none do, the first config is used as the boot configuration
 - Instance is manually booted after configuration
 - Enables fine-grained control over disk layout, kernel, helpers, and interfaces
 
