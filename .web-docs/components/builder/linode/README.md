@@ -142,10 +142,6 @@ can also be supplied to override the typical auto-generated key:
   you are responsible for creating all configuration profiles.
   See the `config` block documentation for available options.
 
-- `image_disk_label` (string) - The label of the disk to use for creating the final image. Required when
-  using custom disk and config blocks. Must match one of the disk labels
-  defined in the disk blocks.
-
 <!-- End of code generated from the comments of the Config struct in builder/linode/config.go; -->
 
 
@@ -441,7 +437,9 @@ When you specify custom `disk` and `config` blocks, you take full control over t
 
 **Note:** The newer `linode_interface` blocks CAN be used with custom disks as they are specified at the instance level and work independently of the disk/config provisioning.
 
-The SSH public key from the communicator configuration will still be automatically added to boot disks.
+The SSH public key from the communicator configuration will be automatically added to the disk specified by the `root_device` in the booted configuration profile. The disk at the root device slot (identified via the `devices` mapping) will also be used to create the final image.
+
+**Important:** The `root_device` must point to a device slot (e.g., `/dev/sda`) that has a disk assigned in the `devices` block. The disk at that slot will be used for both SSH key injection and image creation.
 
 ##### Disk Block
 
@@ -504,7 +502,8 @@ The SSH public key from the communicator configuration will still be automatical
 
 - `init_rd` (int) - The init RAM disk to use. This is optional and typically not needed.
 
-- `root_device` (string) - The root device to boot from, e.g., "/dev/sda".
+- `root_device` (string) - The root device to boot from, e.g., "/dev/sda". When using custom disks,
+  the disk at this device slot in the booted configuration profile will be imaged.
 
 - `run_level` (string) - The run level to boot into. Valid values are "default", "single", "binbash".
 

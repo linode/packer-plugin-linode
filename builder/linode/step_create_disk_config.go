@@ -242,19 +242,27 @@ func (s *stepCreateDiskConfig) Run(ctx context.Context, state multistep.StateBag
 	// Map to track disk label -> disk ID for config device resolution
 	diskLabelToID := make(map[string]int)
 
+	// Get the boot disk label from the boot config's root_device
+	// This is validated during Prepare() so it should always succeed
+	bootDiskLabel, err := c.getBootDiskLabel()
+	if err != nil {
+		return handleError("Failed to determine boot disk", err)
+	}
+
 	// Create disks
 	for _, diskCfg := range c.Disks {
 		ui.Say(fmt.Sprintf("Creating disk: %s...", diskCfg.Label))
 
 		diskOpts := flattenDisk(diskCfg)
 
-		// Always append SSH key from communicator config
+		// Only append SSH key to the disk specified by root_device (the boot disk)
 		// Note: Top-level authorized_keys/authorized_users are validated to be empty when using custom disks
-		if len(c.Comm.SSHPublicKey) > 0 {
-			diskOpts.AuthorizedKeys = append(diskOpts.AuthorizedKeys, string(c.Comm.SSHPublicKey))
+		if diskCfg.Label == bootDiskLabel {
+			if len(c.Comm.SSHPublicKey) > 0 {
+				diskOpts.AuthorizedKeys = append(diskOpts.AuthorizedKeys, string(c.Comm.SSHPublicKey))
+			}
 		}
 
-		// Use the communicator password if root_pass not specified but image is
 		if diskOpts.RootPass == "" && diskOpts.Image != "" {
 			diskOpts.RootPass = c.Comm.Password()
 		}
@@ -327,11 +335,11 @@ func (s *stepCreateDiskConfig) Run(ctx context.Context, state multistep.StateBag
 		}
 	}
 
-	// Find the disk for imaging based on the user-specified label
+	// Find the disk for imaging based on the boot config's root_device
 	var imageDisk *linodego.InstanceDisk
-	imageDiskID, ok := diskLabelToID[c.ImageDiskLabel]
+	bootDiskID, ok := diskLabelToID[bootDiskLabel]
 	if !ok {
-		return handleError("Failed to find image disk", fmt.Errorf("disk with label %q not found", c.ImageDiskLabel))
+		return handleError("Failed to find boot disk", fmt.Errorf("disk with label %q not found", bootDiskLabel))
 	}
 
 	disks, err := s.client.ListInstanceDisks(ctx, instance.ID, nil)
@@ -340,14 +348,14 @@ func (s *stepCreateDiskConfig) Run(ctx context.Context, state multistep.StateBag
 	}
 
 	for _, disk := range disks {
-		if disk.ID == imageDiskID {
+		if disk.ID == bootDiskID {
 			imageDisk = &disk
 			break
 		}
 	}
 
 	if imageDisk == nil {
-		return handleError("Failed to find image disk", fmt.Errorf("disk with ID %d not found", imageDiskID))
+		return handleError("Failed to find boot disk", fmt.Errorf("disk with ID %d not found", bootDiskID))
 	}
 
 	state.Put("disk", imageDisk)

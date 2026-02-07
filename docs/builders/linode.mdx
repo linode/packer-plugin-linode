@@ -186,7 +186,9 @@ When you specify custom `disk` and `config` blocks, you take full control over t
 
 **Note:** The newer `linode_interface` blocks CAN be used with custom disks as they are specified at the instance level and work independently of the disk/config provisioning.
 
-The SSH public key from the communicator configuration will still be automatically added to boot disks.
+The SSH public key from the communicator configuration will be automatically added to the disk specified by the `root_device` in the booted configuration profile. The disk at the root device slot (identified via the `devices` mapping) will also be used to create the final image.
+
+**Important:** The `root_device` must point to a device slot (e.g., `/dev/sda`) that has a disk assigned in the `devices` block. The disk at that slot will be used for both SSH key injection and image creation.
 
 ##### Disk Block
 

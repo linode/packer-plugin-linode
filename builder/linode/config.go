@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/packer-plugin-sdk/common"
@@ -201,7 +202,8 @@ type InstanceConfig struct {
 	// The init RAM disk to use. This is optional and typically not needed.
 	InitRD int `mapstructure:"init_rd" required:"false"`
 
-	// The root device to boot from, e.g., "/dev/sda".
+	// The root device to boot from, e.g., "/dev/sda". When using custom disks,
+	// the disk at this device slot in the booted configuration profile will be imaged.
 	RootDevice string `mapstructure:"root_device" required:"false"`
 
 	// The run level to boot into. Valid values are "default", "single", "binbash".
@@ -355,11 +357,207 @@ type Config struct {
 	// you are responsible for creating all configuration profiles.
 	// See the `config` block documentation for available options.
 	InstanceConfigs []InstanceConfig `mapstructure:"config" required:"false"`
+}
 
-	// The label of the disk to use for creating the final image. Required when
-	// using custom disk and config blocks. Must match one of the disk labels
-	// defined in the disk blocks.
-	ImageDiskLabel string `mapstructure:"image_disk_label" required:"false"`
+// parseRootDevice extracts the device slot name from a root_device path.
+// e.g., "/dev/sda" -> "sda", "/dev/sdab" -> "sdab"
+func parseRootDevice(rootDevice string) string {
+	rootDevice = strings.TrimSpace(rootDevice)
+	if strings.HasPrefix(rootDevice, "/dev/") {
+		return strings.TrimPrefix(rootDevice, "/dev/")
+	}
+	return rootDevice
+}
+
+// getBootConfig returns the configuration profile that will be booted.
+// Returns the first config with booted=true, or the first config if none have booted=true.
+// Returns nil if there are no configs.
+func (c *Config) getBootConfig() *InstanceConfig {
+	if len(c.InstanceConfigs) == 0 {
+		return nil
+	}
+
+	for i := range c.InstanceConfigs {
+		if c.InstanceConfigs[i].Booted {
+			return &c.InstanceConfigs[i]
+		}
+	}
+	return &c.InstanceConfigs[0]
+}
+
+// getDeviceAtSlot returns the device configuration at the given slot name.
+// Returns nil if the slot is empty or not found.
+func (d *InstanceConfigDevices) getDeviceAtSlot(slot string) *InstanceConfigDevice {
+	if d == nil {
+		return nil
+	}
+
+	slot = strings.ToLower(slot)
+	switch slot {
+	case "sda":
+		return d.SDA
+	case "sdb":
+		return d.SDB
+	case "sdc":
+		return d.SDC
+	case "sdd":
+		return d.SDD
+	case "sde":
+		return d.SDE
+	case "sdf":
+		return d.SDF
+	case "sdg":
+		return d.SDG
+	case "sdh":
+		return d.SDH
+	case "sdi":
+		return d.SDI
+	case "sdj":
+		return d.SDJ
+	case "sdk":
+		return d.SDK
+	case "sdl":
+		return d.SDL
+	case "sdm":
+		return d.SDM
+	case "sdn":
+		return d.SDN
+	case "sdo":
+		return d.SDO
+	case "sdp":
+		return d.SDP
+	case "sdq":
+		return d.SDQ
+	case "sdr":
+		return d.SDR
+	case "sds":
+		return d.SDS
+	case "sdt":
+		return d.SDT
+	case "sdu":
+		return d.SDU
+	case "sdv":
+		return d.SDV
+	case "sdw":
+		return d.SDW
+	case "sdx":
+		return d.SDX
+	case "sdy":
+		return d.SDY
+	case "sdz":
+		return d.SDZ
+	case "sdaa":
+		return d.SDAA
+	case "sdab":
+		return d.SDAB
+	case "sdac":
+		return d.SDAC
+	case "sdad":
+		return d.SDAD
+	case "sdae":
+		return d.SDAE
+	case "sdaf":
+		return d.SDAF
+	case "sdag":
+		return d.SDAG
+	case "sdah":
+		return d.SDAH
+	case "sdai":
+		return d.SDAI
+	case "sdaj":
+		return d.SDAJ
+	case "sdak":
+		return d.SDAK
+	case "sdal":
+		return d.SDAL
+	case "sdam":
+		return d.SDAM
+	case "sdan":
+		return d.SDAN
+	case "sdao":
+		return d.SDAO
+	case "sdap":
+		return d.SDAP
+	case "sdaq":
+		return d.SDAQ
+	case "sdar":
+		return d.SDAR
+	case "sdas":
+		return d.SDAS
+	case "sdat":
+		return d.SDAT
+	case "sdau":
+		return d.SDAU
+	case "sdav":
+		return d.SDAV
+	case "sdaw":
+		return d.SDAW
+	case "sdax":
+		return d.SDAX
+	case "sday":
+		return d.SDAY
+	case "sdaz":
+		return d.SDAZ
+	case "sdba":
+		return d.SDBA
+	case "sdbb":
+		return d.SDBB
+	case "sdbc":
+		return d.SDBC
+	case "sdbd":
+		return d.SDBD
+	case "sdbe":
+		return d.SDBE
+	case "sdbf":
+		return d.SDBF
+	case "sdbg":
+		return d.SDBG
+	case "sdbh":
+		return d.SDBH
+	case "sdbi":
+		return d.SDBI
+	case "sdbj":
+		return d.SDBJ
+	case "sdbk":
+		return d.SDBK
+	case "sdbl":
+		return d.SDBL
+	default:
+		return nil
+	}
+}
+
+// getBootDiskLabel returns the disk label of the boot disk (the disk that will be imaged).
+// It derives this from the booted config's root_device setting.
+// Returns an error if the root_device is not set, doesn't point to a valid device,
+// or the device is a volume instead of a disk.
+func (c *Config) getBootDiskLabel() (string, error) {
+	bootConfig := c.getBootConfig()
+	if bootConfig == nil {
+		return "", errors.New("no configuration profile found")
+	}
+
+	if bootConfig.RootDevice == "" {
+		return "", fmt.Errorf("root_device is required in the boot configuration profile %q when using custom disks", bootConfig.Label)
+	}
+
+	slot := parseRootDevice(bootConfig.RootDevice)
+	device := bootConfig.Devices.getDeviceAtSlot(slot)
+	if device == nil {
+		return "", fmt.Errorf("root_device %q points to device slot %q which has no disk or volume assigned in config %q",
+			bootConfig.RootDevice, slot, bootConfig.Label)
+	}
+
+	if device.DiskLabel == "" {
+		if device.VolumeID != 0 {
+			return "", fmt.Errorf("root_device %q points to a volume, not a disk; images can only be created from disks",
+				bootConfig.RootDevice)
+		}
+		return "", fmt.Errorf("root_device %q points to device slot %q which has no disk_label set",
+			bootConfig.RootDevice, slot)
+	}
+
+	return device.DiskLabel, nil
 }
 
 func createRandomRootPassword() (string, error) {
@@ -471,6 +669,13 @@ func (c *Config) Prepare(raws ...any) ([]string, error) {
 			errs, errors.New("disk and config blocks must be specified together"))
 	}
 
+	// Set default root_device for configs that don't have one
+	for i := range c.InstanceConfigs {
+		if c.InstanceConfigs[i].RootDevice == "" {
+			c.InstanceConfigs[i].RootDevice = "/dev/sda"
+		}
+	}
+
 	if len(c.Disks) > 0 {
 		// Validate disk labels are unique
 		diskLabels := make(map[string]bool)
@@ -486,21 +691,22 @@ func (c *Config) Prepare(raws ...any) ([]string, error) {
 			}
 		}
 
-		if c.ImageDiskLabel == "" {
-			errs = packersdk.MultiErrorAppend(
-				errs, errors.New("image_disk_label is required when using custom disks"))
+		// Validate that the boot config's root_device points to a valid disk
+		bootDiskLabel, err := c.getBootDiskLabel()
+		if err != nil {
+			errs = packersdk.MultiErrorAppend(errs, err)
 		} else {
-			// Validate that the specified disk label exists in the disk blocks
+			// Validate that the boot disk label exists in the disk blocks
 			found := false
 			for _, disk := range c.Disks {
-				if disk.Label == c.ImageDiskLabel {
+				if disk.Label == bootDiskLabel {
 					found = true
 					break
 				}
 			}
 			if !found {
 				errs = packersdk.MultiErrorAppend(
-					errs, fmt.Errorf("image_disk_label %q does not match any disk label", c.ImageDiskLabel))
+					errs, fmt.Errorf("root_device points to disk %q which is not defined in the disk blocks", bootDiskLabel))
 			}
 		}
 

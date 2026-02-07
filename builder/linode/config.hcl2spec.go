@@ -95,7 +95,6 @@ type FlatConfig struct {
 	InterfaceGeneration       *string               `mapstructure:"interface_generation" required:"false" cty:"interface_generation" hcl:"interface_generation"`
 	Disks                     []FlatDisk            `mapstructure:"disk" required:"false" cty:"disk" hcl:"disk"`
 	InstanceConfigs           []FlatInstanceConfig  `mapstructure:"config" required:"false" cty:"config" hcl:"config"`
-	ImageDiskLabel            *string               `mapstructure:"image_disk_label" required:"false" cty:"image_disk_label" hcl:"image_disk_label"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -195,7 +194,6 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"interface_generation":         &hcldec.AttrSpec{Name: "interface_generation", Type: cty.String, Required: false},
 		"disk":                         &hcldec.BlockListSpec{TypeName: "disk", Nested: hcldec.ObjectSpec((*FlatDisk)(nil).HCL2Spec())},
 		"config":                       &hcldec.BlockListSpec{TypeName: "config", Nested: hcldec.ObjectSpec((*FlatInstanceConfig)(nil).HCL2Spec())},
-		"image_disk_label":             &hcldec.AttrSpec{Name: "image_disk_label", Type: cty.String, Required: false},
 	}
 	return s
 }

@@ -152,7 +152,6 @@ func (s *stepCreateLinode) Run(ctx context.Context, state multistep.StateBag) mu
 	useCustomDisks := len(c.Disks) > 0
 
 	createOpts := linodego.InstanceCreateOptions{
-		RootPass:            c.Comm.Password(),
 		AuthorizedKeys:      []string{},
 		AuthorizedUsers:     []string{},
 		PrivateIP:           c.PrivateIP,
@@ -167,6 +166,7 @@ func (s *stepCreateLinode) Run(ctx context.Context, state multistep.StateBag) mu
 
 	// Only set image-related options when NOT using custom disks
 	if !useCustomDisks {
+		createOpts.RootPass = c.Comm.Password()
 		createOpts.Image = c.Image
 		createOpts.SwapSize = &c.SwapSize
 		createOpts.StackScriptID = c.StackScriptID

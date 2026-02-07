@@ -754,11 +754,16 @@ func TestBuilderPrepare_CustomDisks(t *testing.T) {
 			"label":       "my-config",
 			"kernel":      "linode/latest-64bit",
 			"root_device": "/dev/sda",
+			"devices": map[string]any{
+				"sda": map[string]any{
+					"disk_label": "boot",
+				},
+				"sdb": map[string]any{
+					"disk_label": "swap",
+				},
+			},
 		},
 	}
-
-	// Specify which disk to use for the final image
-	config["image_disk_label"] = "boot"
 
 	// When using custom disks, image should not be required at top level
 	delete(config, "image")
@@ -821,9 +826,6 @@ func TestBuilderPrepare_CustomConfig(t *testing.T) {
 			"image": "linode/arch",
 		},
 	}
-
-	// Specify which disk to use for the final image
-	config["image_disk_label"] = "boot"
 
 	// When using custom disks, image should not be required at top level
 	delete(config, "image")
@@ -1064,9 +1066,8 @@ func TestBuilderPrepare_CustomDisksValidation(t *testing.T) {
 			{"label": "boot", "size": 25000, "image": "linode/arch"},
 		}
 		config["config"] = []map[string]any{
-			{"label": "my-config"},
+			{"label": "my-config", "root_device": "/dev/sda", "devices": map[string]any{"sda": map[string]any{"disk_label": "boot"}}},
 		}
-		config["image_disk_label"] = "boot"
 
 		_, _, err := b.Prepare(config)
 		if err != nil {
@@ -1074,7 +1075,7 @@ func TestBuilderPrepare_CustomDisksValidation(t *testing.T) {
 		}
 	})
 
-	t.Run("MissingImageDiskLabel", func(t *testing.T) {
+	t.Run("MissingRootDevice", func(t *testing.T) {
 		var b Builder
 		config := testConfig()
 		delete(config, "image")
@@ -1082,20 +1083,21 @@ func TestBuilderPrepare_CustomDisksValidation(t *testing.T) {
 			{"label": "boot", "size": 25000, "image": "linode/arch"},
 		}
 		config["config"] = []map[string]any{
-			{"label": "my-config"},
+			{"label": "my-config", "devices": map[string]any{"sda": map[string]any{"disk_label": "boot"}}},
 		}
-		// Missing image_disk_label
+		// Missing root_device in boot config - should default to /dev/sda
 
 		_, _, err := b.Prepare(config)
-		if err == nil {
-			t.Fatal("expected error when image_disk_label is missing")
+		if err != nil {
+			t.Fatalf("unexpected error: %s", err)
 		}
-		if !strings.Contains(err.Error(), "image_disk_label is required when using custom disks") {
-			t.Fatalf("expected specific error message, got: %s", err)
+		// Verify default was applied
+		if b.config.InstanceConfigs[0].RootDevice != "/dev/sda" {
+			t.Fatalf("expected root_device to default to /dev/sda, got: %s", b.config.InstanceConfigs[0].RootDevice)
 		}
 	})
 
-	t.Run("InvalidImageDiskLabel", func(t *testing.T) {
+	t.Run("RootDevicePointsToUndefinedDisk", func(t *testing.T) {
 		var b Builder
 		config := testConfig()
 		delete(config, "image")
@@ -1103,15 +1105,14 @@ func TestBuilderPrepare_CustomDisksValidation(t *testing.T) {
 			{"label": "boot", "size": 25000, "image": "linode/arch"},
 		}
 		config["config"] = []map[string]any{
-			{"label": "my-config"},
+			{"label": "my-config", "root_device": "/dev/sda", "devices": map[string]any{"sda": map[string]any{"disk_label": "nonexistent"}}},
 		}
-		config["image_disk_label"] = "nonexistent"
 
 		_, _, err := b.Prepare(config)
 		if err == nil {
-			t.Fatal("expected error when image_disk_label does not match any disk")
+			t.Fatal("expected error when root_device points to undefined disk")
 		}
-		if !strings.Contains(err.Error(), "image_disk_label \"nonexistent\" does not match any disk label") {
+		if !strings.Contains(err.Error(), "root_device points to disk") {
 			t.Fatalf("expected specific error message, got: %s", err)
 		}
 	})
@@ -1142,9 +1143,8 @@ func TestBuilderPrepare_CustomDisksValidation(t *testing.T) {
 			{"label": "boot", "size": 512, "filesystem": "swap"},
 		}
 		config["config"] = []map[string]any{
-			{"label": "my-config"},
+			{"label": "my-config", "root_device": "/dev/sda", "devices": map[string]any{"sda": map[string]any{"disk_label": "boot"}}},
 		}
-		config["image_disk_label"] = "boot"
 
 		_, _, err := b.Prepare(config)
 		if err == nil {
@@ -1163,9 +1163,8 @@ func TestBuilderPrepare_CustomDisksValidation(t *testing.T) {
 			{"label": "", "size": 25000, "image": "linode/arch"},
 		}
 		config["config"] = []map[string]any{
-			{"label": "my-config"},
+			{"label": "my-config", "root_device": "/dev/sda", "devices": map[string]any{"sda": map[string]any{"disk_label": ""}}},
 		}
-		config["image_disk_label"] = ""
 
 		_, _, err := b.Prepare(config)
 		if err == nil {
