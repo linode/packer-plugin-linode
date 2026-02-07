@@ -440,3 +440,106 @@ func TestFlattenInstanceConfig(t *testing.T) {
 		})
 	}
 }
+
+// TestSelectBootConfig tests the boot configuration selection logic
+func TestSelectBootConfig(t *testing.T) {
+	tests := []struct {
+		name              string
+		configs           []InstanceConfig
+		wantIndex         int
+		wantError         bool
+		wantErrorContains string
+	}{
+		{
+			name: "Multiple configs with booted=true should error",
+			configs: []InstanceConfig{
+				{Label: "config1", Booted: true},
+				{Label: "config2", Booted: true},
+			},
+			wantError:         true,
+			wantErrorContains: "only one configuration profile can have 'booted' set to true",
+		},
+		{
+			name: "Single config with booted=true should use that config",
+			configs: []InstanceConfig{
+				{Label: "config1", Booted: false},
+				{Label: "config2", Booted: true},
+				{Label: "config3", Booted: false},
+			},
+			wantIndex: 1,
+			wantError: false,
+		},
+		{
+			name: "No configs with booted=true should default to first config",
+			configs: []InstanceConfig{
+				{Label: "config1", Booted: false},
+				{Label: "config2", Booted: false},
+			},
+			wantIndex: 0,
+			wantError: false,
+		},
+		{
+			name: "Single config not marked as booted should use that config",
+			configs: []InstanceConfig{
+				{Label: "config1", Booted: false},
+			},
+			wantIndex: 0,
+			wantError: false,
+		},
+		{
+			name: "First config marked as booted should return index 0",
+			configs: []InstanceConfig{
+				{Label: "config1", Booted: true},
+				{Label: "config2", Booted: false},
+			},
+			wantIndex: 0,
+			wantError: false,
+		},
+		{
+			name: "Last config marked as booted should return its index",
+			configs: []InstanceConfig{
+				{Label: "config1", Booted: false},
+				{Label: "config2", Booted: false},
+				{Label: "config3", Booted: true},
+			},
+			wantIndex: 2,
+			wantError: false,
+		},
+		{
+			name: "Three configs with first one booted",
+			configs: []InstanceConfig{
+				{Label: "config1", Booted: true},
+				{Label: "config2", Booted: false},
+				{Label: "config3", Booted: false},
+			},
+			wantIndex: 0,
+			wantError: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotIndex, err := selectBootConfig(tt.configs)
+
+			if tt.wantError {
+				if err == nil {
+					t.Errorf("selectBootConfig() expected error but got none")
+					return
+				}
+				if tt.wantErrorContains != "" && !strings.Contains(err.Error(), tt.wantErrorContains) {
+					t.Errorf("selectBootConfig() error = %v, want error containing %q", err, tt.wantErrorContains)
+				}
+				return
+			}
+
+			if err != nil {
+				t.Errorf("selectBootConfig() unexpected error: %v", err)
+				return
+			}
+
+			if gotIndex != tt.wantIndex {
+				t.Errorf("selectBootConfig() = %d, want %d (config: %q)", gotIndex, tt.wantIndex, tt.configs[tt.wantIndex].Label)
+			}
+		})
+	}
+}

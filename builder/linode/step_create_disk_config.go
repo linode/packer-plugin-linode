@@ -225,6 +225,32 @@ func flattenInstanceConfig(cfg InstanceConfig, diskLabelToID map[string]int) (li
 	return opts, nil
 }
 
+// selectBootConfig determines which configuration profile should be booted.
+// Returns the index of the config to boot, or an error if multiple configs have booted=true.
+// If no configs have booted=true, returns 0 (first config).
+// If one config has booted=true, returns its index.
+func selectBootConfig(configs []InstanceConfig) (int, error) {
+	bootedCount := 0
+	bootedIndex := -1
+
+	for i, cfg := range configs {
+		if cfg.Booted {
+			bootedCount++
+			bootedIndex = i
+		}
+	}
+
+	if bootedCount > 1 {
+		return 0, errors.New("only one configuration profile can have 'booted' set to true")
+	}
+
+	if bootedIndex >= 0 {
+		return bootedIndex, nil
+	}
+
+	return 0, nil
+}
+
 func (s *stepCreateDiskConfig) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	c := state.Get("config").(*Config)
 	ui := state.Get("ui").(packersdk.Ui)
@@ -288,25 +314,10 @@ func (s *stepCreateDiskConfig) Run(ctx context.Context, state multistep.StateBag
 	// Store disk map in state for other steps
 	state.Put("disk_label_to_id", diskLabelToID)
 
-	// Validate that only one config has booted=true
-	bootedCount := 0
-	bootedIndex := -1
-	for i, cfgProfile := range c.InstanceConfigs {
-		if cfgProfile.Booted {
-			bootedCount++
-			bootedIndex = i
-		}
-	}
-
-	if bootedCount > 1 {
-		return handleError("Multiple configuration profiles marked as booted",
-			errors.New("only one configuration profile can have 'booted' set to true"))
-	}
-
-	// Determine which config to boot: the one marked as booted, or the first one
-	bootConfigIndex := 0
-	if bootedIndex >= 0 {
-		bootConfigIndex = bootedIndex
+	// Determine which config to boot
+	bootConfigIndex, err := selectBootConfig(c.InstanceConfigs)
+	if err != nil {
+		return handleError("Multiple configuration profiles marked as booted", err)
 	}
 
 	// Create configuration profiles and track the boot config ID
