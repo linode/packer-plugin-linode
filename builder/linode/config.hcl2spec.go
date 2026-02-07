@@ -205,7 +205,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 type FlatDisk struct {
 	Label           *string           `mapstructure:"label" required:"true" cty:"label" hcl:"label"`
 	Size            *int              `mapstructure:"size" required:"true" cty:"size" hcl:"size"`
-	Image           *string           `mapstructure:"image" required:"true" cty:"image" hcl:"image"`
+	Image           *string           `mapstructure:"image" required:"false" cty:"image" hcl:"image"`
 	Filesystem      *string           `mapstructure:"filesystem" required:"false" cty:"filesystem" hcl:"filesystem"`
 	AuthorizedKeys  []string          `mapstructure:"authorized_keys" required:"false" cty:"authorized_keys" hcl:"authorized_keys"`
 	AuthorizedUsers []string          `mapstructure:"authorized_users" required:"false" cty:"authorized_users" hcl:"authorized_users"`
