@@ -1,6 +1,8 @@
 module github.com/linode/packer-plugin-linode
 
-go 1.25.7
+go 1.25
+
+toolchain go1.25.7
 
 require (
 	github.com/hashicorp/hcl/v2 v2.24.0
