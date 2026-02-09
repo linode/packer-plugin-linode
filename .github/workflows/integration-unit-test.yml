@@ -59,7 +59,7 @@ jobs:
 
   process-upload-report:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.test_report_upload)
+    if: always() && github.repository == 'linode/packer-plugin-linode' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.test_report_upload))
     needs:
       - integration-and-unit-tests
     steps:
