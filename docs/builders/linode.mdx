@@ -190,6 +190,8 @@ The SSH public key from the communicator configuration will be automatically add
 
 **Important:** The `root_device` must point to a device slot (e.g., `/dev/sda`) that has a disk assigned in the `devices` block. The disk at that slot will be used for both SSH key injection and image creation.
 
+**Note:** Deploying an image to and booting from a volume are currently unsupported. Therefore, the `root_device` cannot point to a volume; it must reference a disk.
+
 ##### Disk Block
 
 @include 'builder/linode/Disk-required.mdx'
