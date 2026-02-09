@@ -275,7 +275,6 @@ func (s *stepCreateDiskConfig) Run(ctx context.Context, state multistep.StateBag
 		return handleError("Failed to determine boot disk", err)
 	}
 
-	// Create disks
 	for _, diskCfg := range c.Disks {
 		ui.Say(fmt.Sprintf("Creating disk: %s...", diskCfg.Label))
 
@@ -391,7 +390,7 @@ func (s *stepCreateDiskConfig) Run(ctx context.Context, state multistep.StateBag
 	return multistep.ActionContinue
 }
 
-func (s *stepCreateDiskConfig) Cleanup(state multistep.StateBag) {
+func (_ *stepCreateDiskConfig) Cleanup(state multistep.StateBag) {
 	// Disks and configs are deleted when the instance is deleted
 	// No additional cleanup needed here
 }
