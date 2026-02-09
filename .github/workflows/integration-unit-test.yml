@@ -3,9 +3,6 @@ name: Integration and Unit Tests
 on:
   workflow_dispatch:
     inputs:
-      sha:
-        description: 'Specify commit hash to test'
-        required: true
       test_report_upload:
         description: 'Indicates whether to upload the test report to object storage. Defaults to "false"'
         type: boolean
@@ -30,7 +27,6 @@ jobs:
         with:
           fetch-depth: 0
           submodules: 'recursive'
-          ref: ${{ inputs.sha || github.sha }}
 
       - name: Set up Go
         uses: actions/setup-go@v6
