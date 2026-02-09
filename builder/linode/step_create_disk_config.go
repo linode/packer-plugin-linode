@@ -390,7 +390,7 @@ func (s *stepCreateDiskConfig) Run(ctx context.Context, state multistep.StateBag
 	return multistep.ActionContinue
 }
 
-func (_ *stepCreateDiskConfig) Cleanup(state multistep.StateBag) {
+func (*stepCreateDiskConfig) Cleanup(state multistep.StateBag) {
 	// Disks and configs are deleted when the instance is deleted
 	// No additional cleanup needed here
 }
