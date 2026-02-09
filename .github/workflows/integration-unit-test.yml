@@ -1,6 +1,16 @@
 name: Integration and Unit Tests
 
 on:
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: 'Specify commit hash to test'
+        required: true
+      test_report_upload:
+        description: 'Indicates whether to upload the test report to object storage. Defaults to "false"'
+        type: boolean
+        required: false
+        default: false
   push:
     branches:
       - 'main'
@@ -17,6 +27,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          submodules: 'recursive'
+          ref: ${{ inputs.sha || github.sha }}
 
       - name: Set up Go
         uses: actions/setup-go@v6
@@ -43,9 +57,9 @@ jobs:
           name: test-report-file
           path: "${{ env.REPORT_FILENAME }}"
 
-
   process-upload-report:
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.test_report_upload)
     needs:
       - integration-and-unit-tests
     steps:
