@@ -39,7 +39,7 @@ jobs:
 
       - name: Upload test report as artifact
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: test-report-file
           path: "${{ env.REPORT_FILENAME }}"
