@@ -77,7 +77,7 @@ type FlatConfig struct {
 	InstanceType              *string               `mapstructure:"instance_type" required:"true" cty:"instance_type" hcl:"instance_type"`
 	Label                     *string               `mapstructure:"instance_label" required:"false" cty:"instance_label" hcl:"instance_label"`
 	Tags                      []string              `mapstructure:"instance_tags" required:"false" cty:"instance_tags" hcl:"instance_tags"`
-	Image                     *string               `mapstructure:"image" required:"true" cty:"image" hcl:"image"`
+	Image                     *string               `mapstructure:"image" required:"false" cty:"image" hcl:"image"`
 	SwapSize                  *int                  `mapstructure:"swap_size" required:"false" cty:"swap_size" hcl:"swap_size"`
 	PrivateIP                 *bool                 `mapstructure:"private_ip" required:"false" cty:"private_ip" hcl:"private_ip"`
 	RootPass                  *string               `mapstructure:"root_pass" required:"false" cty:"root_pass" hcl:"root_pass"`
@@ -93,6 +93,8 @@ type FlatConfig struct {
 	ImageRegions              []string              `mapstructure:"image_regions" required:"false" cty:"image_regions" hcl:"image_regions"`
 	ImageShareGroupIDs        []int                 `mapstructure:"image_share_group_ids" required:"false" cty:"image_share_group_ids" hcl:"image_share_group_ids"`
 	InterfaceGeneration       *string               `mapstructure:"interface_generation" required:"false" cty:"interface_generation" hcl:"interface_generation"`
+	Disks                     []FlatDisk            `mapstructure:"disk" required:"false" cty:"disk" hcl:"disk"`
+	InstanceConfigs           []FlatInstanceConfig  `mapstructure:"config" required:"false" cty:"config" hcl:"config"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -190,6 +192,295 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"image_regions":                &hcldec.AttrSpec{Name: "image_regions", Type: cty.List(cty.String), Required: false},
 		"image_share_group_ids":        &hcldec.AttrSpec{Name: "image_share_group_ids", Type: cty.List(cty.Number), Required: false},
 		"interface_generation":         &hcldec.AttrSpec{Name: "interface_generation", Type: cty.String, Required: false},
+		"disk":                         &hcldec.BlockListSpec{TypeName: "disk", Nested: hcldec.ObjectSpec((*FlatDisk)(nil).HCL2Spec())},
+		"config":                       &hcldec.BlockListSpec{TypeName: "config", Nested: hcldec.ObjectSpec((*FlatInstanceConfig)(nil).HCL2Spec())},
+	}
+	return s
+}
+
+// FlatDisk is an auto-generated flat version of Disk.
+// Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
+type FlatDisk struct {
+	Label           *string           `mapstructure:"label" required:"true" cty:"label" hcl:"label"`
+	Size            *int              `mapstructure:"size" required:"true" cty:"size" hcl:"size"`
+	Image           *string           `mapstructure:"image" required:"false" cty:"image" hcl:"image"`
+	Filesystem      *string           `mapstructure:"filesystem" required:"false" cty:"filesystem" hcl:"filesystem"`
+	AuthorizedKeys  []string          `mapstructure:"authorized_keys" required:"false" cty:"authorized_keys" hcl:"authorized_keys"`
+	AuthorizedUsers []string          `mapstructure:"authorized_users" required:"false" cty:"authorized_users" hcl:"authorized_users"`
+	StackscriptID   *int              `mapstructure:"stackscript_id" required:"false" cty:"stackscript_id" hcl:"stackscript_id"`
+	StackscriptData map[string]string `mapstructure:"stackscript_data" required:"false" cty:"stackscript_data" hcl:"stackscript_data"`
+}
+
+// FlatMapstructure returns a new FlatDisk.
+// FlatDisk is an auto-generated flat version of Disk.
+// Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
+func (*Disk) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatDisk)
+}
+
+// HCL2Spec returns the hcl spec of a Disk.
+// This spec is used by HCL to read the fields of Disk.
+// The decoded values from this spec will then be applied to a FlatDisk.
+func (*FlatDisk) HCL2Spec() map[string]hcldec.Spec {
+	s := map[string]hcldec.Spec{
+		"label":            &hcldec.AttrSpec{Name: "label", Type: cty.String, Required: false},
+		"size":             &hcldec.AttrSpec{Name: "size", Type: cty.Number, Required: false},
+		"image":            &hcldec.AttrSpec{Name: "image", Type: cty.String, Required: false},
+		"filesystem":       &hcldec.AttrSpec{Name: "filesystem", Type: cty.String, Required: false},
+		"authorized_keys":  &hcldec.AttrSpec{Name: "authorized_keys", Type: cty.List(cty.String), Required: false},
+		"authorized_users": &hcldec.AttrSpec{Name: "authorized_users", Type: cty.List(cty.String), Required: false},
+		"stackscript_id":   &hcldec.AttrSpec{Name: "stackscript_id", Type: cty.Number, Required: false},
+		"stackscript_data": &hcldec.AttrSpec{Name: "stackscript_data", Type: cty.Map(cty.String), Required: false},
+	}
+	return s
+}
+
+// FlatInstanceConfig is an auto-generated flat version of InstanceConfig.
+// Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
+type FlatInstanceConfig struct {
+	Label       *string                    `mapstructure:"label" required:"true" cty:"label" hcl:"label"`
+	Booted      *bool                      `mapstructure:"booted" required:"false" cty:"booted" hcl:"booted"`
+	Comments    *string                    `mapstructure:"comments" required:"false" cty:"comments" hcl:"comments"`
+	Devices     *FlatInstanceConfigDevices `mapstructure:"devices" required:"true" cty:"devices" hcl:"devices"`
+	Helpers     *FlatInstanceConfigHelpers `mapstructure:"helpers" required:"false" cty:"helpers" hcl:"helpers"`
+	Interfaces  []FlatInterface            `mapstructure:"interface" required:"false" cty:"interface" hcl:"interface"`
+	MemoryLimit *int                       `mapstructure:"memory_limit" required:"false" cty:"memory_limit" hcl:"memory_limit"`
+	Kernel      *string                    `mapstructure:"kernel" required:"false" cty:"kernel" hcl:"kernel"`
+	InitRD      *int                       `mapstructure:"init_rd" required:"false" cty:"init_rd" hcl:"init_rd"`
+	RootDevice  *string                    `mapstructure:"root_device" required:"false" cty:"root_device" hcl:"root_device"`
+	RunLevel    *string                    `mapstructure:"run_level" required:"false" cty:"run_level" hcl:"run_level"`
+	VirtMode    *string                    `mapstructure:"virt_mode" required:"false" cty:"virt_mode" hcl:"virt_mode"`
+}
+
+// FlatMapstructure returns a new FlatInstanceConfig.
+// FlatInstanceConfig is an auto-generated flat version of InstanceConfig.
+// Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
+func (*InstanceConfig) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatInstanceConfig)
+}
+
+// HCL2Spec returns the hcl spec of a InstanceConfig.
+// This spec is used by HCL to read the fields of InstanceConfig.
+// The decoded values from this spec will then be applied to a FlatInstanceConfig.
+func (*FlatInstanceConfig) HCL2Spec() map[string]hcldec.Spec {
+	s := map[string]hcldec.Spec{
+		"label":        &hcldec.AttrSpec{Name: "label", Type: cty.String, Required: false},
+		"booted":       &hcldec.AttrSpec{Name: "booted", Type: cty.Bool, Required: false},
+		"comments":     &hcldec.AttrSpec{Name: "comments", Type: cty.String, Required: false},
+		"devices":      &hcldec.BlockSpec{TypeName: "devices", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevices)(nil).HCL2Spec())},
+		"helpers":      &hcldec.BlockSpec{TypeName: "helpers", Nested: hcldec.ObjectSpec((*FlatInstanceConfigHelpers)(nil).HCL2Spec())},
+		"interface":    &hcldec.BlockListSpec{TypeName: "interface", Nested: hcldec.ObjectSpec((*FlatInterface)(nil).HCL2Spec())},
+		"memory_limit": &hcldec.AttrSpec{Name: "memory_limit", Type: cty.Number, Required: false},
+		"kernel":       &hcldec.AttrSpec{Name: "kernel", Type: cty.String, Required: false},
+		"init_rd":      &hcldec.AttrSpec{Name: "init_rd", Type: cty.Number, Required: false},
+		"root_device":  &hcldec.AttrSpec{Name: "root_device", Type: cty.String, Required: false},
+		"run_level":    &hcldec.AttrSpec{Name: "run_level", Type: cty.String, Required: false},
+		"virt_mode":    &hcldec.AttrSpec{Name: "virt_mode", Type: cty.String, Required: false},
+	}
+	return s
+}
+
+// FlatInstanceConfigDevice is an auto-generated flat version of InstanceConfigDevice.
+// Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
+type FlatInstanceConfigDevice struct {
+	DiskLabel *string `mapstructure:"disk_label" required:"false" cty:"disk_label" hcl:"disk_label"`
+	VolumeID  *int    `mapstructure:"volume_id" required:"false" cty:"volume_id" hcl:"volume_id"`
+}
+
+// FlatMapstructure returns a new FlatInstanceConfigDevice.
+// FlatInstanceConfigDevice is an auto-generated flat version of InstanceConfigDevice.
+// Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
+func (*InstanceConfigDevice) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatInstanceConfigDevice)
+}
+
+// HCL2Spec returns the hcl spec of a InstanceConfigDevice.
+// This spec is used by HCL to read the fields of InstanceConfigDevice.
+// The decoded values from this spec will then be applied to a FlatInstanceConfigDevice.
+func (*FlatInstanceConfigDevice) HCL2Spec() map[string]hcldec.Spec {
+	s := map[string]hcldec.Spec{
+		"disk_label": &hcldec.AttrSpec{Name: "disk_label", Type: cty.String, Required: false},
+		"volume_id":  &hcldec.AttrSpec{Name: "volume_id", Type: cty.Number, Required: false},
+	}
+	return s
+}
+
+// FlatInstanceConfigDevices is an auto-generated flat version of InstanceConfigDevices.
+// Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
+type FlatInstanceConfigDevices struct {
+	SDA  *FlatInstanceConfigDevice `mapstructure:"sda" required:"false" cty:"sda" hcl:"sda"`
+	SDB  *FlatInstanceConfigDevice `mapstructure:"sdb" required:"false" cty:"sdb" hcl:"sdb"`
+	SDC  *FlatInstanceConfigDevice `mapstructure:"sdc" required:"false" cty:"sdc" hcl:"sdc"`
+	SDD  *FlatInstanceConfigDevice `mapstructure:"sdd" required:"false" cty:"sdd" hcl:"sdd"`
+	SDE  *FlatInstanceConfigDevice `mapstructure:"sde" required:"false" cty:"sde" hcl:"sde"`
+	SDF  *FlatInstanceConfigDevice `mapstructure:"sdf" required:"false" cty:"sdf" hcl:"sdf"`
+	SDG  *FlatInstanceConfigDevice `mapstructure:"sdg" required:"false" cty:"sdg" hcl:"sdg"`
+	SDH  *FlatInstanceConfigDevice `mapstructure:"sdh" required:"false" cty:"sdh" hcl:"sdh"`
+	SDI  *FlatInstanceConfigDevice `mapstructure:"sdi" required:"false" cty:"sdi" hcl:"sdi"`
+	SDJ  *FlatInstanceConfigDevice `mapstructure:"sdj" required:"false" cty:"sdj" hcl:"sdj"`
+	SDK  *FlatInstanceConfigDevice `mapstructure:"sdk" required:"false" cty:"sdk" hcl:"sdk"`
+	SDL  *FlatInstanceConfigDevice `mapstructure:"sdl" required:"false" cty:"sdl" hcl:"sdl"`
+	SDM  *FlatInstanceConfigDevice `mapstructure:"sdm" required:"false" cty:"sdm" hcl:"sdm"`
+	SDN  *FlatInstanceConfigDevice `mapstructure:"sdn" required:"false" cty:"sdn" hcl:"sdn"`
+	SDO  *FlatInstanceConfigDevice `mapstructure:"sdo" required:"false" cty:"sdo" hcl:"sdo"`
+	SDP  *FlatInstanceConfigDevice `mapstructure:"sdp" required:"false" cty:"sdp" hcl:"sdp"`
+	SDQ  *FlatInstanceConfigDevice `mapstructure:"sdq" required:"false" cty:"sdq" hcl:"sdq"`
+	SDR  *FlatInstanceConfigDevice `mapstructure:"sdr" required:"false" cty:"sdr" hcl:"sdr"`
+	SDS  *FlatInstanceConfigDevice `mapstructure:"sds" required:"false" cty:"sds" hcl:"sds"`
+	SDT  *FlatInstanceConfigDevice `mapstructure:"sdt" required:"false" cty:"sdt" hcl:"sdt"`
+	SDU  *FlatInstanceConfigDevice `mapstructure:"sdu" required:"false" cty:"sdu" hcl:"sdu"`
+	SDV  *FlatInstanceConfigDevice `mapstructure:"sdv" required:"false" cty:"sdv" hcl:"sdv"`
+	SDW  *FlatInstanceConfigDevice `mapstructure:"sdw" required:"false" cty:"sdw" hcl:"sdw"`
+	SDX  *FlatInstanceConfigDevice `mapstructure:"sdx" required:"false" cty:"sdx" hcl:"sdx"`
+	SDY  *FlatInstanceConfigDevice `mapstructure:"sdy" required:"false" cty:"sdy" hcl:"sdy"`
+	SDZ  *FlatInstanceConfigDevice `mapstructure:"sdz" required:"false" cty:"sdz" hcl:"sdz"`
+	SDAA *FlatInstanceConfigDevice `mapstructure:"sdaa" required:"false" cty:"sdaa" hcl:"sdaa"`
+	SDAB *FlatInstanceConfigDevice `mapstructure:"sdab" required:"false" cty:"sdab" hcl:"sdab"`
+	SDAC *FlatInstanceConfigDevice `mapstructure:"sdac" required:"false" cty:"sdac" hcl:"sdac"`
+	SDAD *FlatInstanceConfigDevice `mapstructure:"sdad" required:"false" cty:"sdad" hcl:"sdad"`
+	SDAE *FlatInstanceConfigDevice `mapstructure:"sdae" required:"false" cty:"sdae" hcl:"sdae"`
+	SDAF *FlatInstanceConfigDevice `mapstructure:"sdaf" required:"false" cty:"sdaf" hcl:"sdaf"`
+	SDAG *FlatInstanceConfigDevice `mapstructure:"sdag" required:"false" cty:"sdag" hcl:"sdag"`
+	SDAH *FlatInstanceConfigDevice `mapstructure:"sdah" required:"false" cty:"sdah" hcl:"sdah"`
+	SDAI *FlatInstanceConfigDevice `mapstructure:"sdai" required:"false" cty:"sdai" hcl:"sdai"`
+	SDAJ *FlatInstanceConfigDevice `mapstructure:"sdaj" required:"false" cty:"sdaj" hcl:"sdaj"`
+	SDAK *FlatInstanceConfigDevice `mapstructure:"sdak" required:"false" cty:"sdak" hcl:"sdak"`
+	SDAL *FlatInstanceConfigDevice `mapstructure:"sdal" required:"false" cty:"sdal" hcl:"sdal"`
+	SDAM *FlatInstanceConfigDevice `mapstructure:"sdam" required:"false" cty:"sdam" hcl:"sdam"`
+	SDAN *FlatInstanceConfigDevice `mapstructure:"sdan" required:"false" cty:"sdan" hcl:"sdan"`
+	SDAO *FlatInstanceConfigDevice `mapstructure:"sdao" required:"false" cty:"sdao" hcl:"sdao"`
+	SDAP *FlatInstanceConfigDevice `mapstructure:"sdap" required:"false" cty:"sdap" hcl:"sdap"`
+	SDAQ *FlatInstanceConfigDevice `mapstructure:"sdaq" required:"false" cty:"sdaq" hcl:"sdaq"`
+	SDAR *FlatInstanceConfigDevice `mapstructure:"sdar" required:"false" cty:"sdar" hcl:"sdar"`
+	SDAS *FlatInstanceConfigDevice `mapstructure:"sdas" required:"false" cty:"sdas" hcl:"sdas"`
+	SDAT *FlatInstanceConfigDevice `mapstructure:"sdat" required:"false" cty:"sdat" hcl:"sdat"`
+	SDAU *FlatInstanceConfigDevice `mapstructure:"sdau" required:"false" cty:"sdau" hcl:"sdau"`
+	SDAV *FlatInstanceConfigDevice `mapstructure:"sdav" required:"false" cty:"sdav" hcl:"sdav"`
+	SDAW *FlatInstanceConfigDevice `mapstructure:"sdaw" required:"false" cty:"sdaw" hcl:"sdaw"`
+	SDAX *FlatInstanceConfigDevice `mapstructure:"sdax" required:"false" cty:"sdax" hcl:"sdax"`
+	SDAY *FlatInstanceConfigDevice `mapstructure:"sday" required:"false" cty:"sday" hcl:"sday"`
+	SDAZ *FlatInstanceConfigDevice `mapstructure:"sdaz" required:"false" cty:"sdaz" hcl:"sdaz"`
+	SDBA *FlatInstanceConfigDevice `mapstructure:"sdba" required:"false" cty:"sdba" hcl:"sdba"`
+	SDBB *FlatInstanceConfigDevice `mapstructure:"sdbb" required:"false" cty:"sdbb" hcl:"sdbb"`
+	SDBC *FlatInstanceConfigDevice `mapstructure:"sdbc" required:"false" cty:"sdbc" hcl:"sdbc"`
+	SDBD *FlatInstanceConfigDevice `mapstructure:"sdbd" required:"false" cty:"sdbd" hcl:"sdbd"`
+	SDBE *FlatInstanceConfigDevice `mapstructure:"sdbe" required:"false" cty:"sdbe" hcl:"sdbe"`
+	SDBF *FlatInstanceConfigDevice `mapstructure:"sdbf" required:"false" cty:"sdbf" hcl:"sdbf"`
+	SDBG *FlatInstanceConfigDevice `mapstructure:"sdbg" required:"false" cty:"sdbg" hcl:"sdbg"`
+	SDBH *FlatInstanceConfigDevice `mapstructure:"sdbh" required:"false" cty:"sdbh" hcl:"sdbh"`
+	SDBI *FlatInstanceConfigDevice `mapstructure:"sdbi" required:"false" cty:"sdbi" hcl:"sdbi"`
+	SDBJ *FlatInstanceConfigDevice `mapstructure:"sdbj" required:"false" cty:"sdbj" hcl:"sdbj"`
+	SDBK *FlatInstanceConfigDevice `mapstructure:"sdbk" required:"false" cty:"sdbk" hcl:"sdbk"`
+	SDBL *FlatInstanceConfigDevice `mapstructure:"sdbl" required:"false" cty:"sdbl" hcl:"sdbl"`
+}
+
+// FlatMapstructure returns a new FlatInstanceConfigDevices.
+// FlatInstanceConfigDevices is an auto-generated flat version of InstanceConfigDevices.
+// Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
+func (*InstanceConfigDevices) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatInstanceConfigDevices)
+}
+
+// HCL2Spec returns the hcl spec of a InstanceConfigDevices.
+// This spec is used by HCL to read the fields of InstanceConfigDevices.
+// The decoded values from this spec will then be applied to a FlatInstanceConfigDevices.
+func (*FlatInstanceConfigDevices) HCL2Spec() map[string]hcldec.Spec {
+	s := map[string]hcldec.Spec{
+		"sda":  &hcldec.BlockSpec{TypeName: "sda", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdb":  &hcldec.BlockSpec{TypeName: "sdb", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdc":  &hcldec.BlockSpec{TypeName: "sdc", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdd":  &hcldec.BlockSpec{TypeName: "sdd", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sde":  &hcldec.BlockSpec{TypeName: "sde", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdf":  &hcldec.BlockSpec{TypeName: "sdf", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdg":  &hcldec.BlockSpec{TypeName: "sdg", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdh":  &hcldec.BlockSpec{TypeName: "sdh", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdi":  &hcldec.BlockSpec{TypeName: "sdi", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdj":  &hcldec.BlockSpec{TypeName: "sdj", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdk":  &hcldec.BlockSpec{TypeName: "sdk", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdl":  &hcldec.BlockSpec{TypeName: "sdl", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdm":  &hcldec.BlockSpec{TypeName: "sdm", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdn":  &hcldec.BlockSpec{TypeName: "sdn", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdo":  &hcldec.BlockSpec{TypeName: "sdo", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdp":  &hcldec.BlockSpec{TypeName: "sdp", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdq":  &hcldec.BlockSpec{TypeName: "sdq", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdr":  &hcldec.BlockSpec{TypeName: "sdr", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sds":  &hcldec.BlockSpec{TypeName: "sds", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdt":  &hcldec.BlockSpec{TypeName: "sdt", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdu":  &hcldec.BlockSpec{TypeName: "sdu", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdv":  &hcldec.BlockSpec{TypeName: "sdv", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdw":  &hcldec.BlockSpec{TypeName: "sdw", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdx":  &hcldec.BlockSpec{TypeName: "sdx", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdy":  &hcldec.BlockSpec{TypeName: "sdy", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdz":  &hcldec.BlockSpec{TypeName: "sdz", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdaa": &hcldec.BlockSpec{TypeName: "sdaa", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdab": &hcldec.BlockSpec{TypeName: "sdab", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdac": &hcldec.BlockSpec{TypeName: "sdac", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdad": &hcldec.BlockSpec{TypeName: "sdad", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdae": &hcldec.BlockSpec{TypeName: "sdae", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdaf": &hcldec.BlockSpec{TypeName: "sdaf", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdag": &hcldec.BlockSpec{TypeName: "sdag", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdah": &hcldec.BlockSpec{TypeName: "sdah", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdai": &hcldec.BlockSpec{TypeName: "sdai", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdaj": &hcldec.BlockSpec{TypeName: "sdaj", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdak": &hcldec.BlockSpec{TypeName: "sdak", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdal": &hcldec.BlockSpec{TypeName: "sdal", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdam": &hcldec.BlockSpec{TypeName: "sdam", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdan": &hcldec.BlockSpec{TypeName: "sdan", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdao": &hcldec.BlockSpec{TypeName: "sdao", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdap": &hcldec.BlockSpec{TypeName: "sdap", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdaq": &hcldec.BlockSpec{TypeName: "sdaq", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdar": &hcldec.BlockSpec{TypeName: "sdar", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdas": &hcldec.BlockSpec{TypeName: "sdas", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdat": &hcldec.BlockSpec{TypeName: "sdat", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdau": &hcldec.BlockSpec{TypeName: "sdau", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdav": &hcldec.BlockSpec{TypeName: "sdav", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdaw": &hcldec.BlockSpec{TypeName: "sdaw", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdax": &hcldec.BlockSpec{TypeName: "sdax", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sday": &hcldec.BlockSpec{TypeName: "sday", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdaz": &hcldec.BlockSpec{TypeName: "sdaz", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdba": &hcldec.BlockSpec{TypeName: "sdba", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdbb": &hcldec.BlockSpec{TypeName: "sdbb", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdbc": &hcldec.BlockSpec{TypeName: "sdbc", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdbd": &hcldec.BlockSpec{TypeName: "sdbd", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdbe": &hcldec.BlockSpec{TypeName: "sdbe", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdbf": &hcldec.BlockSpec{TypeName: "sdbf", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdbg": &hcldec.BlockSpec{TypeName: "sdbg", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdbh": &hcldec.BlockSpec{TypeName: "sdbh", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdbi": &hcldec.BlockSpec{TypeName: "sdbi", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdbj": &hcldec.BlockSpec{TypeName: "sdbj", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdbk": &hcldec.BlockSpec{TypeName: "sdbk", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+		"sdbl": &hcldec.BlockSpec{TypeName: "sdbl", Nested: hcldec.ObjectSpec((*FlatInstanceConfigDevice)(nil).HCL2Spec())},
+	}
+	return s
+}
+
+// FlatInstanceConfigHelpers is an auto-generated flat version of InstanceConfigHelpers.
+// Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
+type FlatInstanceConfigHelpers struct {
+	UpdateDBDisabled  *bool `mapstructure:"updatedb_disabled" required:"false" cty:"updatedb_disabled" hcl:"updatedb_disabled"`
+	Distro            *bool `mapstructure:"distro" required:"false" cty:"distro" hcl:"distro"`
+	ModulesDep        *bool `mapstructure:"modules_dep" required:"false" cty:"modules_dep" hcl:"modules_dep"`
+	Network           *bool `mapstructure:"network" required:"false" cty:"network" hcl:"network"`
+	DevTmpFsAutomount *bool `mapstructure:"devtmpfs_automount" required:"false" cty:"devtmpfs_automount" hcl:"devtmpfs_automount"`
+}
+
+// FlatMapstructure returns a new FlatInstanceConfigHelpers.
+// FlatInstanceConfigHelpers is an auto-generated flat version of InstanceConfigHelpers.
+// Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
+func (*InstanceConfigHelpers) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatInstanceConfigHelpers)
+}
+
+// HCL2Spec returns the hcl spec of a InstanceConfigHelpers.
+// This spec is used by HCL to read the fields of InstanceConfigHelpers.
+// The decoded values from this spec will then be applied to a FlatInstanceConfigHelpers.
+func (*FlatInstanceConfigHelpers) HCL2Spec() map[string]hcldec.Spec {
+	s := map[string]hcldec.Spec{
+		"updatedb_disabled":  &hcldec.AttrSpec{Name: "updatedb_disabled", Type: cty.Bool, Required: false},
+		"distro":             &hcldec.AttrSpec{Name: "distro", Type: cty.Bool, Required: false},
+		"modules_dep":        &hcldec.AttrSpec{Name: "modules_dep", Type: cty.Bool, Required: false},
+		"network":            &hcldec.AttrSpec{Name: "network", Type: cty.Bool, Required: false},
+		"devtmpfs_automount": &hcldec.AttrSpec{Name: "devtmpfs_automount", Type: cty.Bool, Required: false},
 	}
 	return s
 }

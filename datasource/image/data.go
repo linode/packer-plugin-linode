@@ -58,9 +58,9 @@ func (d *Datasource) Configure(raws ...interface{}) error {
 		envToken := os.Getenv(helper.TokenEnvVar)
 		if envToken == "" {
 			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf(
-				"A Linode API token is required. You can specify it in an "+
+				"a Linode API token is required; you can specify it in an "+
 					"environment variable %q or set linode_token "+
-					"attribute in the datasource block.",
+					"attribute in the datasource block",
 				helper.TokenEnvVar,
 			))
 		}

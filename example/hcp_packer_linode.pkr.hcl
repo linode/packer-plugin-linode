@@ -11,12 +11,12 @@ locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }
 
 source "linode" "example" {
   linode_token      = "Your Personal Access Token"
-  image             = "linode/debian9"
+  image             = "linode/debian13"
   image_description = "My Private Image"
   image_label       = "private-image-${local.timestamp}"
   instance_label    = "temporary-linode-${local.timestamp}"
   instance_type     = "g6-nanode-1"
-  region            = "us-east"
+  region            = "us-mia"
   ssh_username      = "root"
 }
 
