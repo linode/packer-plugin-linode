@@ -1,6 +1,16 @@
 name: Integration and Unit Tests
 
 on:
+  workflow_dispatch:
+    inputs:
+      test_report_upload:
+        description: 'Indicates whether to upload the test report to object storage. Defaults to "false"'
+        type: choice
+        required: false
+        default: 'false'
+        options:
+          - 'true'
+          - 'false'
   push:
     branches:
       - 'main'
@@ -12,7 +22,6 @@ env:
 jobs:
   integration-and-unit-tests:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.event.ref == 'refs/heads/main' || github.event.ref == 'refs/heads/dev')
     env:
       EXIT_STATUS: 0
     steps:
@@ -39,14 +48,14 @@ jobs:
 
       - name: Upload test report as artifact
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: test-report-file
           path: "${{ env.REPORT_FILENAME }}"
 
-
   process-upload-report:
     runs-on: ubuntu-latest
+    if: always() && github.repository == 'linode/packer-plugin-linode' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.test_report_upload == 'true'))
     needs:
       - integration-and-unit-tests
     steps:
@@ -57,7 +66,7 @@ jobs:
           submodules: 'recursive'
 
       - name: Download test report
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: test-report-file
 
