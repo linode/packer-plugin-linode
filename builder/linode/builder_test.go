@@ -3,6 +3,7 @@ package linode
 import (
 	"reflect"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -16,7 +17,7 @@ func testConfig() map[string]any {
 		"region":        "us-ord",
 		"instance_type": "g6-nanode-1",
 		"ssh_username":  "root",
-		"image":         "linode/debian11",
+		"image":         "linode/arch",
 	}
 }
 
@@ -726,4 +727,451 @@ func TestBuilderPrepare_ImageShareGroupIDs(t *testing.T) {
 	if !reflect.DeepEqual(b.config.ImageShareGroupIDs, expected) {
 		t.Errorf("got %v, expected %v", b.config.ImageShareGroupIDs, expected)
 	}
+}
+
+func TestBuilderPrepare_CustomDisks(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test with custom disk
+	config["disk"] = []map[string]any{
+		{
+			"label":      "boot",
+			"size":       25000,
+			"image":      "linode/arch",
+			"filesystem": "ext4",
+		},
+		{
+			"label":      "swap",
+			"size":       512,
+			"filesystem": "swap",
+		},
+	}
+
+	// Add config block (required when using custom disks)
+	config["config"] = []map[string]any{
+		{
+			"label":       "my-config",
+			"kernel":      "linode/latest-64bit",
+			"root_device": "/dev/sda",
+			"devices": map[string]any{
+				"sda": map[string]any{
+					"disk_label": "boot",
+				},
+				"sdb": map[string]any{
+					"disk_label": "swap",
+				},
+			},
+		},
+	}
+
+	// When using custom disks, image should not be required at top level
+	delete(config, "image")
+
+	_, warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error with custom disks: %s", err)
+	}
+
+	if len(b.config.Disks) != 2 {
+		t.Errorf("expected 2 disks, got %d", len(b.config.Disks))
+	}
+
+	if b.config.Disks[0].Label != "boot" {
+		t.Errorf("expected first disk label to be 'boot', got %s", b.config.Disks[0].Label)
+	}
+
+	if b.config.Disks[1].Filesystem != "swap" {
+		t.Errorf("expected second disk filesystem to be 'swap', got %s", b.config.Disks[1].Filesystem)
+	}
+
+	if len(b.config.InstanceConfigs) != 1 {
+		t.Errorf("expected 1 config, got %d", len(b.config.InstanceConfigs))
+	}
+}
+
+func TestBuilderPrepare_CustomConfig(t *testing.T) {
+	var b Builder
+	config := testConfig()
+
+	// Test with custom config
+	config["config"] = []map[string]any{
+		{
+			"label":       "my-config",
+			"comments":    "boot config",
+			"kernel":      "linode/latest-64bit",
+			"root_device": "/dev/sda",
+			"devices": map[string]any{
+				"sda": map[string]any{
+					"disk_label": "boot",
+				},
+			},
+			"helpers": map[string]any{
+				"updatedb_disabled":  true,
+				"distro":             true,
+				"modules_dep":        true,
+				"network":            true,
+				"devtmpfs_automount": true,
+			},
+		},
+	}
+
+	config["disk"] = []map[string]any{
+		{
+			"label": "boot",
+			"size":  25000,
+			"image": "linode/arch",
+		},
+	}
+
+	// When using custom disks, image should not be required at top level
+	delete(config, "image")
+
+	_, warnings, err := b.Prepare(config)
+	if len(warnings) > 0 {
+		t.Fatalf("bad: %#v", warnings)
+	}
+	if err != nil {
+		t.Fatalf("should not have error with custom config: %s", err)
+	}
+
+	if len(b.config.InstanceConfigs) != 1 {
+		t.Errorf("expected 1 config, got %d", len(b.config.InstanceConfigs))
+	}
+
+	if b.config.InstanceConfigs[0].Label != "my-config" {
+		t.Errorf("expected config label to be 'my-config', got %s", b.config.InstanceConfigs[0].Label)
+	}
+
+	if b.config.InstanceConfigs[0].Kernel != "linode/latest-64bit" {
+		t.Errorf("expected kernel to be 'linode/latest-64bit', got %s", b.config.InstanceConfigs[0].Kernel)
+	}
+
+	if b.config.InstanceConfigs[0].Devices == nil {
+		t.Error("expected devices to be set")
+	}
+
+	if b.config.InstanceConfigs[0].Devices.SDA == nil {
+		t.Error("expected SDA device to be set")
+	}
+
+	if b.config.InstanceConfigs[0].Devices.SDA.DiskLabel != "boot" {
+		t.Errorf("expected SDA disk_label to be 'boot', got %s", b.config.InstanceConfigs[0].Devices.SDA.DiskLabel)
+	}
+}
+
+func TestBuilderPrepare_CustomDisksValidation(t *testing.T) {
+	// Test that image and custom disks cannot be specified together
+	t.Run("ImageAndDisks", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		config["image"] = "linode/arch"
+		config["disk"] = []map[string]any{
+			{
+				"label":      "boot",
+				"size":       25000,
+				"image":      "linode/arch",
+				"filesystem": "ext4",
+			},
+		}
+
+		_, _, err := b.Prepare(config)
+		if err == nil {
+			t.Fatal("expected error when specifying both image and custom disks")
+		}
+		if !strings.Contains(err.Error(), "cannot specify both image and custom disks") {
+			t.Fatalf("expected specific error message, got: %s", err)
+		}
+	})
+
+	// Test that config is required when using custom disks
+	t.Run("DisksWithoutConfig", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "image")
+		config["disk"] = []map[string]any{
+			{
+				"label":      "boot",
+				"size":       25000,
+				"image":      "linode/arch",
+				"filesystem": "ext4",
+			},
+		}
+
+		_, _, err := b.Prepare(config)
+		if err == nil {
+			t.Fatal("expected error when using custom disks without config")
+		}
+		if !strings.Contains(err.Error(), "disk and config blocks must be specified together") {
+			t.Fatalf("expected specific error message, got: %s", err)
+		}
+	})
+
+	// Test that either image or disks must be specified
+	t.Run("NoImageOrDisks", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "image")
+
+		_, _, err := b.Prepare(config)
+		if err == nil {
+			t.Fatal("expected error when neither image nor disks specified")
+		}
+		if !strings.Contains(err.Error(), "either image or custom disks must be specified") {
+			t.Fatalf("expected specific error message, got: %s", err)
+		}
+	})
+
+	// Test incompatible attributes with custom disks
+	t.Run("IncompatibleAuthorizedKeys", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "image")
+		config["authorized_keys"] = []string{"ssh-rsa test"}
+		config["disk"] = []map[string]any{
+			{"label": "boot", "size": 25000, "image": "linode/arch"},
+		}
+		config["config"] = []map[string]any{
+			{"label": "my-config"},
+		}
+
+		_, _, err := b.Prepare(config)
+		if err == nil {
+			t.Fatal("expected error with authorized_keys and custom disks")
+		}
+		if !strings.Contains(err.Error(), "authorized_keys cannot be specified when using custom disks") {
+			t.Fatalf("expected specific error message, got: %s", err)
+		}
+	})
+
+	t.Run("IncompatibleAuthorizedUsers", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "image")
+		config["authorized_users"] = []string{"user1"}
+		config["disk"] = []map[string]any{
+			{"label": "boot", "size": 25000, "image": "linode/arch"},
+		}
+		config["config"] = []map[string]any{
+			{"label": "my-config"},
+		}
+
+		_, _, err := b.Prepare(config)
+		if err == nil {
+			t.Fatal("expected error with authorized_users and custom disks")
+		}
+		if !strings.Contains(err.Error(), "authorized_users cannot be specified when using custom disks") {
+			t.Fatalf("expected specific error message, got: %s", err)
+		}
+	})
+
+	t.Run("IncompatibleSwapSize", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "image")
+		config["swap_size"] = 512
+		config["disk"] = []map[string]any{
+			{"label": "boot", "size": 25000, "image": "linode/arch"},
+		}
+		config["config"] = []map[string]any{
+			{"label": "my-config"},
+		}
+
+		_, _, err := b.Prepare(config)
+		if err == nil {
+			t.Fatal("expected error with swap_size and custom disks")
+		}
+		if !strings.Contains(err.Error(), "swap_size cannot be specified when using custom disks") {
+			t.Fatalf("expected specific error message, got: %s", err)
+		}
+	})
+
+	t.Run("IncompatibleStackScriptID", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "image")
+		config["stackscript_id"] = 12345
+		config["disk"] = []map[string]any{
+			{"label": "boot", "size": 25000, "image": "linode/arch"},
+		}
+		config["config"] = []map[string]any{
+			{"label": "my-config"},
+		}
+
+		_, _, err := b.Prepare(config)
+		if err == nil {
+			t.Fatal("expected error with stackscript_id and custom disks")
+		}
+		if !strings.Contains(err.Error(), "stackscript_id cannot be specified when using custom disks") {
+			t.Fatalf("expected specific error message, got: %s", err)
+		}
+	})
+
+	t.Run("IncompatibleStackScriptData", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "image")
+		config["stackscript_data"] = map[string]string{"key": "value"}
+		config["disk"] = []map[string]any{
+			{"label": "boot", "size": 25000, "image": "linode/arch"},
+		}
+		config["config"] = []map[string]any{
+			{"label": "my-config"},
+		}
+
+		_, _, err := b.Prepare(config)
+		if err == nil {
+			t.Fatal("expected error with stackscript_data and custom disks")
+		}
+		if !strings.Contains(err.Error(), "stackscript_data cannot be specified when using custom disks") {
+			t.Fatalf("expected specific error message, got: %s", err)
+		}
+	})
+
+	t.Run("IncompatibleInterface", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "image")
+		config["interface"] = []map[string]any{
+			{"purpose": "public"},
+		}
+		config["disk"] = []map[string]any{
+			{"label": "boot", "size": 25000, "image": "linode/arch"},
+		}
+		config["config"] = []map[string]any{
+			{"label": "my-config"},
+		}
+
+		_, _, err := b.Prepare(config)
+		if err == nil {
+			t.Fatal("expected error with interface and custom disks")
+		}
+		if !strings.Contains(err.Error(), "interface blocks cannot be specified when using custom disks") {
+			t.Fatalf("expected specific error message, got: %s", err)
+		}
+	})
+
+	t.Run("LinodeInterfaceWithCustomDisks", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "image")
+		// linode_interface should be ALLOWED with custom disks
+		config["linode_interface"] = []map[string]any{
+			{"public": map[string]any{}},
+		}
+		config["disk"] = []map[string]any{
+			{"label": "boot", "size": 25000, "image": "linode/arch"},
+		}
+		config["config"] = []map[string]any{
+			{"label": "my-config", "root_device": "/dev/sda", "devices": map[string]any{"sda": map[string]any{"disk_label": "boot"}}},
+		}
+
+		_, _, err := b.Prepare(config)
+		if err != nil {
+			t.Fatalf("linode_interface should be allowed with custom disks, got error: %s", err)
+		}
+	})
+
+	t.Run("MissingRootDevice", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "image")
+		config["disk"] = []map[string]any{
+			{"label": "boot", "size": 25000, "image": "linode/arch"},
+		}
+		config["config"] = []map[string]any{
+			{"label": "my-config", "devices": map[string]any{"sda": map[string]any{"disk_label": "boot"}}},
+		}
+		// Missing root_device in boot config - should default to /dev/sda
+
+		_, _, err := b.Prepare(config)
+		if err != nil {
+			t.Fatalf("unexpected error: %s", err)
+		}
+		// Verify default was applied
+		if b.config.InstanceConfigs[0].RootDevice != "/dev/sda" {
+			t.Fatalf("expected root_device to default to /dev/sda, got: %s", b.config.InstanceConfigs[0].RootDevice)
+		}
+	})
+
+	t.Run("RootDevicePointsToUndefinedDisk", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "image")
+		config["disk"] = []map[string]any{
+			{"label": "boot", "size": 25000, "image": "linode/arch"},
+		}
+		config["config"] = []map[string]any{
+			{"label": "my-config", "root_device": "/dev/sda", "devices": map[string]any{"sda": map[string]any{"disk_label": "nonexistent"}}},
+		}
+
+		_, _, err := b.Prepare(config)
+		if err == nil {
+			t.Fatal("expected error when root_device points to undefined disk")
+		}
+		if !strings.Contains(err.Error(), "root_device points to disk") {
+			t.Fatalf("expected specific error message, got: %s", err)
+		}
+	})
+
+	t.Run("ConfigWithoutDisks", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		// Specify config blocks without disk blocks
+		config["config"] = []map[string]any{
+			{"label": "my-config"},
+		}
+
+		_, _, err := b.Prepare(config)
+		if err == nil {
+			t.Fatal("expected error when using config blocks without disk blocks")
+		}
+		if !strings.Contains(err.Error(), "disk and config blocks must be specified together") {
+			t.Fatalf("expected specific error message, got: %s", err)
+		}
+	})
+
+	t.Run("DuplicateDiskLabels", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "image")
+		config["disk"] = []map[string]any{
+			{"label": "boot", "size": 25000, "image": "linode/arch"},
+			{"label": "boot", "size": 512, "filesystem": "swap"},
+		}
+		config["config"] = []map[string]any{
+			{"label": "my-config", "root_device": "/dev/sda", "devices": map[string]any{"sda": map[string]any{"disk_label": "boot"}}},
+		}
+
+		_, _, err := b.Prepare(config)
+		if err == nil {
+			t.Fatal("expected error when disk labels are duplicated")
+		}
+		if !strings.Contains(err.Error(), "duplicate disk label \"boot\" found") {
+			t.Fatalf("expected specific error message, got: %s", err)
+		}
+	})
+
+	t.Run("EmptyDiskLabel", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "image")
+		config["disk"] = []map[string]any{
+			{"label": "", "size": 25000, "image": "linode/arch"},
+		}
+		config["config"] = []map[string]any{
+			{"label": "my-config", "root_device": "/dev/sda", "devices": map[string]any{"sda": map[string]any{"disk_label": ""}}},
+		}
+
+		_, _, err := b.Prepare(config)
+		if err == nil {
+			t.Fatal("expected error when disk label is empty")
+		}
+		if !strings.Contains(err.Error(), "disk label cannot be empty") {
+			t.Fatalf("expected specific error message, got: %s", err)
+		}
+	})
 }
