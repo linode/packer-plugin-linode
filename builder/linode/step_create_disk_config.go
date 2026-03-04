@@ -370,7 +370,7 @@ func (s *stepCreateDiskConfig) Run(ctx context.Context, state multistep.StateBag
 
 	state.Put("disk", imageDisk)
 
-	// Boot the instance with the first configuration profile
+	// Boot the instance with the selected configuration profile
 	if bootConfigID != 0 {
 		ui.Say(fmt.Sprintf("Booting Linode with config ID %d...", bootConfigID))
 		err = s.client.BootInstance(ctx, instance.ID, bootConfigID)
