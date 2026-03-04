@@ -152,8 +152,6 @@ func (s *stepCreateLinode) Run(ctx context.Context, state multistep.StateBag) mu
 	useCustomDisks := len(c.Disks) > 0
 
 	createOpts := linodego.InstanceCreateOptions{
-		AuthorizedKeys:      []string{},
-		AuthorizedUsers:     []string{},
 		PrivateIP:           c.PrivateIP,
 		Region:              c.Region,
 		Type:                c.InstanceType,
@@ -171,6 +169,11 @@ func (s *stepCreateLinode) Run(ctx context.Context, state multistep.StateBag) mu
 		createOpts.SwapSize = &c.SwapSize
 		createOpts.StackScriptID = c.StackScriptID
 		createOpts.StackScriptData = c.StackScriptData
+
+		if pubKey := string(c.Comm.SSHPublicKey); pubKey != "" {
+			createOpts.AuthorizedKeys = append(createOpts.AuthorizedKeys, pubKey)
+		}
+
 	} else {
 		ui.Say("Using custom disk configuration - instance will be created without an image")
 
@@ -197,10 +200,6 @@ func (s *stepCreateLinode) Run(ctx context.Context, state multistep.StateBag) mu
 
 	if len(linodeInterfaces) > 0 {
 		createOpts.LinodeInterfaces = linodeInterfaces
-	}
-
-	if pubKey := string(c.Comm.SSHPublicKey); pubKey != "" {
-		createOpts.AuthorizedKeys = append(createOpts.AuthorizedKeys, pubKey)
 	}
 
 	createOpts.AuthorizedKeys = append(createOpts.AuthorizedKeys, c.AuthorizedKeys...)
