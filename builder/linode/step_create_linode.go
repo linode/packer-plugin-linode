@@ -80,7 +80,9 @@ func flattenVPCInterface(vpc *VPCInterface) *linodego.VPCInterfaceCreateOptions 
 		ranges := make([]linodego.VPCInterfaceIPv4RangeCreateOptions, len(vpc.IPv4.Ranges))
 		for i, addr := range vpc.IPv4.Addresses {
 			addresses[i] = linodego.VPCInterfaceIPv4AddressCreateOptions{
-				Address: addr.Address,
+				Address:        addr.Address,
+				Primary:        addr.Primary,
+				NAT1To1Address: addr.NAT1To1Address,
 			}
 		}
 		for i, r := range vpc.IPv4.Ranges {
