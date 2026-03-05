@@ -1,6 +1,7 @@
 package linode
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 
@@ -271,19 +272,49 @@ func TestFlattenDisk(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := flattenDisk(tt.disk)
 
-			if got.Label != tt.want.Label {
-				t.Errorf("flattenDisk() Label = %v, want %v", got.Label, tt.want.Label)
-			}
-			if got.Size != tt.want.Size {
-				t.Errorf("flattenDisk() Size = %v, want %v", got.Size, tt.want.Size)
-			}
-			if got.Image != tt.want.Image {
-				t.Errorf("flattenDisk() Image = %v, want %v", got.Image, tt.want.Image)
-			}
-			if got.Filesystem != tt.want.Filesystem {
-				t.Errorf("flattenDisk() Filesystem = %v, want %v", got.Filesystem, tt.want.Filesystem)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Fatalf("flattenDisk() = %+v, want %+v", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestFlattenDisk_AllFields(t *testing.T) {
+	disk := Disk{
+		Label:           "boot",
+		Size:            32000,
+		Image:           "linode/ubuntu24.04",
+		Filesystem:      "ext4",
+		AuthorizedKeys:  []string{"ssh-rsa AAAA-test"},
+		AuthorizedUsers: []string{"root", "devops"},
+		StackscriptID:   123,
+		StackscriptData: map[string]string{"foo": "bar"},
+	}
+
+	got := flattenDisk(disk)
+	if got.Label != disk.Label {
+		t.Fatalf("Label = %q, want %q", got.Label, disk.Label)
+	}
+	if got.Size != disk.Size {
+		t.Fatalf("Size = %d, want %d", got.Size, disk.Size)
+	}
+	if got.Image != disk.Image {
+		t.Fatalf("Image = %q, want %q", got.Image, disk.Image)
+	}
+	if got.Filesystem != disk.Filesystem {
+		t.Fatalf("Filesystem = %q, want %q", got.Filesystem, disk.Filesystem)
+	}
+	if len(got.AuthorizedKeys) != 1 || got.AuthorizedKeys[0] != "ssh-rsa AAAA-test" {
+		t.Fatalf("AuthorizedKeys = %v, want [ssh-rsa AAAA-test]", got.AuthorizedKeys)
+	}
+	if len(got.AuthorizedUsers) != 2 || got.AuthorizedUsers[0] != "root" || got.AuthorizedUsers[1] != "devops" {
+		t.Fatalf("AuthorizedUsers = %v, want [root devops]", got.AuthorizedUsers)
+	}
+	if got.StackscriptID != 123 {
+		t.Fatalf("StackscriptID = %d, want 123", got.StackscriptID)
+	}
+	if got.StackscriptData["foo"] != "bar" {
+		t.Fatalf("StackscriptData = %v, want map[foo:bar]", got.StackscriptData)
 	}
 }
 
@@ -437,7 +468,109 @@ func TestFlattenInstanceConfig(t *testing.T) {
 			if opts.Label != tt.config.Label {
 				t.Errorf("flattenInstanceConfig() Label = %v, want %v", opts.Label, tt.config.Label)
 			}
+			if opts.Comments != tt.config.Comments {
+				t.Errorf("flattenInstanceConfig() Comments = %v, want %v", opts.Comments, tt.config.Comments)
+			}
+
+			if tt.config.Devices != nil {
+				if tt.config.Devices.SDA != nil {
+					if opts.Devices.SDA == nil || opts.Devices.SDA.DiskID != diskLabelToID[tt.config.Devices.SDA.DiskLabel] {
+						t.Errorf("flattenInstanceConfig() SDA = %v, want disk id %d", opts.Devices.SDA, diskLabelToID[tt.config.Devices.SDA.DiskLabel])
+					}
+				}
+				if tt.config.Devices.SDB != nil {
+					if opts.Devices.SDB == nil || opts.Devices.SDB.DiskID != diskLabelToID[tt.config.Devices.SDB.DiskLabel] {
+						t.Errorf("flattenInstanceConfig() SDB = %v, want disk id %d", opts.Devices.SDB, diskLabelToID[tt.config.Devices.SDB.DiskLabel])
+					}
+				}
+			}
+
+			if len(opts.Interfaces) != len(tt.config.Interfaces) {
+				t.Errorf("flattenInstanceConfig() Interfaces length = %d, want %d", len(opts.Interfaces), len(tt.config.Interfaces))
+			}
+			for i := range tt.config.Interfaces {
+				if i >= len(opts.Interfaces) {
+					break
+				}
+				if opts.Interfaces[i].Purpose != linodego.ConfigInterfacePurpose(tt.config.Interfaces[i].Purpose) {
+					t.Errorf("flattenInstanceConfig() Interfaces[%d].Purpose = %q, want %q", i, opts.Interfaces[i].Purpose, tt.config.Interfaces[i].Purpose)
+				}
+				if opts.Interfaces[i].Primary != tt.config.Interfaces[i].Primary {
+					t.Errorf("flattenInstanceConfig() Interfaces[%d].Primary = %v, want %v", i, opts.Interfaces[i].Primary, tt.config.Interfaces[i].Primary)
+				}
+			}
+
+			if tt.config.RootDevice == "" {
+				if opts.RootDevice != nil {
+					t.Errorf("flattenInstanceConfig() RootDevice = %v, want nil", opts.RootDevice)
+				}
+			} else {
+				if opts.RootDevice == nil || *opts.RootDevice != tt.config.RootDevice {
+					t.Errorf("flattenInstanceConfig() RootDevice = %v, want %q", opts.RootDevice, tt.config.RootDevice)
+				}
+			}
+
+			if opts.MemoryLimit != tt.config.MemoryLimit || opts.Kernel != tt.config.Kernel || opts.InitRD != tt.config.InitRD || opts.RunLevel != tt.config.RunLevel || opts.VirtMode != tt.config.VirtMode {
+				t.Errorf("flattenInstanceConfig() scalar fields mismatch: got %+v, config %+v", opts, tt.config)
+			}
 		})
+	}
+}
+
+func TestFlattenInstanceConfig_AllFields(t *testing.T) {
+	diskLabelToID := map[string]int{"boot": 101, "swap": 202}
+	trueVal := true
+	cfg := InstanceConfig{
+		Label:    "cfg-all",
+		Comments: "all fields",
+		Devices: &InstanceConfigDevices{
+			SDA: &InstanceConfigDevice{DiskLabel: "boot"},
+			SDB: &InstanceConfigDevice{DiskLabel: "swap"},
+		},
+		Helpers: &InstanceConfigHelpers{
+			UpdateDBDisabled:  &trueVal,
+			Distro:            &trueVal,
+			ModulesDep:        &trueVal,
+			Network:           &trueVal,
+			DevTmpFsAutomount: &trueVal,
+		},
+		Interfaces: []Interface{{Purpose: "public", Primary: true}},
+		MemoryLimit: 2048,
+		Kernel:      "linode/grub2",
+		InitRD:      44,
+		RootDevice:  "/dev/sda",
+		RunLevel:    "default",
+		VirtMode:    "paravirt",
+	}
+
+	opts, err := flattenInstanceConfig(cfg, diskLabelToID)
+	if err != nil {
+		t.Fatalf("flattenInstanceConfig() unexpected error: %v", err)
+	}
+
+	if opts.Label != cfg.Label || opts.Comments != cfg.Comments {
+		t.Fatalf("label/comments = %q/%q, want %q/%q", opts.Label, opts.Comments, cfg.Label, cfg.Comments)
+	}
+	if opts.Devices.SDA == nil || opts.Devices.SDA.DiskID != 101 {
+		t.Fatalf("SDA = %v, want DiskID 101", opts.Devices.SDA)
+	}
+	if opts.Devices.SDB == nil || opts.Devices.SDB.DiskID != 202 {
+		t.Fatalf("SDB = %v, want DiskID 202", opts.Devices.SDB)
+	}
+	if opts.Helpers == nil || !opts.Helpers.UpdateDBDisabled || !opts.Helpers.Distro || !opts.Helpers.ModulesDep || !opts.Helpers.Network || !opts.Helpers.DevTmpFsAutomount {
+		t.Fatalf("helpers = %+v, want all true", opts.Helpers)
+	}
+	if len(opts.Interfaces) != 1 {
+		t.Fatalf("interfaces length = %d, want 1", len(opts.Interfaces))
+	}
+	if opts.Interfaces[0].Purpose != linodego.ConfigInterfacePurpose("public") || !opts.Interfaces[0].Primary {
+		t.Fatalf("interface mapping = %+v, want purpose public primary true", opts.Interfaces[0])
+	}
+	if opts.MemoryLimit != cfg.MemoryLimit || opts.Kernel != cfg.Kernel || opts.InitRD != cfg.InitRD || opts.RunLevel != cfg.RunLevel || opts.VirtMode != cfg.VirtMode {
+		t.Fatalf("scalar config fields not mapped correctly: %+v", opts)
+	}
+	if opts.RootDevice == nil || *opts.RootDevice != cfg.RootDevice {
+		t.Fatalf("RootDevice = %v, want %q", opts.RootDevice, cfg.RootDevice)
 	}
 }
 
