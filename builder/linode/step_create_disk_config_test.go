@@ -534,7 +534,7 @@ func TestFlattenInstanceConfig_AllFields(t *testing.T) {
 			Network:           &trueVal,
 			DevTmpFsAutomount: &trueVal,
 		},
-		Interfaces: []Interface{{Purpose: "public", Primary: true}},
+		Interfaces:  []Interface{{Purpose: "public", Primary: true}},
 		MemoryLimit: 2048,
 		Kernel:      "linode/grub2",
 		InitRD:      44,
