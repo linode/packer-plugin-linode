@@ -168,7 +168,7 @@ func (s *stepCreateLinode) Run(ctx context.Context, state multistep.StateBag) mu
 	if !useCustomDisks {
 		createOpts.RootPass = c.Comm.Password()
 		createOpts.Image = c.Image
-		createOpts.SwapSize = &c.SwapSize
+		createOpts.SwapSize = c.SwapSize
 		createOpts.StackScriptID = c.StackScriptID
 		createOpts.StackScriptData = c.StackScriptData
 
