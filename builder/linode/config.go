@@ -720,7 +720,7 @@ func (c *Config) Prepare(raws ...any) ([]string, error) {
 				errs, errors.New("authorized_users cannot be specified when using custom disks (specify in disk blocks instead)"))
 		}
 
-		if c.SwapSize != nil && *c.SwapSize > 0 {
+		if c.SwapSize != nil {
 			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("swap_size cannot be specified when using custom disks (create a swap disk instead)"))
 		}
