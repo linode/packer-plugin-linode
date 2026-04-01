@@ -1027,6 +1027,27 @@ func TestBuilderPrepare_CustomDisksValidation(t *testing.T) {
 		}
 	})
 
+	t.Run("IncompatibleSwapSizeZero", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "image")
+		config["swap_size"] = 0
+		config["disk"] = []map[string]any{
+			{"label": "boot", "size": 25000, "image": "linode/arch"},
+		}
+		config["config"] = []map[string]any{
+			{"label": "my-config"},
+		}
+
+		_, _, err := b.Prepare(config)
+		if err == nil {
+			t.Fatal("expected error with swap_size=0 and custom disks")
+		}
+		if !strings.Contains(err.Error(), "swap_size cannot be specified when using custom disks") {
+			t.Fatalf("expected specific error message, got: %s", err)
+		}
+	})
+
 	t.Run("IncompatibleStackScriptID", func(t *testing.T) {
 		var b Builder
 		config := testConfig()
