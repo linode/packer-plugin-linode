@@ -88,7 +88,7 @@ can also be supplied to override the typical auto-generated key:
   for more information on the Images available for use. Examples are `linode/debian12`,
   `linode/debian13`, `linode/ubuntu24.04`, `linode/arch`, and `private/12345`.
 
-- `swap_size` (int) - The disk size (MiB) allocated for swap space.
+- `swap_size` (\*int) - The disk size (MiB) allocated for swap space.
 
 - `private_ip` (bool) - If true, the created Linode will have private networking enabled and assigned
   a private IPv4 address.
@@ -275,6 +275,8 @@ This section outlines the fields configurable for a newer Linode interface objec
 
 - `ipv4` (\*VPCInterfaceIPv4) - Interfaces can be configured with IPv4 addresses or ranges.
 
+- `ipv6` (\*VPCInterfaceIPv6) - IPv6 configuration for this VPC interface.
+
 <!-- End of code generated from the comments of the VPCInterface struct in builder/linode/linode_interfaces.go; -->
 
 
@@ -328,6 +330,43 @@ This section outlines the fields configurable for a newer Linode interface objec
 - `range` (string) - VPC IPv4 ranges.
 
 <!-- End of code generated from the comments of the VPCInterfaceIPv4Range struct in builder/linode/linode_interfaces.go; -->
+
+
+##### VPC Linode Interface IPv6 configuration object (VPCInterfaceIPv6)
+
+###### Optional
+
+<!-- Code generated from the comments of the VPCInterfaceIPv6 struct in builder/linode/linode_interfaces.go; DO NOT EDIT MANUALLY -->
+
+- `slaac` ([]VPCInterfaceIPv6SLAAC) - IPv6 SLAAC settings for this VPC interface.
+
+- `ranges` ([]VPCInterfaceIPv6Range) - IPv6 ranges for this VPC interface.
+
+- `is_public` (\*bool) - Whether the IPv6 addresses are publicly routable.
+
+<!-- End of code generated from the comments of the VPCInterfaceIPv6 struct in builder/linode/linode_interfaces.go; -->
+
+
+##### VPC Linode Interface IPv6 SLAAC configuration object (VPCInterfaceIPv6SLAAC)
+
+###### Required
+
+<!-- Code generated from the comments of the VPCInterfaceIPv6SLAAC struct in builder/linode/linode_interfaces.go; DO NOT EDIT MANUALLY -->
+
+- `range` (string) - The IPv6 SLAAC range for this VPC interface.
+
+<!-- End of code generated from the comments of the VPCInterfaceIPv6SLAAC struct in builder/linode/linode_interfaces.go; -->
+
+
+##### VPC Linode Interface IPv6 Range configuration object (VPCInterfaceIPv6Range)
+
+###### Required
+
+<!-- Code generated from the comments of the VPCInterfaceIPv6Range struct in builder/linode/linode_interfaces.go; DO NOT EDIT MANUALLY -->
+
+- `range` (string) - The IPv6 range for this VPC interface.
+
+<!-- End of code generated from the comments of the VPCInterfaceIPv6Range struct in builder/linode/linode_interfaces.go; -->
 
 
 ##### VLAN Linode Interface configuration object (VLANInterface)

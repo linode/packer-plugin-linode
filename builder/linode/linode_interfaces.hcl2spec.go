@@ -212,6 +212,7 @@ func (*FlatVLANInterface) HCL2Spec() map[string]hcldec.Spec {
 type FlatVPCInterface struct {
 	SubnetID *int                  `mapstructure:"subnet_id" required:"true" cty:"subnet_id" hcl:"subnet_id"`
 	IPv4     *FlatVPCInterfaceIPv4 `mapstructure:"ipv4" required:"false" cty:"ipv4" hcl:"ipv4"`
+	IPv6     *FlatVPCInterfaceIPv6 `mapstructure:"ipv6" required:"false" cty:"ipv6" hcl:"ipv6"`
 }
 
 // FlatMapstructure returns a new FlatVPCInterface.
@@ -228,6 +229,7 @@ func (*FlatVPCInterface) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"subnet_id": &hcldec.AttrSpec{Name: "subnet_id", Type: cty.Number, Required: false},
 		"ipv4":      &hcldec.BlockSpec{TypeName: "ipv4", Nested: hcldec.ObjectSpec((*FlatVPCInterfaceIPv4)(nil).HCL2Spec())},
+		"ipv6":      &hcldec.BlockSpec{TypeName: "ipv6", Nested: hcldec.ObjectSpec((*FlatVPCInterfaceIPv6)(nil).HCL2Spec())},
 	}
 	return s
 }
@@ -301,6 +303,79 @@ func (*VPCInterfaceIPv4Range) FlatMapstructure() interface{ HCL2Spec() map[strin
 // This spec is used by HCL to read the fields of VPCInterfaceIPv4Range.
 // The decoded values from this spec will then be applied to a FlatVPCInterfaceIPv4Range.
 func (*FlatVPCInterfaceIPv4Range) HCL2Spec() map[string]hcldec.Spec {
+	s := map[string]hcldec.Spec{
+		"range": &hcldec.AttrSpec{Name: "range", Type: cty.String, Required: false},
+	}
+	return s
+}
+
+// FlatVPCInterfaceIPv6 is an auto-generated flat version of VPCInterfaceIPv6.
+// Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
+type FlatVPCInterfaceIPv6 struct {
+	SLAAC    []FlatVPCInterfaceIPv6SLAAC `mapstructure:"slaac" required:"false" cty:"slaac" hcl:"slaac"`
+	Ranges   []FlatVPCInterfaceIPv6Range `mapstructure:"ranges" required:"false" cty:"ranges" hcl:"ranges"`
+	IsPublic *bool                       `mapstructure:"is_public" required:"false" cty:"is_public" hcl:"is_public"`
+}
+
+// FlatMapstructure returns a new FlatVPCInterfaceIPv6.
+// FlatVPCInterfaceIPv6 is an auto-generated flat version of VPCInterfaceIPv6.
+// Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
+func (*VPCInterfaceIPv6) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatVPCInterfaceIPv6)
+}
+
+// HCL2Spec returns the hcl spec of a VPCInterfaceIPv6.
+// This spec is used by HCL to read the fields of VPCInterfaceIPv6.
+// The decoded values from this spec will then be applied to a FlatVPCInterfaceIPv6.
+func (*FlatVPCInterfaceIPv6) HCL2Spec() map[string]hcldec.Spec {
+	s := map[string]hcldec.Spec{
+		"slaac":     &hcldec.BlockListSpec{TypeName: "slaac", Nested: hcldec.ObjectSpec((*FlatVPCInterfaceIPv6SLAAC)(nil).HCL2Spec())},
+		"ranges":    &hcldec.BlockListSpec{TypeName: "ranges", Nested: hcldec.ObjectSpec((*FlatVPCInterfaceIPv6Range)(nil).HCL2Spec())},
+		"is_public": &hcldec.AttrSpec{Name: "is_public", Type: cty.Bool, Required: false},
+	}
+	return s
+}
+
+// FlatVPCInterfaceIPv6Range is an auto-generated flat version of VPCInterfaceIPv6Range.
+// Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
+type FlatVPCInterfaceIPv6Range struct {
+	Range *string `mapstructure:"range" required:"true" cty:"range" hcl:"range"`
+}
+
+// FlatMapstructure returns a new FlatVPCInterfaceIPv6Range.
+// FlatVPCInterfaceIPv6Range is an auto-generated flat version of VPCInterfaceIPv6Range.
+// Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
+func (*VPCInterfaceIPv6Range) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatVPCInterfaceIPv6Range)
+}
+
+// HCL2Spec returns the hcl spec of a VPCInterfaceIPv6Range.
+// This spec is used by HCL to read the fields of VPCInterfaceIPv6Range.
+// The decoded values from this spec will then be applied to a FlatVPCInterfaceIPv6Range.
+func (*FlatVPCInterfaceIPv6Range) HCL2Spec() map[string]hcldec.Spec {
+	s := map[string]hcldec.Spec{
+		"range": &hcldec.AttrSpec{Name: "range", Type: cty.String, Required: false},
+	}
+	return s
+}
+
+// FlatVPCInterfaceIPv6SLAAC is an auto-generated flat version of VPCInterfaceIPv6SLAAC.
+// Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
+type FlatVPCInterfaceIPv6SLAAC struct {
+	Range *string `mapstructure:"range" required:"true" cty:"range" hcl:"range"`
+}
+
+// FlatMapstructure returns a new FlatVPCInterfaceIPv6SLAAC.
+// FlatVPCInterfaceIPv6SLAAC is an auto-generated flat version of VPCInterfaceIPv6SLAAC.
+// Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
+func (*VPCInterfaceIPv6SLAAC) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatVPCInterfaceIPv6SLAAC)
+}
+
+// HCL2Spec returns the hcl spec of a VPCInterfaceIPv6SLAAC.
+// This spec is used by HCL to read the fields of VPCInterfaceIPv6SLAAC.
+// The decoded values from this spec will then be applied to a FlatVPCInterfaceIPv6SLAAC.
+func (*FlatVPCInterfaceIPv6SLAAC) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
 		"range": &hcldec.AttrSpec{Name: "range", Type: cty.String, Required: false},
 	}

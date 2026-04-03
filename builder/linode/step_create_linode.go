@@ -95,6 +95,25 @@ func flattenVPCInterface(vpc *VPCInterface) *linodego.VPCInterfaceCreateOptions 
 			Ranges:    linodego.Pointer(ranges),
 		}
 	}
+	if vpc.IPv6 != nil {
+		slaac := make([]linodego.VPCInterfaceIPv6SLAACCreateOptions, len(vpc.IPv6.SLAAC))
+		ranges := make([]linodego.VPCInterfaceIPv6RangeCreateOptions, len(vpc.IPv6.Ranges))
+		for i, s := range vpc.IPv6.SLAAC {
+			slaac[i] = linodego.VPCInterfaceIPv6SLAACCreateOptions{
+				Range: s.Range,
+			}
+		}
+		for i, r := range vpc.IPv6.Ranges {
+			ranges[i] = linodego.VPCInterfaceIPv6RangeCreateOptions{
+				Range: r.Range,
+			}
+		}
+		result.IPv6 = &linodego.VPCInterfaceIPv6CreateOptions{
+			SLAAC:    linodego.Pointer(slaac),
+			Ranges:   linodego.Pointer(ranges),
+			IsPublic: vpc.IPv6.IsPublic,
+		}
+	}
 	return result
 }
 
@@ -168,7 +187,7 @@ func (s *stepCreateLinode) Run(ctx context.Context, state multistep.StateBag) mu
 	if !useCustomDisks {
 		createOpts.RootPass = c.Comm.Password()
 		createOpts.Image = c.Image
-		createOpts.SwapSize = &c.SwapSize
+		createOpts.SwapSize = c.SwapSize
 		createOpts.StackScriptID = c.StackScriptID
 		createOpts.StackScriptData = c.StackScriptData
 
