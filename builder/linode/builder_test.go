@@ -123,6 +123,44 @@ func TestBuilderPrepare_Size(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare_SwapSize(t *testing.T) {
+	t.Run("omitted remains nil", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "swap_size")
+
+		_, warnings, err := b.Prepare(config)
+		if len(warnings) > 0 {
+			t.Fatalf("bad: %#v", warnings)
+		}
+		if err != nil {
+			t.Fatalf("should not have error: %s", err)
+		}
+
+		if b.config.SwapSize != nil {
+			t.Fatalf("swap_size = %v, want nil", b.config.SwapSize)
+		}
+	})
+
+	t.Run("explicit zero remains non-nil", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		config["swap_size"] = 0
+
+		_, warnings, err := b.Prepare(config)
+		if len(warnings) > 0 {
+			t.Fatalf("bad: %#v", warnings)
+		}
+		if err != nil {
+			t.Fatalf("should not have error: %s", err)
+		}
+
+		if b.config.SwapSize == nil || *b.config.SwapSize != 0 {
+			t.Fatalf("swap_size = %v, want pointer to 0", b.config.SwapSize)
+		}
+	})
+}
+
 func TestBuilderPrepare_Image(t *testing.T) {
 	var b Builder
 	config := testConfig()
@@ -983,6 +1021,27 @@ func TestBuilderPrepare_CustomDisksValidation(t *testing.T) {
 		_, _, err := b.Prepare(config)
 		if err == nil {
 			t.Fatal("expected error with swap_size and custom disks")
+		}
+		if !strings.Contains(err.Error(), "swap_size cannot be specified when using custom disks") {
+			t.Fatalf("expected specific error message, got: %s", err)
+		}
+	})
+
+	t.Run("IncompatibleSwapSizeZero", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "image")
+		config["swap_size"] = 0
+		config["disk"] = []map[string]any{
+			{"label": "boot", "size": 25000, "image": "linode/arch"},
+		}
+		config["config"] = []map[string]any{
+			{"label": "my-config"},
+		}
+
+		_, _, err := b.Prepare(config)
+		if err == nil {
+			t.Fatal("expected error with swap_size=0 and custom disks")
 		}
 		if !strings.Contains(err.Error(), "swap_size cannot be specified when using custom disks") {
 			t.Fatalf("expected specific error message, got: %s", err)

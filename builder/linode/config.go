@@ -288,7 +288,7 @@ type Config struct {
 	Image string `mapstructure:"image" required:"false"`
 
 	// The disk size (MiB) allocated for swap space.
-	SwapSize int `mapstructure:"swap_size" required:"false"`
+	SwapSize *int `mapstructure:"swap_size" required:"false"`
 
 	// If true, the created Linode will have private networking enabled and assigned
 	// a private IPv4 address.
@@ -720,7 +720,7 @@ func (c *Config) Prepare(raws ...any) ([]string, error) {
 				errs, errors.New("authorized_users cannot be specified when using custom disks (specify in disk blocks instead)"))
 		}
 
-		if c.SwapSize > 0 {
+		if c.SwapSize != nil {
 			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("swap_size cannot be specified when using custom disks (create a swap disk instead)"))
 		}
