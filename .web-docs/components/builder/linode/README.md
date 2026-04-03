@@ -88,7 +88,7 @@ can also be supplied to override the typical auto-generated key:
   for more information on the Images available for use. Examples are `linode/debian12`,
   `linode/debian13`, `linode/ubuntu24.04`, `linode/arch`, and `private/12345`.
 
-- `swap_size` (\*int) - The disk size (MiB) allocated for swap space.
+- `swap_size` (int) - The disk size (MiB) allocated for swap space. If omitted, no swap size is sent in the API payload.
 
 - `private_ip` (bool) - If true, the created Linode will have private networking enabled and assigned
   a private IPv4 address.
