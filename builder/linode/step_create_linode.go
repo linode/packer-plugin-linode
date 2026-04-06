@@ -112,7 +112,7 @@ func flattenVLANInterface(vlan *VLANInterface) *linodego.VLANInterface {
 }
 
 func flattenLinodeInterface(li LinodeInterface) (opts linodego.LinodeInterfaceCreateOptions) {
-	opts.FirewallID = linodego.Pointer(li.FirewallID)
+	opts.FirewallID = li.FirewallID
 
 	if li.DefaultRoute != nil {
 		opts.DefaultRoute = &linodego.InterfaceDefaultRoute{
