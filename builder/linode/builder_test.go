@@ -569,6 +569,71 @@ func TestBuilderPrepare_LinodeNetworkInterfaces(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
+	config["linode_interface"] = []map[string]any{
+		{
+			"firewall_id": 123,
+			"default_route": map[string]any{
+				"ipv4": true,
+				"ipv6": true,
+			},
+			"public": map[string]any{
+				"ipv4": map[string]any{
+					"address": []map[string]any{
+						{
+							"address": "auto",
+							"primary": true,
+						},
+					},
+				},
+				"ipv6": map[string]any{
+					"ranges": []map[string]any{
+						{
+							"range": "/64",
+						},
+					},
+				},
+			},
+		},
+		{
+			"firewall_id": 123,
+			"default_route": map[string]any{
+				"ipv4": false,
+				"ipv6": false,
+			},
+			"vpc": map[string]any{
+				"subnet_id": 12345,
+				"ipv4": map[string]any{
+					"addresses": []map[string]any{
+						{"address": "auto", "primary": false, "nat_1_1_address": "auto"},
+					},
+				},
+				"ipv6": map[string]any{
+					"slaac": []map[string]any{
+						{
+							"range": "2600:3c03:e000:123::/64",
+						},
+					},
+					"ranges": []map[string]any{
+						{
+							"range": "2600:3c03:e000:123:1::/64",
+						},
+					},
+					"is_public": true,
+				},
+			},
+		},
+		{
+			"default_route": map[string]any{
+				"ipv4": false,
+				"ipv6": false,
+			},
+			"vlan": map[string]any{
+				"vlan_label":   "vlan-1",
+				"ipam_address": "10.0.0.1/24",
+			},
+		},
+	}
+
 	expectedLinodeInterfaces := []LinodeInterface{
 		{
 			FirewallID: linodego.Pointer(123),
@@ -611,6 +676,19 @@ func TestBuilderPrepare_LinodeNetworkInterfaces(t *testing.T) {
 						},
 					},
 				},
+				IPv6: &VPCInterfaceIPv6{
+					SLAAC: []VPCInterfaceIPv6SLAAC{
+						{
+							Range: "2600:3c03:e000:123::/64",
+						},
+					},
+					Ranges: []VPCInterfaceIPv6Range{
+						{
+							Range: "2600:3c03:e000:123:1::/64",
+						},
+					},
+					IsPublic: linodego.Pointer(true),
+				},
 			},
 		},
 		{
@@ -625,8 +703,6 @@ func TestBuilderPrepare_LinodeNetworkInterfaces(t *testing.T) {
 		},
 	}
 
-	// Test set
-	config["linode_interface"] = expectedLinodeInterfaces
 	b = Builder{}
 	_, warnings, err = b.Prepare(config)
 	if len(warnings) > 0 {
