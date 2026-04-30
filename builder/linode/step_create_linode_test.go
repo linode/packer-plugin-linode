@@ -55,6 +55,44 @@ func TestFlattenVPCInterface_IPv4AddressFields(t *testing.T) {
 	}
 }
 
+func TestFlattenVPCInterface_IPv6Fields(t *testing.T) {
+	vpc := &VPCInterface{
+		SubnetID: 12345,
+		IPv6: &VPCInterfaceIPv6{
+			SLAAC: []VPCInterfaceIPv6SLAAC{
+				{Range: "2600:3c03:e000:123::/64"},
+			},
+			Ranges: []VPCInterfaceIPv6Range{
+				{Range: "2600:3c03:e000:123:1::/64"},
+			},
+			IsPublic: linodego.Pointer(true),
+		},
+	}
+
+	got := flattenVPCInterface(vpc)
+	if got == nil {
+		t.Fatal("flattenVPCInterface() returned nil")
+	}
+	if got.IPv6 == nil {
+		t.Fatal("flattenVPCInterface().IPv6 returned nil")
+	}
+	if got.IPv6.SLAAC == nil || len(*got.IPv6.SLAAC) != 1 {
+		t.Fatalf("slaac = %v, want one slaac range", got.IPv6.SLAAC)
+	}
+	if (*got.IPv6.SLAAC)[0].Range != "2600:3c03:e000:123::/64" {
+		t.Fatalf("slaac range = %q, want 2600:3c03:e000:123::/64", (*got.IPv6.SLAAC)[0].Range)
+	}
+	if got.IPv6.Ranges == nil || len(*got.IPv6.Ranges) != 1 {
+		t.Fatalf("ranges = %v, want one ipv6 range", got.IPv6.Ranges)
+	}
+	if (*got.IPv6.Ranges)[0].Range != "2600:3c03:e000:123:1::/64" {
+		t.Fatalf("range = %q, want 2600:3c03:e000:123:1::/64", (*got.IPv6.Ranges)[0].Range)
+	}
+	if got.IPv6.IsPublic == nil || !*got.IPv6.IsPublic {
+		t.Fatalf("is_public = %v, want true", got.IPv6.IsPublic)
+	}
+}
+
 func TestFlattenConfigInterface_AllFields(t *testing.T) {
 	vpcIP := &InterfaceIPv4{VPC: "10.0.0.2", NAT1To1: linodego.Pointer("198.51.100.2")}
 	iface := Interface{
@@ -151,7 +189,7 @@ func TestFlattenLinodeInterface_AllFields(t *testing.T) {
 	}
 
 	got := flattenLinodeInterface(li)
-	if got.FirewallID == nil || *got.FirewallID == nil || **got.FirewallID != 123 {
+	if got.FirewallID == nil || *got.FirewallID != 123 {
 		t.Fatalf("firewall_id = %v, want 123", got.FirewallID)
 	}
 	if got.DefaultRoute == nil || got.DefaultRoute.IPv4 == nil || !*got.DefaultRoute.IPv4 {
