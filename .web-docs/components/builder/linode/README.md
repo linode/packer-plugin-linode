@@ -90,12 +90,20 @@ can also be supplied to override the typical auto-generated key:
 
 - `swap_size` (\*int) - The disk size (MiB) allocated for swap space.
 
+- `boot_size` (\*int) - The size (MiB) of the primary boot disk. Any remaining disk space beyond
+  the boot disk and swap partition is left unallocated. If not specified,
+  the boot disk will use all available space after swap.
+
+- `kernel` (string) - The kernel to boot the instance with. This can be a kernel ID such as
+  "linode/latest-64bit" or "linode/grub2". See the available kernels at
+  https://api.linode.com/v4/linode/kernels.
+
 - `private_ip` (bool) - If true, the created Linode will have private networking enabled and assigned
   a private IPv4 address.
 
 - `root_pass` (string) - The root password of the Linode instance for building the image. Please note that when
-  you create a new Linode instance with a private image, you will be required to setup a
-  new root password.
+  you create a new Linode instance with an image, at least one of root_pass,
+  authorized_keys, or authorized_users must be provided
 
 - `image_label` (string) - The name of the resulting image that will appear
   in your account. Defaults to `packer-{{timestamp}}` (see [configuration
@@ -456,10 +464,14 @@ The SSH public key from the communicator configuration will be automatically add
 
 <!-- Code generated from the comments of the Disk struct in builder/linode/config.go; DO NOT EDIT MANUALLY -->
 
-- `image` (string) - An Image ID to deploy the Linode Disk from. If provided, root_pass is required.
+- `image` (string) - An Image ID to deploy the Linode Disk from. If provided,
+  at least one of root_pass, authorized_keys, or authorized_users
+  must be provided to ensure access.
 
 - `filesystem` (string) - The filesystem for the disk. Valid values are raw, swap, ext3, ext4, initrd.
   Defaults to ext4.
+
+- `root_pass` (string) - The root password for this disk when deploying from an image.
 
 - `authorized_keys` ([]string) - A list of public SSH keys to be installed on the disk as the root user's
   ~/.ssh/authorized_keys file.
