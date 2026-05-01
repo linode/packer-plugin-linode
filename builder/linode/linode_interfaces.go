@@ -1,5 +1,5 @@
 //go:generate packer-sdc struct-markdown
-//go:generate packer-sdc mapstructure-to-hcl2 -type LinodeInterface,InterfaceDefaultRoute,PublicInterface,PublicInterfaceIPv4,PublicInterfaceIPv6,PublicInterfaceIPv4Address,PublicInterfaceIPv6Range,VPCInterface,VPCInterfaceIPv4,VPCInterfaceIPv4Address,VPCInterfaceIPv4Range,VLANInterface
+//go:generate packer-sdc mapstructure-to-hcl2 -type LinodeInterface,InterfaceDefaultRoute,PublicInterface,PublicInterfaceIPv4,PublicInterfaceIPv6,PublicInterfaceIPv4Address,PublicInterfaceIPv6Range,VPCInterface,VPCInterfaceIPv4,VPCInterfaceIPv4Address,VPCInterfaceIPv4Range,VPCInterfaceIPv6,VPCInterfaceIPv6SLAAC,VPCInterfaceIPv6Range,VLANInterface
 package linode
 
 type LinodeInterface struct {
@@ -79,7 +79,11 @@ type VPCInterface struct {
 
 	// Interfaces can be configured with IPv4 addresses or ranges.
 	IPv4 *VPCInterfaceIPv4 `mapstructure:"ipv4" required:"false"`
+
+	// IPv6 configuration for this VPC interface.
+	IPv6 *VPCInterfaceIPv6 `mapstructure:"ipv6" required:"false"`
 }
+
 type VPCInterfaceIPv4 struct {
 	// IPv4 address settings for this VPC interface.
 	Addresses []VPCInterfaceIPv4Address `mapstructure:"addresses" required:"false"`
@@ -107,6 +111,27 @@ type VPCInterfaceIPv4Address struct {
 
 type VPCInterfaceIPv4Range struct {
 	// VPC IPv4 ranges.
+	Range string `mapstructure:"range" required:"true"`
+}
+
+type VPCInterfaceIPv6 struct {
+	// IPv6 SLAAC settings for this VPC interface.
+	SLAAC []VPCInterfaceIPv6SLAAC `mapstructure:"slaac" required:"false"`
+
+	// IPv6 ranges for this VPC interface.
+	Ranges []VPCInterfaceIPv6Range `mapstructure:"ranges" required:"false"`
+
+	// Whether the IPv6 addresses are publicly routable.
+	IsPublic *bool `mapstructure:"is_public" required:"false"`
+}
+
+type VPCInterfaceIPv6SLAAC struct {
+	// The IPv6 SLAAC range for this VPC interface.
+	Range string `mapstructure:"range" required:"true"`
+}
+
+type VPCInterfaceIPv6Range struct {
+	// The IPv6 range for this VPC interface.
 	Range string `mapstructure:"range" required:"true"`
 }
 
