@@ -635,13 +635,17 @@ func (c *Config) Prepare(raws ...any) ([]string, error) {
 	}
 
 	// When creating a Linode from an image, at least one of root_pass, authorized_keys, or authorized_users
-	// must be provided to ensure access to the instance
+	// must be provided to ensure access to the instance.
+	// Note: If no SSHPrivateKeyFile is provided, Packer will auto-generate an SSH key pair during the build,
+	// which will be added to authorized_keys on the instance, satisfying this requirement.
 	if c.Image != "" {
 		hasRootPass := strings.TrimSpace(c.RootPass) != ""
 		hasKeys := len(c.AuthorizedKeys) > 0
 		hasUsers := len(c.AuthorizedUsers) > 0
+		// If no private key file is specified, Packer will auto-generate an SSH key
+		willAutoGenerateKey := c.Comm.SSHPrivateKeyFile == ""
 
-		if !hasRootPass && !hasKeys && !hasUsers {
+		if !hasRootPass && !hasKeys && !hasUsers && !willAutoGenerateKey {
 			errs = packersdk.MultiErrorAppend(
 				errs,
 				fmt.Errorf(
@@ -651,8 +655,17 @@ func (c *Config) Prepare(raws ...any) ([]string, error) {
 		}
 	}
 
+	// Get boot disk label for validation (if custom disks are configured)
+	bootLabel, bootLabelErr := c.getBootDiskLabel()
+
+	// Validate non-boot disks: they don't get the auto-generated SSH key, so they need explicit auth
 	for _, d := range c.Disks {
 		if strings.TrimSpace(d.Image) == "" {
+			continue
+		}
+
+		// Skip boot disk - it's validated separately below
+		if bootLabelErr == nil && d.Label == bootLabel {
 			continue
 		}
 
@@ -671,8 +684,8 @@ func (c *Config) Prepare(raws ...any) ([]string, error) {
 		}
 	}
 
-	bootLabel, err := c.getBootDiskLabel()
-	if err == nil {
+	// Validate boot disk: it gets the auto-generated SSH key appended (if no ssh_private_key_file)
+	if bootLabelErr == nil {
 		for _, d := range c.Disks {
 			if d.Label != bootLabel {
 				continue
@@ -685,8 +698,10 @@ func (c *Config) Prepare(raws ...any) ([]string, error) {
 			hasRootPass := strings.TrimSpace(d.RootPass) != ""
 			hasKeys := len(d.AuthorizedKeys) > 0
 			hasUsers := len(d.AuthorizedUsers) > 0
+			// If no private key file is specified, Packer will auto-generate an SSH key
+			willAutoGenerateKey := c.Comm.SSHPrivateKeyFile == ""
 
-			if !hasRootPass && !hasKeys && !hasUsers {
+			if !hasRootPass && !hasKeys && !hasUsers && !willAutoGenerateKey {
 				errs = packersdk.MultiErrorAppend(
 					errs,
 					fmt.Errorf(
