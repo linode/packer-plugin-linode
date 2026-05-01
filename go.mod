@@ -14,6 +14,8 @@ require (
 	golang.org/x/oauth2 v0.36.0
 )
 
+replace github.com/linode/linodego => github.com/psnoch-akamai/linodego v0.0.0-20260429094800-f218e562c953
+
 require (
 	cel.dev/expr v0.25.1 // indirect
 	cloud.google.com/go v0.123.0 // indirect

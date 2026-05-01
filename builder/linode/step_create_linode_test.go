@@ -151,7 +151,7 @@ func TestFlattenLinodeInterface_AllFields(t *testing.T) {
 	}
 
 	got := flattenLinodeInterface(li)
-	if got.FirewallID == nil || *got.FirewallID != 123 {
+	if got.FirewallID == nil || *got.FirewallID == nil || **got.FirewallID != 123 {
 		t.Fatalf("firewall_id = %v, want 123", got.FirewallID)
 	}
 	if got.DefaultRoute == nil || got.DefaultRoute.IPv4 == nil || !*got.DefaultRoute.IPv4 {

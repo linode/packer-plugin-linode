@@ -112,7 +112,9 @@ func flattenVLANInterface(vlan *VLANInterface) *linodego.VLANInterface {
 }
 
 func flattenLinodeInterface(li LinodeInterface) (opts linodego.LinodeInterfaceCreateOptions) {
-	opts.FirewallID = li.FirewallID
+	if li.FirewallID != nil {
+		opts.FirewallID = &li.FirewallID
+	}
 
 	if li.DefaultRoute != nil {
 		opts.DefaultRoute = &linodego.InterfaceDefaultRoute{
@@ -166,11 +168,18 @@ func (s *stepCreateLinode) Run(ctx context.Context, state multistep.StateBag) mu
 
 	// Only set image-related options when NOT using custom disks
 	if !useCustomDisks {
-		createOpts.RootPass = c.Comm.Password()
+		// Use c.RootPass directly instead of c.Comm.Password() to respect the user's choice
+		// If root_pass is not provided, the API will accept it when authorized_keys or authorized_users is set
+		createOpts.RootPass = c.RootPass
 		createOpts.Image = c.Image
 		createOpts.SwapSize = c.SwapSize
+		createOpts.BootSize = c.BootSize
 		createOpts.StackScriptID = c.StackScriptID
 		createOpts.StackScriptData = c.StackScriptData
+
+		if c.Kernel != "" {
+			createOpts.Kernel = &c.Kernel
+		}
 
 		if pubKey := string(c.Comm.SSHPublicKey); pubKey != "" {
 			createOpts.AuthorizedKeys = append(createOpts.AuthorizedKeys, pubKey)

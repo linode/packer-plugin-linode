@@ -13,11 +13,12 @@ import (
 
 func testConfig() map[string]any {
 	return map[string]any{
-		"linode_token":  "bar",
-		"region":        "us-ord",
-		"instance_type": "g6-nanode-1",
-		"ssh_username":  "root",
-		"image":         "linode/arch",
+		"linode_token":    "bar",
+		"region":          "us-ord",
+		"instance_type":   "g6-nanode-1",
+		"ssh_username":    "root",
+		"image":           "linode/arch",
+		"authorized_keys": []string{"ssh-rsa AAAA..."},
 	}
 }
 
@@ -373,9 +374,11 @@ func TestBuilderPrepare_AuthorizedKeysAndUsers(t *testing.T) {
 	var b Builder
 	config := testConfig()
 
-	// Test optional
+	// Test optional - when image is specified, at least one of root_pass, authorized_keys, or authorized_users is required
+	// So we use root_pass as the alternative auth method
 	delete(config, "authorized_keys")
 	delete(config, "authorized_users")
+	config["root_pass"] = "testpassword123"
 
 	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
@@ -412,6 +415,214 @@ func TestBuilderPrepare_AuthorizedKeysAndUsers(t *testing.T) {
 	if !reflect.DeepEqual(b.config.AuthorizedUsers, expectedUsers) {
 		t.Errorf("got %v, expected %v", b.config.AuthorizedKeys, expectedUsers)
 	}
+}
+
+// TestBuilderPrepare_RootPassOptional tests that root_pass is optional when
+// authorized_keys or authorized_users is provided for instances with an image.
+func TestBuilderPrepare_RootPassOptional(t *testing.T) {
+	t.Run("RootPassOnlyWithImage", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "authorized_keys")
+		delete(config, "authorized_users")
+		config["root_pass"] = "testpassword123"
+
+		_, _, err := b.Prepare(config)
+		if err != nil {
+			t.Fatalf("root_pass only should work: %s", err)
+		}
+		if b.config.RootPass != "testpassword123" {
+			t.Errorf("expected root_pass to be set, got: %s", b.config.RootPass)
+		}
+	})
+
+	t.Run("AuthorizedKeysOnlyWithImage", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "root_pass")
+		// authorized_keys is already set in testConfig()
+
+		_, _, err := b.Prepare(config)
+		if err != nil {
+			t.Fatalf("authorized_keys only should work: %s", err)
+		}
+		if b.config.RootPass != "" {
+			t.Errorf("expected root_pass to be empty, got: %s", b.config.RootPass)
+		}
+	})
+
+	t.Run("AuthorizedUsersOnlyWithImage", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "authorized_keys")
+		delete(config, "root_pass")
+		config["authorized_users"] = []string{"testuser"}
+
+		_, _, err := b.Prepare(config)
+		if err != nil {
+			t.Fatalf("authorized_users only should work: %s", err)
+		}
+		if b.config.RootPass != "" {
+			t.Errorf("expected root_pass to be empty, got: %s", b.config.RootPass)
+		}
+	})
+
+	t.Run("NoAuthMethodWithImage", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "authorized_keys")
+		delete(config, "authorized_users")
+		delete(config, "root_pass")
+
+		_, _, err := b.Prepare(config)
+		if err == nil {
+			t.Fatal("expected error when no auth method is specified with image")
+		}
+		if !strings.Contains(err.Error(), "at least one of root_pass, authorized_keys, or authorized_users must be provided") {
+			t.Fatalf("expected specific error message, got: %s", err)
+		}
+	})
+
+	t.Run("AllAuthMethodsWithImage", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		config["root_pass"] = "testpassword123"
+		config["authorized_keys"] = []string{"ssh-rsa AAAA..."}
+		config["authorized_users"] = []string{"testuser"}
+
+		_, _, err := b.Prepare(config)
+		if err != nil {
+			t.Fatalf("all auth methods together should work: %s", err)
+		}
+	})
+}
+
+// TestBuilderPrepare_DiskRootPassOptional tests that root_pass is optional for
+// custom disks with images when authorized_keys or authorized_users is provided.
+func TestBuilderPrepare_DiskRootPassOptional(t *testing.T) {
+	t.Run("DiskWithRootPassOnly", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "image")
+		delete(config, "authorized_keys")
+		config["disk"] = []map[string]any{
+			{
+				"label":     "boot",
+				"size":      25000,
+				"image":     "linode/arch",
+				"root_pass": "diskpassword123",
+			},
+		}
+		config["config"] = []map[string]any{
+			{"label": "my-config", "root_device": "/dev/sda", "devices": map[string]any{"sda": map[string]any{"disk_label": "boot"}}},
+		}
+
+		_, _, err := b.Prepare(config)
+		if err != nil {
+			t.Fatalf("disk with root_pass only should work: %s", err)
+		}
+	})
+
+	t.Run("DiskWithAuthorizedKeysOnly", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "image")
+		delete(config, "authorized_keys")
+		config["disk"] = []map[string]any{
+			{
+				"label":           "boot",
+				"size":            25000,
+				"image":           "linode/arch",
+				"authorized_keys": []string{"ssh-rsa AAAA..."},
+			},
+		}
+		config["config"] = []map[string]any{
+			{"label": "my-config", "root_device": "/dev/sda", "devices": map[string]any{"sda": map[string]any{"disk_label": "boot"}}},
+		}
+
+		_, _, err := b.Prepare(config)
+		if err != nil {
+			t.Fatalf("disk with authorized_keys only should work: %s", err)
+		}
+	})
+
+	t.Run("DiskWithAuthorizedUsersOnly", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "image")
+		delete(config, "authorized_keys")
+		config["disk"] = []map[string]any{
+			{
+				"label":            "boot",
+				"size":             25000,
+				"image":            "linode/arch",
+				"authorized_users": []string{"testuser"},
+			},
+		}
+		config["config"] = []map[string]any{
+			{"label": "my-config", "root_device": "/dev/sda", "devices": map[string]any{"sda": map[string]any{"disk_label": "boot"}}},
+		}
+
+		_, _, err := b.Prepare(config)
+		if err != nil {
+			t.Fatalf("disk with authorized_users only should work: %s", err)
+		}
+	})
+
+	t.Run("DiskWithNoAuthMethod", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "image")
+		delete(config, "authorized_keys")
+		config["disk"] = []map[string]any{
+			{
+				"label": "boot",
+				"size":  25000,
+				"image": "linode/arch",
+				// No auth method specified
+			},
+		}
+		config["config"] = []map[string]any{
+			{"label": "my-config", "root_device": "/dev/sda", "devices": map[string]any{"sda": map[string]any{"disk_label": "boot"}}},
+		}
+
+		_, _, err := b.Prepare(config)
+		if err == nil {
+			t.Fatal("expected error when disk has image but no auth method")
+		}
+		if !strings.Contains(err.Error(), "at least one of root_pass, authorized_keys, or authorized_users must be provided") {
+			t.Fatalf("expected specific error message, got: %s", err)
+		}
+	})
+
+	t.Run("DiskWithoutImageNoAuthRequired", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "image")
+		delete(config, "authorized_keys")
+		config["disk"] = []map[string]any{
+			{
+				"label":           "boot",
+				"size":            25000,
+				"image":           "linode/arch",
+				"authorized_keys": []string{"ssh-rsa AAAA..."},
+			},
+			{
+				"label":      "data",
+				"size":       10000,
+				"filesystem": "ext4",
+				// No image, so no auth method required
+			},
+		}
+		config["config"] = []map[string]any{
+			{"label": "my-config", "root_device": "/dev/sda", "devices": map[string]any{"sda": map[string]any{"disk_label": "boot"}, "sdb": map[string]any{"disk_label": "data"}}},
+		}
+
+		_, _, err := b.Prepare(config)
+		if err != nil {
+			t.Fatalf("disk without image should not require auth method: %s", err)
+		}
+	})
 }
 
 func TestBuilderPrepare_PrivateIP(t *testing.T) {
@@ -767,6 +978,136 @@ func TestBuilderPrepare_ImageShareGroupIDs(t *testing.T) {
 	}
 }
 
+func TestBuilderPrepare_BootSizeAndKernel(t *testing.T) {
+	t.Run("DefaultsAreNilAndEmpty", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "boot_size")
+		delete(config, "kernel")
+
+		_, warnings, err := b.Prepare(config)
+		if len(warnings) > 0 {
+			t.Fatalf("bad: %#v", warnings)
+		}
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		if b.config.BootSize != nil {
+			t.Errorf("expected boot_size to be nil, got %v", b.config.BootSize)
+		}
+		if b.config.Kernel != "" {
+			t.Errorf("expected kernel to be empty, got %v", b.config.Kernel)
+		}
+	})
+
+	t.Run("BootSizeSet", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		expectedBootSize := 20000
+		config["boot_size"] = expectedBootSize
+
+		_, warnings, err := b.Prepare(config)
+		if len(warnings) > 0 {
+			t.Fatalf("bad: %#v", warnings)
+		}
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		if b.config.BootSize == nil || *b.config.BootSize != expectedBootSize {
+			t.Errorf("expected boot_size to be %d, got %v", expectedBootSize, b.config.BootSize)
+		}
+	})
+
+	t.Run("KernelSet", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		expectedKernel := "linode/latest-64bit"
+		config["kernel"] = expectedKernel
+
+		_, warnings, err := b.Prepare(config)
+		if len(warnings) > 0 {
+			t.Fatalf("bad: %#v", warnings)
+		}
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		if b.config.Kernel != expectedKernel {
+			t.Errorf("expected kernel to be %s, got %s", expectedKernel, b.config.Kernel)
+		}
+	})
+
+	t.Run("BothSet", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		expectedBootSize := 15000
+		expectedKernel := "linode/grub2"
+		config["boot_size"] = expectedBootSize
+		config["kernel"] = expectedKernel
+
+		_, warnings, err := b.Prepare(config)
+		if len(warnings) > 0 {
+			t.Fatalf("bad: %#v", warnings)
+		}
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		if b.config.BootSize == nil || *b.config.BootSize != expectedBootSize {
+			t.Errorf("expected boot_size to be %d, got %v", expectedBootSize, b.config.BootSize)
+		}
+		if b.config.Kernel != expectedKernel {
+			t.Errorf("expected kernel to be %s, got %s", expectedKernel, b.config.Kernel)
+		}
+	})
+
+	t.Run("BootSizeNotAllowedWithCustomDisks", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "image")
+		delete(config, "authorized_keys")
+		config["boot_size"] = 20000
+		config["disk"] = []map[string]any{
+			{"label": "boot", "size": 25000, "image": "linode/arch", "authorized_keys": []string{"ssh-rsa AAAA..."}},
+		}
+		config["config"] = []map[string]any{
+			{"label": "my-config", "root_device": "/dev/sda", "devices": map[string]any{"sda": map[string]any{"disk_label": "boot"}}},
+		}
+
+		_, _, err := b.Prepare(config)
+		if err == nil {
+			t.Fatal("expected error when boot_size is specified with custom disks")
+		}
+		if !strings.Contains(err.Error(), "boot_size cannot be specified when using custom disks") {
+			t.Fatalf("expected specific error message, got: %s", err)
+		}
+	})
+
+	t.Run("KernelNotAllowedWithCustomDisks", func(t *testing.T) {
+		var b Builder
+		config := testConfig()
+		delete(config, "image")
+		delete(config, "authorized_keys")
+		config["kernel"] = "linode/latest-64bit"
+		config["disk"] = []map[string]any{
+			{"label": "boot", "size": 25000, "image": "linode/arch", "authorized_keys": []string{"ssh-rsa AAAA..."}},
+		}
+		config["config"] = []map[string]any{
+			{"label": "my-config", "root_device": "/dev/sda", "devices": map[string]any{"sda": map[string]any{"disk_label": "boot"}}},
+		}
+
+		_, _, err := b.Prepare(config)
+		if err == nil {
+			t.Fatal("expected error when kernel is specified with custom disks")
+		}
+		if !strings.Contains(err.Error(), "kernel cannot be specified when using custom disks") {
+			t.Fatalf("expected specific error message, got: %s", err)
+		}
+	})
+}
+
 func TestBuilderPrepare_CustomDisks(t *testing.T) {
 	var b Builder
 	config := testConfig()
@@ -774,10 +1115,11 @@ func TestBuilderPrepare_CustomDisks(t *testing.T) {
 	// Test with custom disk
 	config["disk"] = []map[string]any{
 		{
-			"label":      "boot",
-			"size":       25000,
-			"image":      "linode/arch",
-			"filesystem": "ext4",
+			"label":           "boot",
+			"size":            25000,
+			"image":           "linode/arch",
+			"filesystem":      "ext4",
+			"authorized_keys": []string{"ssh-rsa AAAA..."},
 		},
 		{
 			"label":      "swap",
@@ -804,7 +1146,9 @@ func TestBuilderPrepare_CustomDisks(t *testing.T) {
 	}
 
 	// When using custom disks, image should not be required at top level
+	// Also remove top-level authorized_keys since it's not allowed with custom disks
 	delete(config, "image")
+	delete(config, "authorized_keys")
 
 	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
@@ -859,14 +1203,16 @@ func TestBuilderPrepare_CustomConfig(t *testing.T) {
 
 	config["disk"] = []map[string]any{
 		{
-			"label": "boot",
-			"size":  25000,
-			"image": "linode/arch",
+			"label":           "boot",
+			"size":            25000,
+			"image":           "linode/arch",
+			"authorized_keys": []string{"ssh-rsa AAAA..."},
 		},
 	}
 
-	// When using custom disks, image should not be required at top level
+	// When using custom disks, image and authorized_keys should not be at top level
 	delete(config, "image")
+	delete(config, "authorized_keys")
 
 	_, warnings, err := b.Prepare(config)
 	if len(warnings) > 0 {
@@ -1117,12 +1463,13 @@ func TestBuilderPrepare_CustomDisksValidation(t *testing.T) {
 		var b Builder
 		config := testConfig()
 		delete(config, "image")
+		delete(config, "authorized_keys")
 		// linode_interface should be ALLOWED with custom disks
 		config["linode_interface"] = []map[string]any{
 			{"public": map[string]any{}},
 		}
 		config["disk"] = []map[string]any{
-			{"label": "boot", "size": 25000, "image": "linode/arch"},
+			{"label": "boot", "size": 25000, "image": "linode/arch", "authorized_keys": []string{"ssh-rsa AAAA..."}},
 		}
 		config["config"] = []map[string]any{
 			{"label": "my-config", "root_device": "/dev/sda", "devices": map[string]any{"sda": map[string]any{"disk_label": "boot"}}},
@@ -1138,8 +1485,9 @@ func TestBuilderPrepare_CustomDisksValidation(t *testing.T) {
 		var b Builder
 		config := testConfig()
 		delete(config, "image")
+		delete(config, "authorized_keys")
 		config["disk"] = []map[string]any{
-			{"label": "boot", "size": 25000, "image": "linode/arch"},
+			{"label": "boot", "size": 25000, "image": "linode/arch", "authorized_keys": []string{"ssh-rsa AAAA..."}},
 		}
 		config["config"] = []map[string]any{
 			{"label": "my-config", "devices": map[string]any{"sda": map[string]any{"disk_label": "boot"}}},
