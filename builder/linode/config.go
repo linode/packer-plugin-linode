@@ -4,8 +4,6 @@
 package linode
 
 import (
-	"crypto/rand"
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"os"
@@ -44,12 +42,17 @@ type Disk struct {
 	// when the Linode is offline and may take some time.
 	Size int `mapstructure:"size" required:"true"`
 
-	// An Image ID to deploy the Linode Disk from. If provided, root_pass is required.
+	// An Image ID to deploy the Linode Disk from. If provided,
+	// at least one of root_pass, authorized_keys, or authorized_users
+	// must be provided to ensure access.
 	Image string `mapstructure:"image" required:"false"`
 
 	// The filesystem for the disk. Valid values are raw, swap, ext3, ext4, initrd.
 	// Defaults to ext4.
 	Filesystem string `mapstructure:"filesystem" required:"false"`
+
+	// The root password for this disk when deploying from an image.
+	RootPass string `mapstructure:"root_pass" required:"false"`
 
 	// A list of public SSH keys to be installed on the disk as the root user's
 	// ~/.ssh/authorized_keys file.
@@ -290,13 +293,23 @@ type Config struct {
 	// The disk size (MiB) allocated for swap space.
 	SwapSize *int `mapstructure:"swap_size" required:"false"`
 
+	// The size (MiB) of the primary boot disk. Any remaining disk space beyond
+	// the boot disk and swap partition is left unallocated. If not specified,
+	// the boot disk will use all available space after swap.
+	BootSize *int `mapstructure:"boot_size" required:"false"`
+
+	// The kernel to boot the instance with. This can be a kernel ID such as
+	// "linode/latest-64bit" or "linode/grub2". See the available kernels at
+	// https://api.linode.com/v4/linode/kernels.
+	Kernel string `mapstructure:"kernel" required:"false"`
+
 	// If true, the created Linode will have private networking enabled and assigned
 	// a private IPv4 address.
 	PrivateIP bool `mapstructure:"private_ip" required:"false"`
 
 	// The root password of the Linode instance for building the image. Please note that when
-	// you create a new Linode instance with a private image, you will be required to setup a
-	// new root password.
+	// you create a new Linode instance with an image, at least one of root_pass,
+	// authorized_keys, or authorized_users must be provided
 	RootPass string `mapstructure:"root_pass" required:"false"`
 
 	// The name of the resulting image that will appear
@@ -560,16 +573,6 @@ func (c *Config) getBootDiskLabel() (string, error) {
 	return device.DiskLabel, nil
 }
 
-func createRandomRootPassword() (string, error) {
-	rawRootPass := make([]byte, 50)
-	_, err := rand.Read(rawRootPass)
-	if err != nil {
-		return "", fmt.Errorf("failed to generate random password")
-	}
-	rootPass := base64.StdEncoding.EncodeToString(rawRootPass)
-	return rootPass, nil
-}
-
 func (c *Config) Prepare(raws ...any) ([]string, error) {
 	if err := config.Decode(c, &config.DecodeOpts{
 		Interpolate:        true,
@@ -613,14 +616,6 @@ func (c *Config) Prepare(raws ...any) ([]string, error) {
 		}
 	}
 
-	if c.RootPass == "" {
-		var err error
-		c.RootPass, err = createRandomRootPassword()
-		if err != nil {
-			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("unable to generate root_pass: %s", err))
-		}
-	}
-
 	if c.StateTimeout == 0 {
 		// Default to 5 minute timeouts waiting for state change
 		c.StateTimeout = 5 * time.Minute
@@ -631,11 +626,94 @@ func (c *Config) Prepare(raws ...any) ([]string, error) {
 		c.ImageCreateTimeout = 10 * time.Minute
 	}
 
+	if strings.TrimSpace(c.RootPass) != "" {
+		c.Comm.SSHPassword = c.RootPass
+	}
+
 	if es := c.Comm.Prepare(&c.ctx); len(es) > 0 {
 		errs = packersdk.MultiErrorAppend(errs, es...)
 	}
 
-	c.Comm.SSHPassword = c.RootPass
+	// When creating a Linode from an image, at least one of root_pass, authorized_keys, or authorized_users
+	// must be provided to ensure access to the instance.
+	// Note: If no SSHPrivateKeyFile is provided, Packer will auto-generate an SSH key pair during the build,
+	// which will be added to authorized_keys on the instance, satisfying this requirement.
+	if c.Image != "" {
+		hasRootPass := strings.TrimSpace(c.RootPass) != ""
+		hasKeys := len(c.AuthorizedKeys) > 0
+		hasUsers := len(c.AuthorizedUsers) > 0
+		// If no private key file is specified, Packer will auto-generate an SSH key
+		willAutoGenerateKey := c.Comm.SSHPrivateKeyFile == ""
+
+		if !hasRootPass && !hasKeys && !hasUsers && !willAutoGenerateKey {
+			errs = packersdk.MultiErrorAppend(
+				errs,
+				fmt.Errorf(
+					"when image is specified, at least one of root_pass, authorized_keys, or authorized_users must be provided",
+				),
+			)
+		}
+	}
+
+	// Get boot disk label for validation (if custom disks are configured)
+	bootLabel, bootLabelErr := c.getBootDiskLabel()
+
+	// Validate non-boot disks: they don't get the auto-generated SSH key, so they need explicit auth
+	for _, d := range c.Disks {
+		if strings.TrimSpace(d.Image) == "" {
+			continue
+		}
+
+		// Skip boot disk - it's validated separately below
+		if bootLabelErr == nil && d.Label == bootLabel {
+			continue
+		}
+
+		hasRootPass := strings.TrimSpace(d.RootPass) != ""
+		hasKeys := len(d.AuthorizedKeys) > 0
+		hasUsers := len(d.AuthorizedUsers) > 0
+
+		if !hasRootPass && !hasKeys && !hasUsers {
+			errs = packersdk.MultiErrorAppend(
+				errs,
+				fmt.Errorf(
+					"disk %q: when image is specified, at least one of root_pass, authorized_keys, or authorized_users must be provided",
+					d.Label,
+				),
+			)
+		}
+	}
+
+	// Validate boot disk: it gets the auto-generated SSH key appended (if no ssh_private_key_file)
+	if bootLabelErr == nil {
+		for _, d := range c.Disks {
+			if d.Label != bootLabel {
+				continue
+			}
+
+			if strings.TrimSpace(d.Image) == "" {
+				break
+			}
+
+			hasRootPass := strings.TrimSpace(d.RootPass) != ""
+			hasKeys := len(d.AuthorizedKeys) > 0
+			hasUsers := len(d.AuthorizedUsers) > 0
+			// If no private key file is specified, Packer will auto-generate an SSH key
+			willAutoGenerateKey := c.Comm.SSHPrivateKeyFile == ""
+
+			if !hasRootPass && !hasKeys && !hasUsers && !willAutoGenerateKey {
+				errs = packersdk.MultiErrorAppend(
+					errs,
+					fmt.Errorf(
+						"boot disk %q must define root_pass, authorized_keys, or authorized_users",
+						d.Label,
+					),
+				)
+			}
+
+			break
+		}
+	}
 
 	if c.PersonalAccessToken == "" {
 		// Required configurations that will display errors if not set
@@ -723,6 +801,16 @@ func (c *Config) Prepare(raws ...any) ([]string, error) {
 		if c.SwapSize != nil {
 			errs = packersdk.MultiErrorAppend(
 				errs, errors.New("swap_size cannot be specified when using custom disks (create a swap disk instead)"))
+		}
+
+		if c.BootSize != nil {
+			errs = packersdk.MultiErrorAppend(
+				errs, errors.New("boot_size cannot be specified when using custom disks (specify size in disk blocks instead)"))
+		}
+
+		if c.Kernel != "" {
+			errs = packersdk.MultiErrorAppend(
+				errs, errors.New("kernel cannot be specified when using custom disks (specify in config blocks instead)"))
 		}
 
 		if c.StackScriptID > 0 {
