@@ -79,6 +79,8 @@ type FlatConfig struct {
 	Tags                      []string              `mapstructure:"instance_tags" required:"false" cty:"instance_tags" hcl:"instance_tags"`
 	Image                     *string               `mapstructure:"image" required:"false" cty:"image" hcl:"image"`
 	SwapSize                  *int                  `mapstructure:"swap_size" required:"false" cty:"swap_size" hcl:"swap_size"`
+	BootSize                  *int                  `mapstructure:"boot_size" required:"false" cty:"boot_size" hcl:"boot_size"`
+	Kernel                    *string               `mapstructure:"kernel" required:"false" cty:"kernel" hcl:"kernel"`
 	PrivateIP                 *bool                 `mapstructure:"private_ip" required:"false" cty:"private_ip" hcl:"private_ip"`
 	RootPass                  *string               `mapstructure:"root_pass" required:"false" cty:"root_pass" hcl:"root_pass"`
 	ImageLabel                *string               `mapstructure:"image_label" required:"false" cty:"image_label" hcl:"image_label"`
@@ -178,6 +180,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"instance_tags":                &hcldec.AttrSpec{Name: "instance_tags", Type: cty.List(cty.String), Required: false},
 		"image":                        &hcldec.AttrSpec{Name: "image", Type: cty.String, Required: false},
 		"swap_size":                    &hcldec.AttrSpec{Name: "swap_size", Type: cty.Number, Required: false},
+		"boot_size":                    &hcldec.AttrSpec{Name: "boot_size", Type: cty.Number, Required: false},
+		"kernel":                       &hcldec.AttrSpec{Name: "kernel", Type: cty.String, Required: false},
 		"private_ip":                   &hcldec.AttrSpec{Name: "private_ip", Type: cty.Bool, Required: false},
 		"root_pass":                    &hcldec.AttrSpec{Name: "root_pass", Type: cty.String, Required: false},
 		"image_label":                  &hcldec.AttrSpec{Name: "image_label", Type: cty.String, Required: false},
@@ -205,6 +209,7 @@ type FlatDisk struct {
 	Size            *int              `mapstructure:"size" required:"true" cty:"size" hcl:"size"`
 	Image           *string           `mapstructure:"image" required:"false" cty:"image" hcl:"image"`
 	Filesystem      *string           `mapstructure:"filesystem" required:"false" cty:"filesystem" hcl:"filesystem"`
+	RootPass        *string           `mapstructure:"root_pass" required:"false" cty:"root_pass" hcl:"root_pass"`
 	AuthorizedKeys  []string          `mapstructure:"authorized_keys" required:"false" cty:"authorized_keys" hcl:"authorized_keys"`
 	AuthorizedUsers []string          `mapstructure:"authorized_users" required:"false" cty:"authorized_users" hcl:"authorized_users"`
 	StackscriptID   *int              `mapstructure:"stackscript_id" required:"false" cty:"stackscript_id" hcl:"stackscript_id"`
@@ -227,6 +232,7 @@ func (*FlatDisk) HCL2Spec() map[string]hcldec.Spec {
 		"size":             &hcldec.AttrSpec{Name: "size", Type: cty.Number, Required: false},
 		"image":            &hcldec.AttrSpec{Name: "image", Type: cty.String, Required: false},
 		"filesystem":       &hcldec.AttrSpec{Name: "filesystem", Type: cty.String, Required: false},
+		"root_pass":        &hcldec.AttrSpec{Name: "root_pass", Type: cty.String, Required: false},
 		"authorized_keys":  &hcldec.AttrSpec{Name: "authorized_keys", Type: cty.List(cty.String), Required: false},
 		"authorized_users": &hcldec.AttrSpec{Name: "authorized_users", Type: cty.List(cty.String), Required: false},
 		"stackscript_id":   &hcldec.AttrSpec{Name: "stackscript_id", Type: cty.Number, Required: false},
