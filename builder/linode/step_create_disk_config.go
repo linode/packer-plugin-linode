@@ -24,7 +24,6 @@ func flattenDisk(d Disk) linodego.InstanceDiskCreateOptions {
 		Size:            d.Size,
 		Image:           d.Image,
 		Filesystem:      d.Filesystem,
-		RootPass:        d.RootPass,
 		AuthorizedKeys:  d.AuthorizedKeys,
 		AuthorizedUsers: d.AuthorizedUsers,
 		StackscriptID:   d.StackscriptID,
@@ -289,8 +288,9 @@ func (s *stepCreateDiskConfig) Run(ctx context.Context, state multistep.StateBag
 			}
 		}
 
-		// Note: Each disk with an image must define its own auth method (root_pass, authorized_keys, or authorized_users)
-		// This is validated in config.go - we don't fall back to any default here
+		if diskOpts.RootPass == "" && diskOpts.Image != "" {
+			diskOpts.RootPass = c.Comm.Password()
+		}
 
 		disk, err := s.client.CreateInstanceDisk(ctx, instance.ID, diskOpts)
 		if err != nil {
