@@ -22,10 +22,11 @@ func TestPrepare(t *testing.T) {
 		ctx:  interpolate.Context{},
 		Comm: communicator.Config{SSH: data},
 
-		Region:       "us-ord",
-		InstanceType: "g6-standard-1",
-		Image:        "linode/debian12",
-		ImageRegions: []string{"us-ord", "us-mia", "us-lax"},
+		Region:         "us-ord",
+		InstanceType:   "g6-standard-1",
+		Image:          "linode/debian12",
+		ImageRegions:   []string{"us-ord", "us-mia", "us-lax"},
+		AuthorizedKeys: []string{"ssh-rsa AAAA..."},
 	}
 
 	warnings, err := config.Prepare()
