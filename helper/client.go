@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/linode/linodego"
+	"github.com/linode/linodego/v2"
 	"github.com/linode/packer-plugin-linode/version"
 	"golang.org/x/oauth2"
 )
@@ -37,19 +37,22 @@ func AddRootCAToTransport(CAPath string, transport *http.Transport) error {
 	return nil
 }
 
-func linodeClientFromTransport(transport http.RoundTripper) *linodego.Client {
+func linodeClientFromTransport(transport http.RoundTripper) (*linodego.Client, error) {
 	oauth2Client := &http.Client{
 		Transport: transport,
 	}
 
-	client := linodego.NewClient(oauth2Client)
+	client, err := linodego.NewClient(oauth2Client)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize Linode client: %w", err)
+	}
 
 	projectURL := "https://www.packer.io"
 	userAgent := fmt.Sprintf("Packer/%s (+%s) linodego/%s",
 		version.PluginVersion.FormattedVersion(), projectURL, linodego.Version)
 
 	client.SetUserAgent(userAgent)
-	return &client
+	return &client, nil
 }
 
 func getDefaultTransportWithCA(CAPath string) (*http.Transport, error) {
@@ -66,7 +69,7 @@ func getOauth2TransportWithToken(token string, baseTransport http.RoundTripper) 
 	return oauthTransport
 }
 
-func NewLinodeClient(token string) *linodego.Client {
+func NewLinodeClient(token string) (*linodego.Client, error) {
 	oauthTransport := getOauth2TransportWithToken(token, nil)
 	return linodeClientFromTransport(oauthTransport)
 }
@@ -77,5 +80,5 @@ func NewLinodeClientWithCA(token, CAPath string) (*linodego.Client, error) {
 		return nil, err
 	}
 	oauthTransport := getOauth2TransportWithToken(token, transport)
-	return linodeClientFromTransport(oauthTransport), nil
+	return linodeClientFromTransport(oauthTransport)
 }

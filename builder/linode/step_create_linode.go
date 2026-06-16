@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
-	"github.com/linode/linodego"
+	"github.com/linode/linodego/v2"
 	"github.com/linode/packer-plugin-linode/helper"
 )
 
@@ -14,12 +14,12 @@ type stepCreateLinode struct {
 	client *linodego.Client
 }
 
-func flattenConfigInterfaceIPv4(i *InterfaceIPv4) *linodego.VPCIPv4 {
+func flattenConfigInterfaceIPv4(i *InterfaceIPv4) *linodego.VPCIPv4CreateOptions {
 	if i == nil {
 		return nil
 	}
 
-	return &linodego.VPCIPv4{
+	return &linodego.VPCIPv4CreateOptions{
 		VPC:     i.VPC,
 		NAT1To1: i.NAT1To1,
 	}
@@ -51,7 +51,7 @@ func flattenPublicInterface(public *PublicInterface) *linodego.PublicInterfaceCr
 			}
 		}
 		result.IPv4 = &linodego.PublicInterfaceIPv4CreateOptions{
-			Addresses: linodego.Pointer(addresses),
+			Addresses: addresses,
 		}
 	}
 	if public.IPv6 != nil {
@@ -62,7 +62,7 @@ func flattenPublicInterface(public *PublicInterface) *linodego.PublicInterfaceCr
 			}
 		}
 		result.IPv6 = &linodego.PublicInterfaceIPv6CreateOptions{
-			Ranges: linodego.Pointer(ranges),
+			Ranges: ranges,
 		}
 	}
 	return result
@@ -91,8 +91,8 @@ func flattenVPCInterface(vpc *VPCInterface) *linodego.VPCInterfaceCreateOptions 
 			}
 		}
 		result.IPv4 = &linodego.VPCInterfaceIPv4CreateOptions{
-			Addresses: linodego.Pointer(addresses),
-			Ranges:    linodego.Pointer(ranges),
+			Addresses: addresses,
+			Ranges:    ranges,
 		}
 	}
 	if vpc.IPv6 != nil {
@@ -109,44 +109,38 @@ func flattenVPCInterface(vpc *VPCInterface) *linodego.VPCInterfaceCreateOptions 
 			}
 		}
 		result.IPv6 = &linodego.VPCInterfaceIPv6CreateOptions{
-			SLAAC:    linodego.Pointer(slaac),
-			Ranges:   linodego.Pointer(ranges),
+			SLAAC:    slaac,
+			Ranges:   ranges,
 			IsPublic: vpc.IPv6.IsPublic,
 		}
 	}
 	return result
 }
 
-func flattenVLANInterface(vlan *VLANInterface) *linodego.VLANInterface {
+func flattenVLANInterface(vlan *VLANInterface) *linodego.VLANInterfaceCreateOptions {
 	if vlan == nil {
 		return nil
 	}
-	result := &linodego.VLANInterface{
-		VLANLabel: vlan.VLANLabel,
+	return &linodego.VLANInterfaceCreateOptions{
+		VLANLabel:   vlan.VLANLabel,
+		IPAMAddress: vlan.IPAMAddress,
 	}
-	if vlan.IPAMAddress != nil {
-		result.IPAMAddress = vlan.IPAMAddress
-	}
-	return result
 }
 
-func flattenLinodeInterface(li LinodeInterface) (opts linodego.LinodeInterfaceCreateOptions) {
-	if li.FirewallID != nil {
-		opts.FirewallID = li.FirewallID
+func flattenLinodeInterface(li LinodeInterface) linodego.LinodeInterfaceCreateOptions {
+	opts := linodego.LinodeInterfaceCreateOptions{
+		FirewallID: li.FirewallID,
+		Public:     flattenPublicInterface(li.Public),
+		VPC:        flattenVPCInterface(li.VPC),
+		VLAN:       flattenVLANInterface(li.VLAN),
 	}
-
 	if li.DefaultRoute != nil {
-		opts.DefaultRoute = &linodego.InterfaceDefaultRoute{
+		opts.DefaultRoute = &linodego.InterfaceDefaultRouteCreateOptions{
 			IPv4: li.DefaultRoute.IPv4,
 			IPv6: li.DefaultRoute.IPv6,
 		}
 	}
-
-	opts.Public = flattenPublicInterface(li.Public)
-	opts.VPC = flattenVPCInterface(li.VPC)
-	opts.VLAN = flattenVLANInterface(li.VLAN)
-
-	return
+	return opts
 }
 
 func flattenMetadata(m Metadata) *linodego.InstanceMetadataOptions {
@@ -245,8 +239,11 @@ func (s *stepCreateLinode) Run(ctx context.Context, state multistep.StateBag) mu
 	// When using custom disks, we skip waiting for running state here
 	// because the instance won't boot until we create disks and configs
 	if useCustomDisks {
-		// Wait for instance to be in offline state (resources allocated)
-		instance, err = s.client.WaitForInstanceStatus(ctx, instance.ID, linodego.InstanceOffline, int(c.StateTimeout.Seconds()))
+		// Wait for instance resources to be allocated before creating disks/configs.
+		waitCtx, cancel := context.WithTimeout(ctx, c.StateTimeout)
+		defer cancel()
+
+		instance, err = s.client.WaitForInstanceStatus(waitCtx, instance.ID, linodego.InstanceOffline)
 		if err != nil {
 			return handleError("Failed to wait for Linode to be offline", err)
 		}
@@ -256,7 +253,10 @@ func (s *stepCreateLinode) Run(ctx context.Context, state multistep.StateBag) mu
 	}
 
 	// wait until instance is running
-	instance, err = s.client.WaitForInstanceStatus(ctx, instance.ID, linodego.InstanceRunning, int(c.StateTimeout.Seconds()))
+	waitCtx, cancel := context.WithTimeout(ctx, c.StateTimeout)
+	defer cancel()
+
+	instance, err = s.client.WaitForInstanceStatus(waitCtx, instance.ID, linodego.InstanceRunning)
 	if err != nil {
 		return handleError("Failed to wait for Linode ready", err)
 	}

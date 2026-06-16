@@ -8,7 +8,7 @@ import (
 
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
-	"github.com/linode/linodego"
+	"github.com/linode/linodego/v2"
 	"github.com/linode/packer-plugin-linode/helper"
 )
 
@@ -297,8 +297,10 @@ func (s *stepCreateDiskConfig) Run(ctx context.Context, state multistep.StateBag
 			return handleError(fmt.Sprintf("Failed to create disk %q", diskCfg.Label), err)
 		}
 
-		// Wait for disk to be ready
-		disk, err = s.client.WaitForInstanceDiskStatus(ctx, instance.ID, disk.ID, linodego.DiskReady, int(c.StateTimeout.Seconds()))
+		// Wait for disk to be ready.
+		waitCtx, cancel := context.WithTimeout(ctx, c.StateTimeout)
+		disk, err = s.client.WaitForInstanceDiskStatus(waitCtx, instance.ID, disk.ID, linodego.DiskReady)
+		cancel()
 		if err != nil {
 			return handleError(fmt.Sprintf("Failed to wait for disk %q", diskCfg.Label), err)
 		}
@@ -373,13 +375,15 @@ func (s *stepCreateDiskConfig) Run(ctx context.Context, state multistep.StateBag
 	// Boot the instance with the selected configuration profile
 	if bootConfigID != 0 {
 		ui.Say(fmt.Sprintf("Booting Linode with config ID %d...", bootConfigID))
-		err = s.client.BootInstance(ctx, instance.ID, bootConfigID)
+		err = s.client.BootInstance(ctx, instance.ID, linodego.InstanceBootOptions{ConfigID: &bootConfigID})
 		if err != nil {
 			return handleError("Failed to boot Linode", err)
 		}
 
-		// Wait for instance to be running
-		instance, err = s.client.WaitForInstanceStatus(ctx, instance.ID, linodego.InstanceRunning, int(c.StateTimeout.Seconds()))
+		// Wait for instance to be running.
+		waitCtx, cancel := context.WithTimeout(ctx, c.StateTimeout)
+		instance, err = s.client.WaitForInstanceStatus(waitCtx, instance.ID, linodego.InstanceRunning)
+		cancel()
 		if err != nil {
 			return handleError("Failed to wait for Linode to be running", err)
 		}

@@ -6,7 +6,7 @@ import (
 	"log"
 
 	registryimage "github.com/hashicorp/packer-plugin-sdk/packer/registry/image"
-	"github.com/linode/linodego"
+	"github.com/linode/linodego/v2"
 )
 
 type Artifact struct {

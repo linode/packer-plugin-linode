@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/hcl2helper"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
-	"github.com/linode/linodego"
+	"github.com/linode/linodego/v2"
 	"github.com/linode/packer-plugin-linode/helper"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -138,7 +138,10 @@ func (d *Datasource) Execute() (cty.Value, error) {
 			return cty.NullVal(cty.EmptyObject), err
 		}
 	} else {
-		client = helper.NewLinodeClient(d.config.PersonalAccessToken)
+		client, err = helper.NewLinodeClient(d.config.PersonalAccessToken)
+		if err != nil {
+			return cty.NullVal(cty.EmptyObject), err
+		}
 	}
 
 	filters := linodego.Filter{}

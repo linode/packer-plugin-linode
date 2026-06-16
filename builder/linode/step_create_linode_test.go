@@ -3,7 +3,7 @@ package linode
 import (
 	"testing"
 
-	"github.com/linode/linodego"
+	"github.com/linode/linodego/v2"
 )
 
 func TestFlattenVPCInterface_IPv4AddressFields(t *testing.T) {
@@ -33,11 +33,11 @@ func TestFlattenVPCInterface_IPv4AddressFields(t *testing.T) {
 	if got.IPv4 == nil {
 		t.Fatal("flattenVPCInterface().IPv4 returned nil")
 	}
-	if got.IPv4.Addresses == nil || len(*got.IPv4.Addresses) != 1 {
+	if len(got.IPv4.Addresses) != 1 {
 		t.Fatalf("flattenVPCInterface().IPv4.Addresses = %v, want one address", got.IPv4.Addresses)
 	}
 
-	addr := (*got.IPv4.Addresses)[0]
+	addr := got.IPv4.Addresses[0]
 	if addr.Address == nil || *addr.Address != "auto" {
 		t.Fatalf("address = %v, want auto", addr.Address)
 	}
@@ -47,11 +47,11 @@ func TestFlattenVPCInterface_IPv4AddressFields(t *testing.T) {
 	if addr.NAT1To1Address == nil || *addr.NAT1To1Address != "192.0.2.10" {
 		t.Fatalf("nat_1_1_address = %v, want 192.0.2.10", addr.NAT1To1Address)
 	}
-	if got.IPv4.Ranges == nil || len(*got.IPv4.Ranges) != 1 {
+	if len(got.IPv4.Ranges) != 1 {
 		t.Fatalf("ranges = %v, want one range", got.IPv4.Ranges)
 	}
-	if (*got.IPv4.Ranges)[0].Range != "10.0.0.0/28" {
-		t.Fatalf("range = %q, want 10.0.0.0/28", (*got.IPv4.Ranges)[0].Range)
+	if got.IPv4.Ranges[0].Range != "10.0.0.0/28" {
+		t.Fatalf("range = %q, want 10.0.0.0/28", got.IPv4.Ranges[0].Range)
 	}
 }
 
@@ -76,17 +76,17 @@ func TestFlattenVPCInterface_IPv6Fields(t *testing.T) {
 	if got.IPv6 == nil {
 		t.Fatal("flattenVPCInterface().IPv6 returned nil")
 	}
-	if got.IPv6.SLAAC == nil || len(*got.IPv6.SLAAC) != 1 {
+	if len(got.IPv6.SLAAC) != 1 {
 		t.Fatalf("slaac = %v, want one slaac range", got.IPv6.SLAAC)
 	}
-	if (*got.IPv6.SLAAC)[0].Range != "2600:3c03:e000:123::/64" {
-		t.Fatalf("slaac range = %q, want 2600:3c03:e000:123::/64", (*got.IPv6.SLAAC)[0].Range)
+	if got.IPv6.SLAAC[0].Range != "2600:3c03:e000:123::/64" {
+		t.Fatalf("slaac range = %q, want 2600:3c03:e000:123::/64", got.IPv6.SLAAC[0].Range)
 	}
-	if got.IPv6.Ranges == nil || len(*got.IPv6.Ranges) != 1 {
+	if len(got.IPv6.Ranges) != 1 {
 		t.Fatalf("ranges = %v, want one ipv6 range", got.IPv6.Ranges)
 	}
-	if (*got.IPv6.Ranges)[0].Range != "2600:3c03:e000:123:1::/64" {
-		t.Fatalf("range = %q, want 2600:3c03:e000:123:1::/64", (*got.IPv6.Ranges)[0].Range)
+	if got.IPv6.Ranges[0].Range != "2600:3c03:e000:123:1::/64" {
+		t.Fatalf("range = %q, want 2600:3c03:e000:123:1::/64", got.IPv6.Ranges[0].Range)
 	}
 	if got.IPv6.IsPublic == nil || !*got.IPv6.IsPublic {
 		t.Fatalf("is_public = %v, want true", got.IPv6.IsPublic)
@@ -153,17 +153,17 @@ func TestFlattenPublicInterface_AllFields(t *testing.T) {
 	if got == nil || got.IPv4 == nil || got.IPv6 == nil {
 		t.Fatalf("flattenPublicInterface() = %v, want non-nil ipv4 and ipv6", got)
 	}
-	if got.IPv4.Addresses == nil || len(*got.IPv4.Addresses) != 1 {
+	if len(got.IPv4.Addresses) != 1 {
 		t.Fatalf("ipv4 addresses = %v, want one address", got.IPv4.Addresses)
 	}
-	addr := (*got.IPv4.Addresses)[0]
+	addr := got.IPv4.Addresses[0]
 	if addr.Address == nil || *addr.Address != "auto" {
 		t.Fatalf("ipv4 address = %v, want auto", addr.Address)
 	}
 	if addr.Primary == nil || !*addr.Primary {
 		t.Fatalf("ipv4 primary = %v, want true", addr.Primary)
 	}
-	if got.IPv6.Ranges == nil || len(*got.IPv6.Ranges) != 1 || (*got.IPv6.Ranges)[0].Range != "/64" {
+	if len(got.IPv6.Ranges) != 1 || got.IPv6.Ranges[0].Range != "/64" {
 		t.Fatalf("ipv6 ranges = %v, want [/64]", got.IPv6.Ranges)
 	}
 }
@@ -201,10 +201,10 @@ func TestFlattenLinodeInterface_AllFields(t *testing.T) {
 	if got.Public == nil {
 		t.Fatalf("public = nil, want non-nil")
 	}
-	if got.Public.IPv4 == nil || got.Public.IPv4.Addresses == nil || len(*got.Public.IPv4.Addresses) != 1 {
+	if got.Public.IPv4 == nil || len(got.Public.IPv4.Addresses) != 1 {
 		t.Fatalf("public ipv4 addresses = %v, want one address", got.Public)
 	}
-	if addr := (*got.Public.IPv4.Addresses)[0]; addr.Address == nil || *addr.Address != "auto" {
+	if addr := got.Public.IPv4.Addresses[0]; addr.Address == nil || *addr.Address != "auto" {
 		t.Fatalf("public ipv4 address = %v, want auto", addr.Address)
 	}
 	if got.Public.IPv6 != nil {
