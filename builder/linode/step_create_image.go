@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
-	"github.com/linode/linodego"
+	"github.com/linode/linodego/v2"
 	"github.com/linode/packer-plugin-linode/helper"
 )
 
@@ -41,7 +41,10 @@ func (s *stepCreateImage) Run(ctx context.Context, state multistep.StateBag) mul
 		return handleError("Failed to create image", err)
 	}
 
-	_, err = creationPoller.WaitForFinished(ctx, int(c.ImageCreateTimeout.Seconds()))
+	waitCtx, cancel := context.WithTimeout(ctx, c.ImageCreateTimeout)
+	defer cancel()
+
+	_, err = creationPoller.WaitForFinished(waitCtx)
 	if err != nil {
 		return handleError("Failed to wait for image creation", err)
 	}
