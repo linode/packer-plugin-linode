@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"sort"
 
-	"github.com/linode/linodego"
+	"github.com/linode/linodego/v2"
 )
 
 type ImageFilter func(linodego.Image) bool

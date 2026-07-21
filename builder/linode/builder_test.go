@@ -8,7 +8,7 @@ import (
 	"time"
 
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
-	"github.com/linode/linodego"
+	"github.com/linode/linodego/v2"
 )
 
 func testConfig() map[string]any {

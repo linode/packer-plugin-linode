@@ -3,7 +3,7 @@ package image
 import (
 	"testing"
 
-	"github.com/linode/linodego"
+	"github.com/linode/linodego/v2"
 )
 
 func TestImageDatasourceFilter_IDExactFilter(t *testing.T) {

@@ -9,7 +9,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/linode/linodego"
+	"github.com/linode/linodego/v2"
 
 	"github.com/hashicorp/packer-plugin-sdk/communicator"
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
@@ -47,7 +47,10 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			return nil, err
 		}
 	} else {
-		client = helper.NewLinodeClient(b.config.PersonalAccessToken)
+		client, err = helper.NewLinodeClient(b.config.PersonalAccessToken)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	state := new(multistep.BasicStateBag)
