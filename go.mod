@@ -5,7 +5,7 @@ go 1.26.8
 require (
 	github.com/hashicorp/hcl/v2 v2.24.0
 	github.com/hashicorp/packer-plugin-sdk v0.6.11
-	github.com/linode/linodego/v2 v2.6.0
+	github.com/linode/linodego/v2 v2.7.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/zclconf/go-cty v1.16.3
 	golang.org/x/crypto v0.57.0
